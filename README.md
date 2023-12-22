@@ -1,2 +1,3 @@
-# .github
-mediastream/.github is a ✨special ✨ repository used to add README.md to our public organization profile, visible to anyone.
+# Welcome Developers!
+
+The platform provides you with an extremely powerful API that allows you to build cool video applications ranging from a simple embed on a website to a full OTT solution.
