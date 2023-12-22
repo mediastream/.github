@@ -1,3 +1,5 @@
+<img src="https://platform-static.cdn.mdstrm.com/github-banner.png" alt="banner" data-canonical-src="https://platform-static.cdn.mdstrm.com/github-banner.png" style="max-width: 100%;">
+
 #  👋 Welcome Developers! 
 
 Mediastream provides you with an extremely powerful API that allows you to build cool video applications, ranging from a simple embed on a website to a full OTT solution. 🚀
