@@ -1,4 +1,4 @@
-<img src="https://platform-static.cdn.mdstrm.com/github-banner.png" alt="banner" data-canonical-src="https://platform-static.cdn.mdstrm.com/github-banner.png" style="max-width: 100%;">
+<img src="https://platform-static.cdn.mdstrm.com/github-banner.png" alt="mediastream banner" data-canonical-src="https://platform-static.cdn.mdstrm.com/github-banner.png" style="max-width: 100%;">
 
 #  👋 Welcome Developers! 
 
