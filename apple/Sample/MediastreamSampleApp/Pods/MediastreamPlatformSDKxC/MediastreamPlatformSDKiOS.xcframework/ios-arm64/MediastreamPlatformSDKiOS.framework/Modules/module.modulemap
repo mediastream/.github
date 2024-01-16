@@ -1,0 +1,11 @@
+framework module MediastreamPlatformSDKiOS {
+  umbrella header "MediastreamPlatformSDKiOS-umbrella.h"
+
+  export *
+  module * { export * }
+}
+
+module MediastreamPlatformSDKiOS.Swift {
+  header "MediastreamPlatformSDKiOS-Swift.h"
+  requires objc
+}

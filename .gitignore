@@ -1,0 +1,34 @@
+# Gradle files
+android/MediastreamSampleApp/.gradle/
+android/MediastreamSampleApp/build/
+
+# Local configuration file (sdk path, etc)
+android/MediastreamSampleApp/local.properties
+
+# Log/OS Files
+android/MediastreamSampleApp/*.log
+
+# Android Studio generated files and folders
+android/MediastreamSampleApp/captures/
+android/MediastreamSampleApp/.externalNativeBuild/
+android/MediastreamSampleApp/.cxx/
+android/MediastreamSampleApp/*.apk
+android/MediastreamSampleApp/output.json
+
+# IntelliJ
+android/MediastreamSampleApp/*.iml
+android/MediastreamSampleApp/.idea/
+android/MediastreamSampleApp/misc.xml
+android/MediastreamSampleApp/deploymentTargetDropDown.xml
+android/MediastreamSampleApp/render.experimental.xml
+
+# Keystore files
+android/MediastreamSampleApp/*.jks
+android/MediastreamSampleApp/*.keystore
+
+# Google Services (e.g. APIs or Firebase)
+android/MediastreamSampleApp/google-services.json
+
+# Android Profiling
+android/MediastreamSampleApp/*.hprof
+apple/MediastreamSampleApp/Pods/*

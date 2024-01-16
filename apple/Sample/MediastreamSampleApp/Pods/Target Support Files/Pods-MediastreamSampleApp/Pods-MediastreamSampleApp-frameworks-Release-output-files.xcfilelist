@@ -1,0 +1,4 @@
+${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YouboraAVPlayerAdapter.framework
+${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YouboraLib.framework
+${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleInteractiveMediaAds.framework
+${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MediastreamPlatformSDKiOS.framework

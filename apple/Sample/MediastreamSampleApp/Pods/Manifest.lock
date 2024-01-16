@@ -1,0 +1,29 @@
+PODS:
+  - GoogleAds-IMA-iOS-SDK (3.16.3)
+  - MediastreamPlatformSDKxC (2.0.2):
+    - GoogleAds-IMA-iOS-SDK (= 3.16.3)
+    - YouboraAVPlayerAdapter (= 6.3.5)
+    - YouboraLib (= 6.3.9)
+  - YouboraAVPlayerAdapter (6.3.5):
+    - YouboraLib (~> 6.3.0)
+  - YouboraLib (6.3.9)
+
+DEPENDENCIES:
+  - MediastreamPlatformSDKxC (~> 2.0.2)
+
+SPEC REPOS:
+  trunk:
+    - GoogleAds-IMA-iOS-SDK
+    - MediastreamPlatformSDKxC
+    - YouboraAVPlayerAdapter
+    - YouboraLib
+
+SPEC CHECKSUMS:
+  GoogleAds-IMA-iOS-SDK: 1aba71fa5b58dc463cc5b752f06e970ec7c739c1
+  MediastreamPlatformSDKxC: 8b04dc6b0f30d23b18d827cf943795e5b000a238
+  YouboraAVPlayerAdapter: 18c4c75ad2b43fb27f043ae23f1c979c3076ce7a
+  YouboraLib: bee6890fb6cf8c4e8ff30a6462bc9692347e28ff
+
+PODFILE CHECKSUM: 519695daf7df94201ed65c2c8464aa735af2dbd8
+
+COCOAPODS: 1.13.0

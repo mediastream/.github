@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="MainScene" extends="Scene">
+    <script type="text/brightscript" uri="MainScene.brs" />
+    <interface>
+        <field id="msPlayerVideoStatus" type="assocarray" alwaysNotify="true"/>
+        <field id="msPlayerVideoPosition" type="assocarray" alwaysNotify="true"/>
+        <field id="isSDKTaskFinished" type="boolean" alwaysNotify="true"/>
+    </interface>
+    <children>
+      <poster
+          id="background"
+          uri="pkg:/images/splash_fhd.png"
+          width="1920"
+          height="1080"
+          translation="[0,0]"/>
+
+        <Rectangle width="1920" height="1080" opacity="0.9" color="#000000"/>
+
+        <poster
+            id="logo"
+            uri="pkg:/images/logo.png"
+            width="300"
+            height="50"
+            translation="[810,100]"/>
+
+        <LabelList id = "mediaStreamLableList" translation = "[740,230]" textHorizAlign="center" itemSpacing = "[0,40]" itemSize = "[440,48]" visible="false" focusedColor="#B3E73E" focusBitmapUri="pkg:/images/border.9.png">
+            <ContentNode id = "mediaStreamContent" role = "content" >
+                <ContentNode id="vodPlayer" title = "VIDEO ON DEMAND" />
+                <ContentNode id="liveVideo" title = "LIVE VIDEO" />
+            </ContentNode>
+        </LabelList>
+        <Group id="msRokuPlayerContainer"></Group>
+        <BusySpinner id="loader" translation="[590,290]" control="start" clockwise="true" spinInterval="0.8"/>
+    </children>
+</component>

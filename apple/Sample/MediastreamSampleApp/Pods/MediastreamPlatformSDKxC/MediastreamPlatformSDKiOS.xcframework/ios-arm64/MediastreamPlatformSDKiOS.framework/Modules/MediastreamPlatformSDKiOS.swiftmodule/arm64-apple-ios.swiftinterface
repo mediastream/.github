@@ -1,0 +1,896 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 5.9.2 (swiftlang-5.9.2.2.56 clang-1500.1.0.2.5)
+// swift-module-flags: -target arm64-apple-ios12.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name MediastreamPlatformSDKiOS
+// swift-module-flags-ignorable: -enable-bare-slash-regex
+import AVFoundation
+import AVKit
+import DeveloperToolsSupport
+import Foundation
+import GoogleInteractiveMediaAds
+import MediaPlayer
+@_exported import MediastreamPlatformSDKiOS
+import Swift
+import SwiftUI
+import SystemConfiguration
+import UIKit
+import YouboraAVPlayerAdapter
+import YouboraLib
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+@_inheritsConvenienceInitializers @objc open class MediastreamDAIConfig : ObjectiveC.NSObject {
+  @objc override dynamic public init()
+  public enum Environments : Swift.String {
+    case PRODUCTION
+    case DEV
+    public init?(rawValue: Swift.String)
+    public typealias RawValue = Swift.String
+    public var rawValue: Swift.String {
+      get
+    }
+  }
+  open var assetKey: Swift.String? {
+    get
+    set(val)
+  }
+  open var stream_id: Swift.String? {
+    get
+    set(val)
+  }
+  open var stream_manifest: Swift.String? {
+    get
+    set(val)
+  }
+  open var media_verification_url: Swift.String? {
+    get
+    set(val)
+  }
+  open var metadata_url: Swift.String? {
+    get
+    set(val)
+  }
+  open var session_update_url: Swift.String? {
+    get
+    set(val)
+  }
+  open var polling_frequency: Swift.Int {
+    get
+    set(val)
+  }
+  open var environment: MediastreamPlatformSDKiOS.MediastreamDAIConfig.Environments {
+    get
+    set(val)
+  }
+  open var id: Swift.String? {
+    get
+    set(val)
+  }
+  @objc deinit
+}
+@objc @_hasMissingDesignatedInitializers public class AssetLoaderDelegate : ObjectiveC.NSObject {
+  @objc deinit
+}
+extension MediastreamPlatformSDKiOS.AssetLoaderDelegate : AVFoundation.AVAssetResourceLoaderDelegate {
+  @objc dynamic public func resourceLoader(_ resourceLoader: AVFoundation.AVAssetResourceLoader, shouldWaitForLoadingOfRequestedResource loadingRequest: AVFoundation.AVAssetResourceLoadingRequest) -> Swift.Bool
+  @objc dynamic public func resourceLoader(_ resourceLoader: AVFoundation.AVAssetResourceLoader, shouldWaitForRenewalOfRequestedResource renewalRequest: AVFoundation.AVAssetResourceRenewalRequest) -> Swift.Bool
+}
+@_hasMissingDesignatedInitializers public class EventManager {
+  open func listenTo(eventName: Swift.String, action: @escaping (() -> ()))
+  open func listenTo(eventName: Swift.String, action: @escaping ((Any?) -> ()))
+  open func removeListeners(eventNameToRemoveOrNil: Swift.String?)
+  open func trigger(eventName: Swift.String, information: Any? = nil)
+  @objc deinit
+}
+@objc @_inheritsConvenienceInitializers @_Concurrency.MainActor(unsafe) public class MediastreamCustomUIView : UIKit.UIView {
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var topRightLogo: UIKit.UIImageView!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var topLeftLogo: UIKit.UIImageView!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var bottomLeftLogo: UIKit.UIImageView!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var bottomRightLogo: UIKit.UIImageView!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var topLayout: UIKit.UIView!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var bottomLayout: UIKit.UIView!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var dismissButton: UIKit.UIButton!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var liveStatus: UIKit.UIButton!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var title: UIKit.UILabel!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var playButton: UIKit.UIButton!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var backwardButton: UIKit.UIButton!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var volumeButton: UIKit.UIButton!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var fullscreenButton: UIKit.UIButton!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var logoControlBar: UIKit.UIImageView!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var slider: UIKit.UISlider!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var currentTime: UIKit.UILabel!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var duration: UIKit.UILabel!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var dvrLiveButton: UIKit.UIButton!
+  @objc @IBOutlet @_Concurrency.MainActor(unsafe) weak open var bufferingIndicator: UIKit.UIActivityIndicatorView!
+  @_Concurrency.MainActor(unsafe) @objc override dynamic public init(frame: CoreFoundation.CGRect)
+  @_Concurrency.MainActor(unsafe) @objc required dynamic public init?(coder: Foundation.NSCoder)
+  @objc deinit
+}
+@objc @_hasMissingDesignatedInitializers @_Concurrency.MainActor(unsafe) open class MediastreamPlatformSDK : UIKit.UIViewController, GoogleInteractiveMediaAds.IMAAdsLoaderDelegate, GoogleInteractiveMediaAds.IMAAdsManagerDelegate, GoogleInteractiveMediaAds.IMALinkOpenerDelegate {
+  @_Concurrency.MainActor(unsafe) open var isPlayerReady: Swift.Bool
+  @_Concurrency.MainActor(unsafe) open var isPlayingAds: Swift.Bool
+  @_Concurrency.MainActor(unsafe) open var events: MediastreamPlatformSDKiOS.EventManager
+  @_Concurrency.MainActor(unsafe) open var player: AVFoundation.AVPlayer?
+  @_Concurrency.MainActor(unsafe) open var playerViewController: AVKit.AVPlayerViewController?
+  @_Concurrency.MainActor(unsafe) open var playerLayer: AVFoundation.AVPlayerLayer?
+  @_Concurrency.MainActor(unsafe) open var currentStringDuration: Swift.String?
+  @_Concurrency.MainActor(unsafe) open var currentStringValue: Swift.String?
+  @_Concurrency.MainActor(unsafe) open var timeSliderMaximumValue: Swift.Float?
+  @_Concurrency.MainActor(unsafe) open var timeSliderMinimunValue: Swift.Float?
+  @_Concurrency.MainActor(unsafe) open var currentTimeValue: Swift.Float?
+  @_Concurrency.MainActor(unsafe) open var dismissButton: UIKit.UIButton?
+  @_Concurrency.MainActor(unsafe) public var customUIView: MediastreamPlatformSDKiOS.MediastreamCustomUIView?
+  @_Concurrency.MainActor(unsafe) open var castUrl: Swift.String
+  @_Concurrency.MainActor(unsafe) open var mediaTitle: Swift.String
+  @_Concurrency.MainActor(unsafe) open var initPreparePlayerTimestamp: Foundation.Date?
+  public enum StaticUrl : Swift.String {
+    case PRODUCTION
+    case DEV
+    public init?(rawValue: Swift.String)
+    public typealias RawValue = Swift.String
+    public var rawValue: Swift.String {
+      get
+    }
+  }
+  public enum NowPlayingCropUrl : Swift.String {
+    case PRODUCTION
+    case DEV
+    public init?(rawValue: Swift.String)
+    public typealias RawValue = Swift.String
+    public var rawValue: Swift.String {
+      get
+    }
+  }
+  @_Concurrency.MainActor(unsafe) @objc convenience dynamic public init()
+  @_Concurrency.MainActor(unsafe) @objc required dynamic public init?(coder aDecoder: Foundation.NSCoder)
+  @_Concurrency.MainActor(unsafe) open var currentTime: Swift.Double {
+    get
+    set(val)
+  }
+  @_Concurrency.MainActor(unsafe) open var volume: Swift.Int {
+    get
+    set(val)
+  }
+  @_Concurrency.MainActor(unsafe) open func clearWaitingCount()
+  @_Concurrency.MainActor(unsafe) open func isLocalFile() -> Swift.Bool
+  @_Concurrency.MainActor(unsafe) open func removeObservers()
+  @objc @_Concurrency.MainActor(unsafe) open func releasePlayer()
+  @_Concurrency.MainActor(unsafe) open func reloadAssets()
+  @_Concurrency.MainActor(unsafe) open func playBackgroundAudio()
+  @_Concurrency.MainActor(unsafe) open func getBandwidth() -> Swift.Double
+  @_Concurrency.MainActor(unsafe) open func getBitrate() -> Swift.Int
+  @_Concurrency.MainActor(unsafe) open func getInitBufferingTime() -> Swift.Int64
+  @_Concurrency.MainActor(unsafe) open func setInitBufferingTime(time: Foundation.Date)
+  @_Concurrency.MainActor(unsafe) open func checkIsBuffering() -> Swift.Bool
+  @_Concurrency.MainActor(unsafe) open func checkIsPlaying() -> Swift.Bool
+  @_Concurrency.MainActor(unsafe) open func getCurrentPosition() -> Swift.Int
+  @_Concurrency.MainActor(unsafe) open func getDuration() -> Swift.Int
+  @_Concurrency.MainActor(unsafe) open func getLiveDuration() -> Swift.Int?
+  @_Concurrency.MainActor(unsafe) open func getHeight() -> Swift.Int
+  @_Concurrency.MainActor(unsafe) open func getHostname() -> Swift.String
+  @_Concurrency.MainActor(unsafe) open func getUniqueId() -> Swift.String
+  @_Concurrency.MainActor(unsafe) open func getSessionID() -> Swift.String
+  @_Concurrency.MainActor(unsafe) open func getWaitingCount() -> Swift.Int
+  @_Concurrency.MainActor(unsafe) open func tooglePlay()
+  @objc @_Concurrency.MainActor(unsafe) open func play()
+  @objc @_Concurrency.MainActor(unsafe) open func pause()
+  @_Concurrency.MainActor(unsafe) open func stop()
+  @objc @_Concurrency.MainActor(unsafe) open func seekTo(_ time: Swift.Double)
+  @objc @_Concurrency.MainActor(unsafe) open func fordward(_ time: Swift.Double)
+  @objc @_Concurrency.MainActor(unsafe) open func backward(_ time: Swift.Double)
+  @_Concurrency.MainActor(unsafe) open func getCurrentMediaConfig() -> MediastreamPlatformSDKiOS.MediastreamPlayerConfig
+  @_Concurrency.MainActor(unsafe) open func getScreenResolution() -> Swift.String
+  @_Concurrency.MainActor(unsafe) open func getResolution() -> Swift.String
+  @_Concurrency.MainActor(unsafe) open func getTimeString(from time: CoreMedia.CMTime) -> Swift.String
+  @objc @_Concurrency.MainActor(unsafe) open func contentDidFinishPlaying(_ notification: Foundation.Notification)
+  @objc @_Concurrency.MainActor(unsafe) open func resumeAd()
+  @objc @_Concurrency.MainActor(unsafe) open func getAdManager() -> GoogleInteractiveMediaAds.IMAAdsManager?
+  @_Concurrency.MainActor(unsafe) @objc open func adsLoader(_ loader: GoogleInteractiveMediaAds.IMAAdsLoader!, adsLoadedWith adsLoadedData: GoogleInteractiveMediaAds.IMAAdsLoadedData!)
+  @_Concurrency.MainActor(unsafe) @objc open func adsLoader(_ loader: GoogleInteractiveMediaAds.IMAAdsLoader!, failedWith adErrorData: GoogleInteractiveMediaAds.IMAAdLoadingErrorData!)
+  @_Concurrency.MainActor(unsafe) @objc open func adsManager(_ adsManager: GoogleInteractiveMediaAds.IMAAdsManager!, didReceive event: GoogleInteractiveMediaAds.IMAAdEvent!)
+  @_Concurrency.MainActor(unsafe) @objc open func adsManagerDidRequestContentPause(_ adsManager: GoogleInteractiveMediaAds.IMAAdsManager!)
+  @_Concurrency.MainActor(unsafe) @objc open func adsManagerDidRequestContentResume(_ adsManager: GoogleInteractiveMediaAds.IMAAdsManager!)
+  @_Concurrency.MainActor(unsafe) @objc open func adsManager(_ adsManager: GoogleInteractiveMediaAds.IMAAdsManager!, didReceive error: GoogleInteractiveMediaAds.IMAAdError!)
+  @_Concurrency.MainActor(unsafe) open func webOpenerDidClose(inAppBrowser webOpener: ObjectiveC.NSObject!)
+  @_Concurrency.MainActor(unsafe) open func webOpenerDidOpen(inAppBrowser webOpener: ObjectiveC.NSObject!)
+  @_Concurrency.MainActor(unsafe) open func webOpenerWillClose(inAppBrowser webOpener: ObjectiveC.NSObject!)
+  @_Concurrency.MainActor(unsafe) open func webOpenerWillOpen(inAppBrowser webOpener: ObjectiveC.NSObject!)
+  @_Concurrency.MainActor(unsafe) open func webOpenerWillOpenExternalBrowser(_ webOpener: ObjectiveC.NSObject!)
+  @_Concurrency.MainActor(unsafe) @objc override dynamic open func observeValue(forKeyPath keyPath: Swift.String?, of object: Any?, change: [Foundation.NSKeyValueChangeKey : Any]?, context: Swift.UnsafeMutableRawPointer?)
+  @_Concurrency.MainActor(unsafe) open func getPBId() -> Swift.String
+  @_Concurrency.MainActor(unsafe) open func getSId() -> Swift.String
+  @_Concurrency.MainActor(unsafe) open func getUId() -> Swift.String
+  @_Concurrency.MainActor(unsafe) open func preparePlayer(player: AVFoundation.AVPlayer)
+  @objc @_Concurrency.MainActor(unsafe) open func failedToPlayToEndTime(_ notification: Foundation.Notification)
+  @objc @_Concurrency.MainActor(unsafe) open func reloadPlayer(_ config: MediastreamPlatformSDKiOS.MediastreamPlayerConfig)
+  @objc @_Concurrency.MainActor(unsafe) open func setup(_ config: MediastreamPlatformSDKiOS.MediastreamPlayerConfig)
+  @_Concurrency.MainActor(unsafe) open func setupMediaPlayerNotificationView()
+  @objc @_Concurrency.MainActor(unsafe) open func getMediaTitle() -> Swift.String
+  @objc @_Concurrency.MainActor(unsafe) open func getMediaPoster() -> Swift.String
+  @_Concurrency.MainActor(unsafe) open func setupNotificationView()
+  @objc @_Concurrency.MainActor(unsafe) open func showCastButton(show: Swift.Bool)
+  @_Concurrency.MainActor(unsafe) open func playNext()
+  @_Concurrency.MainActor(unsafe) open func playPrev()
+  @objc @_Concurrency.MainActor(unsafe) open func enterFullscreen(fullscreen: Swift.Bool)
+  @objc @_Concurrency.MainActor(unsafe) open func getCurrentTime() -> Swift.Int64
+  @_Concurrency.MainActor(unsafe) open func showDaiClickerView(show: Swift.Bool)
+  @_Concurrency.MainActor(unsafe) open func getPreviousCurrentTime() -> Swift.Int64
+  @_Concurrency.MainActor(unsafe) open func setPreviousCurrentTime(time: Swift.Int64)
+  @objc @_Concurrency.MainActor(unsafe) open func getVersion() -> Swift.String
+  @objc deinit
+}
+extension MediastreamPlatformSDKiOS.MediastreamPlatformSDK : AVKit.AVPlayerViewControllerDelegate {
+  @_Concurrency.MainActor(unsafe) @objc dynamic public func playerViewController(_ playerViewController: AVKit.AVPlayerViewController, willEndFullScreenPresentationWithAnimationCoordinator coordinator: any UIKit.UIViewControllerTransitionCoordinator)
+  @_Concurrency.MainActor(unsafe) @objc dynamic public func playerViewController(_ playerViewController: AVKit.AVPlayerViewController, willBeginFullScreenPresentationWithAnimationCoordinator coordinator: any UIKit.UIViewControllerTransitionCoordinator)
+}
+@objc open class MediastreamPlayerCollector : ObjectiveC.NSObject {
+  public init(mdstrm: MediastreamPlatformSDKiOS.MediastreamPlatformSDK, config: MediastreamPlatformSDKiOS.MediastreamPlayerConfig)
+  open func setNewConfig(config: MediastreamPlatformSDKiOS.MediastreamPlayerConfig)
+  open func startCollector()
+  open func stopCollector()
+  open func releaseCollector()
+  open func addPlayerLoadEvent(position: Swift.Int64)
+  open func addErrorEvent(errorData: [Swift.String : Any])
+  open func track()
+  @objc deinit
+}
+@_inheritsConvenienceInitializers @objc open class MediastreamPlayerConfig : ObjectiveC.NSObject {
+  @objc override dynamic public init()
+  public enum VideoTypes : Swift.String {
+    case LIVE
+    case VOD
+    case EPISODE
+    public init?(rawValue: Swift.String)
+    public typealias RawValue = Swift.String
+    public var rawValue: Swift.String {
+      get
+    }
+  }
+  public enum Environments : Swift.String {
+    case PRODUCTION
+    case DEV
+    public init?(rawValue: Swift.String)
+    public typealias RawValue = Swift.String
+    public var rawValue: Swift.String {
+      get
+    }
+  }
+  public enum AudioVideoFormat : Swift.String {
+    case HLS
+    case M4A
+    case MP3
+    public init?(rawValue: Swift.String)
+    public typealias RawValue = Swift.String
+    public var rawValue: Swift.String {
+      get
+    }
+  }
+  open var appName: Swift.String? {
+    get
+    set(val)
+  }
+  open var appVersion: Swift.String? {
+    get
+    set(val)
+  }
+  open var distributorId: Swift.String? {
+    get
+    set(val)
+  }
+  open var accessToken: Swift.String? {
+    get
+    set(val)
+  }
+  open var accountID: Swift.String? {
+    get
+    set(val)
+  }
+  open func addAdCustomAttribute(_ key: Swift.String, value: Swift.String)
+  open func addYouboraExtraParams(_ value: Swift.String)
+  open var adURL: Swift.String? {
+    get
+    set(val)
+  }
+  open func addDrmHeader(_ key: Swift.String, value: Swift.String)
+  open var analyticsCustom: Swift.String? {
+    get
+    set(val)
+  }
+  open var appCertificateUrl: Swift.String? {
+    get
+    set(val)
+  }
+  open var autoplay: Swift.Bool {
+    get
+    set(val)
+  }
+  open var showBackgroundOnTitleAndControls: Swift.Bool {
+    get
+    set(val)
+  }
+  open var tryToGetMetadataFromLiveWhenAudio: Swift.Bool {
+    get
+    set(val)
+  }
+  open var updatesNowPlayingInfoCenter: Swift.Bool {
+    get
+    set(val)
+  }
+  open var customerID: Swift.String? {
+    get
+    set(val)
+  }
+  open var needReload: Swift.Bool {
+    get
+    set(val)
+  }
+  open var debug: Swift.Bool {
+    get
+    set(val)
+  }
+  open var defaultOrientation: UIKit.UIInterfaceOrientation? {
+    get
+    set(val)
+  }
+  open var dvr: Swift.Bool {
+    get
+    set(val)
+  }
+  open var dvrStart: Swift.String? {
+    get
+    set(val)
+  }
+  open var dvrEnd: Swift.String? {
+    get
+    set(val)
+  }
+  open var customUI: Swift.Bool {
+    get
+    set(val)
+  }
+  open var drmHeaders: [(Swift.String, Swift.String)] {
+    get
+  }
+  open var drmUrl: Swift.String? {
+    get
+    set(val)
+  }
+  open var playerId: Swift.String? {
+    get
+    set(val)
+  }
+  open var googleImaPPID: Swift.String? {
+    get
+    set(val)
+  }
+  open var environment: MediastreamPlatformSDKiOS.MediastreamPlayerConfig.Environments {
+    get
+    set(val)
+  }
+  open var id: Swift.String? {
+    get
+    set(val)
+  }
+  open var maxProfile: Swift.String? {
+    get
+    set(val)
+  }
+  open var showControls: Swift.Bool {
+    get
+    set(val)
+  }
+  open var showDismissButton: Swift.Bool {
+    get
+    set(val)
+  }
+  open var showCastButton: Swift.Bool {
+    get
+    set(val)
+  }
+  open var useCustomCastButton: UIKit.UIButton? {
+    get
+    set(val)
+  }
+  open var loadNextAutomatically: Swift.Bool {
+    get
+    set(val)
+  }
+  open var trackEnable: Swift.Bool {
+    get
+    set(val)
+  }
+  open var src: Foundation.NSURL? {
+    get
+    set(val)
+  }
+  open var referer: Swift.String? {
+    get
+    set(val)
+  }
+  open var startAt: Swift.Int {
+    get
+    set(val)
+  }
+  open var type: MediastreamPlatformSDKiOS.MediastreamPlayerConfig.VideoTypes {
+    get
+    set(val)
+  }
+  open var volume: Swift.Int {
+    get
+    set(val)
+  }
+  open var windowDvr: Swift.Int {
+    get
+    set(val)
+  }
+  open var videoFormat: MediastreamPlatformSDKiOS.MediastreamPlayerConfig.AudioVideoFormat {
+    get
+    set(val)
+  }
+  open var protocoL: Swift.String {
+    get
+    set(val)
+  }
+  open func hasAds() -> Swift.Bool
+  open func getAdQueryString() -> Swift.String
+  open func getYouboraExtraParams() -> [Swift.String]
+  open func getMediaQueryString() -> Swift.String
+  @objc deinit
+}
+public enum ReachabilityError : Swift.Error {
+  case FailedToCreateWithAddress(Darwin.sockaddr_in)
+  case FailedToCreateWithHostname(Swift.String)
+  case UnableToSetCallback
+  case UnableToSetDispatchQueue
+}
+public let ReachabilityChangedNotification: Foundation.NSNotification.Name
+public class MediastreamPlayerReachability {
+  public typealias NetworkReachable = (MediastreamPlatformSDKiOS.MediastreamPlayerReachability) -> ()
+  public typealias NetworkUnreachable = (MediastreamPlatformSDKiOS.MediastreamPlayerReachability) -> ()
+  public enum NetworkStatus : Swift.CustomStringConvertible {
+    case notReachable, reachableViaWiFi, reachableViaWWAN
+    public var description: Swift.String {
+      get
+    }
+    public static func == (a: MediastreamPlatformSDKiOS.MediastreamPlayerReachability.NetworkStatus, b: MediastreamPlatformSDKiOS.MediastreamPlayerReachability.NetworkStatus) -> Swift.Bool
+    public func hash(into hasher: inout Swift.Hasher)
+    public var hashValue: Swift.Int {
+      get
+    }
+  }
+  public var whenReachable: MediastreamPlatformSDKiOS.MediastreamPlayerReachability.NetworkReachable?
+  public var whenUnreachable: MediastreamPlatformSDKiOS.MediastreamPlayerReachability.NetworkUnreachable?
+  public var reachableOnWWAN: Swift.Bool
+  public var notificationCenter: Foundation.NotificationCenter
+  public var currentReachabilityString: Swift.String {
+    get
+  }
+  public var currentReachabilityStatus: MediastreamPlatformSDKiOS.MediastreamPlayerReachability.NetworkStatus {
+    get
+  }
+  required public init(reachabilityRef: SystemConfiguration.SCNetworkReachability)
+  convenience public init?(hostname: Swift.String)
+  convenience public init?()
+  @objc deinit
+}
+extension MediastreamPlatformSDKiOS.MediastreamPlayerReachability {
+  public func startNotifier() throws
+  public func stopNotifier()
+  public var isReachable: Swift.Bool {
+    get
+  }
+  public var isReachableViaWWAN: Swift.Bool {
+    get
+  }
+  public var isReachableViaWiFi: Swift.Bool {
+    get
+  }
+  public var description: Swift.String {
+    get
+  }
+}
+@objc open class MediastreamPlayerTracker : ObjectiveC.NSObject {
+  public init(config: MediastreamPlatformSDKiOS.MediastreamPlayerConfig, SDK: MediastreamPlatformSDKiOS.MediastreamPlatformSDK)
+  open func wasTrackerInitialized() -> Swift.Bool
+  open func setCanPlayDate(canPlayDate: Foundation.Date)
+  open func startTrackPing()
+  open func stopTrackPing()
+  open func track(firstStart: Swift.Bool)
+  open func getUrlQueryString() -> Swift.String
+  @objc open func pingTask()
+  @objc deinit
+}
+@available(*, deprecated, renamed: "SwiftyJSONError.errorDomain", message: "ErrorDomain is deprecated. Use `SwiftyJSONError.errorDomain` instead.")
+public let ErrorDomain: Swift.String
+@available(*, deprecated, renamed: "SwiftyJSONError.unsupportedType", message: "ErrorUnsupportedType is deprecated. Use `SwiftyJSONError.unsupportedType` instead.")
+public let ErrorUnsupportedType: Swift.Int
+@available(*, deprecated, renamed: "SwiftyJSONError.indexOutOfBounds", message: "ErrorIndexOutOfBounds is deprecated. Use `SwiftyJSONError.indexOutOfBounds` instead.")
+public let ErrorIndexOutOfBounds: Swift.Int
+@available(*, deprecated, renamed: "SwiftyJSONError.wrongType", message: "ErrorWrongType is deprecated. Use `SwiftyJSONError.wrongType` instead.")
+public let ErrorWrongType: Swift.Int
+@available(*, deprecated, renamed: "SwiftyJSONError.notExist", message: "ErrorNotExist is deprecated. Use `SwiftyJSONError.notExist` instead.")
+public let ErrorNotExist: Swift.Int
+@available(*, deprecated, renamed: "SwiftyJSONError.invalidJSON", message: "ErrorInvalidJSON is deprecated. Use `SwiftyJSONError.invalidJSON` instead.")
+public let ErrorInvalidJSON: Swift.Int
+public enum SwiftyJSONError : Swift.Int, Swift.Error {
+  case unsupportedType
+  case indexOutOfBounds
+  case elementTooDeep
+  case wrongType
+  case notExist
+  case invalidJSON
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+extension MediastreamPlatformSDKiOS.SwiftyJSONError : Foundation.CustomNSError {
+  public static var errorDomain: Swift.String {
+    get
+  }
+  public var errorCode: Swift.Int {
+    get
+  }
+  public var errorUserInfo: [Swift.String : Any] {
+    get
+  }
+}
+public enum Type : Swift.Int {
+  case number
+  case string
+  case bool
+  case array
+  case dictionary
+  case null
+  case unknown
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+public struct JSON {
+  public init(data: Foundation.Data, options opt: Foundation.JSONSerialization.ReadingOptions = []) throws
+  public init(_ object: Any)
+  public init(parseJSON jsonString: Swift.String)
+  @available(*, deprecated, message: "Use instead `init(parseJSON: )`")
+  public static func parse(_ json: Swift.String) -> MediastreamPlatformSDKiOS.JSON
+  public mutating func merge(with other: MediastreamPlatformSDKiOS.JSON) throws
+  public func merged(with other: MediastreamPlatformSDKiOS.JSON) throws -> MediastreamPlatformSDKiOS.JSON
+  public var type: MediastreamPlatformSDKiOS.`Type` {
+    get
+  }
+  public var error: MediastreamPlatformSDKiOS.SwiftyJSONError? {
+    get
+  }
+  public var object: Any {
+    get
+    set
+  }
+  @available(*, unavailable, renamed: "null")
+  public static var nullJSON: MediastreamPlatformSDKiOS.JSON {
+    get
+  }
+  public static var null: MediastreamPlatformSDKiOS.JSON {
+    get
+  }
+}
+public enum Index<T> : Swift.Comparable {
+  case array(Swift.Int)
+  case dictionary(Swift.DictionaryIndex<Swift.String, T>)
+  case null
+  public static func == (lhs: MediastreamPlatformSDKiOS.Index<T>, rhs: MediastreamPlatformSDKiOS.Index<T>) -> Swift.Bool
+  public static func < (lhs: MediastreamPlatformSDKiOS.Index<T>, rhs: MediastreamPlatformSDKiOS.Index<T>) -> Swift.Bool
+}
+public typealias JSONIndex = MediastreamPlatformSDKiOS.Index<MediastreamPlatformSDKiOS.JSON>
+public typealias JSONRawIndex = MediastreamPlatformSDKiOS.Index<Any>
+extension MediastreamPlatformSDKiOS.JSON : Swift.Collection {
+  public typealias Index = MediastreamPlatformSDKiOS.JSONRawIndex
+  public var startIndex: MediastreamPlatformSDKiOS.JSON.Index {
+    get
+  }
+  public var endIndex: MediastreamPlatformSDKiOS.JSON.Index {
+    get
+  }
+  public func index(after i: MediastreamPlatformSDKiOS.JSON.Index) -> MediastreamPlatformSDKiOS.JSON.Index
+  public subscript(position: MediastreamPlatformSDKiOS.JSON.Index) -> (Swift.String, MediastreamPlatformSDKiOS.JSON) {
+    get
+  }
+  public typealias Element = (Swift.String, MediastreamPlatformSDKiOS.JSON)
+  public typealias Indices = Swift.DefaultIndices<MediastreamPlatformSDKiOS.JSON>
+  public typealias Iterator = Swift.IndexingIterator<MediastreamPlatformSDKiOS.JSON>
+  public typealias SubSequence = Swift.Slice<MediastreamPlatformSDKiOS.JSON>
+}
+public enum JSONKey {
+  case index(Swift.Int)
+  case key(Swift.String)
+}
+public protocol JSONSubscriptType {
+  var jsonKey: MediastreamPlatformSDKiOS.JSONKey { get }
+}
+extension Swift.Int : MediastreamPlatformSDKiOS.JSONSubscriptType {
+  public var jsonKey: MediastreamPlatformSDKiOS.JSONKey {
+    get
+  }
+}
+extension Swift.String : MediastreamPlatformSDKiOS.JSONSubscriptType {
+  public var jsonKey: MediastreamPlatformSDKiOS.JSONKey {
+    get
+  }
+}
+extension MediastreamPlatformSDKiOS.JSON {
+  public subscript(path: [any MediastreamPlatformSDKiOS.JSONSubscriptType]) -> MediastreamPlatformSDKiOS.JSON {
+    get
+    set
+  }
+  public subscript(path: any MediastreamPlatformSDKiOS.JSONSubscriptType...) -> MediastreamPlatformSDKiOS.JSON {
+    get
+    set
+  }
+}
+extension MediastreamPlatformSDKiOS.JSON : Swift.ExpressibleByStringLiteral {
+  public init(stringLiteral value: Swift.StringLiteralType)
+  public init(extendedGraphemeClusterLiteral value: MediastreamPlatformSDKiOS.JSON.StringLiteralType)
+  public init(unicodeScalarLiteral value: MediastreamPlatformSDKiOS.JSON.StringLiteralType)
+  public typealias ExtendedGraphemeClusterLiteralType = MediastreamPlatformSDKiOS.JSON.StringLiteralType
+  public typealias StringLiteralType = Swift.StringLiteralType
+  public typealias UnicodeScalarLiteralType = MediastreamPlatformSDKiOS.JSON.StringLiteralType
+}
+extension MediastreamPlatformSDKiOS.JSON : Swift.ExpressibleByIntegerLiteral {
+  public init(integerLiteral value: Swift.IntegerLiteralType)
+  public typealias IntegerLiteralType = Swift.IntegerLiteralType
+}
+extension MediastreamPlatformSDKiOS.JSON : Swift.ExpressibleByBooleanLiteral {
+  public init(booleanLiteral value: Swift.BooleanLiteralType)
+  public typealias BooleanLiteralType = Swift.BooleanLiteralType
+}
+extension MediastreamPlatformSDKiOS.JSON : Swift.ExpressibleByFloatLiteral {
+  public init(floatLiteral value: Swift.FloatLiteralType)
+  public typealias FloatLiteralType = Swift.FloatLiteralType
+}
+extension MediastreamPlatformSDKiOS.JSON : Swift.ExpressibleByDictionaryLiteral {
+  public init(dictionaryLiteral elements: (Swift.String, Any)...)
+  public typealias Key = Swift.String
+  public typealias Value = Any
+}
+extension MediastreamPlatformSDKiOS.JSON : Swift.ExpressibleByArrayLiteral {
+  public init(arrayLiteral elements: Any...)
+  public typealias ArrayLiteralElement = Any
+}
+extension MediastreamPlatformSDKiOS.JSON : Swift.ExpressibleByNilLiteral {
+  @available(*, deprecated, message: "use JSON.null instead. Will be removed in future versions")
+  public init(nilLiteral: ())
+}
+extension MediastreamPlatformSDKiOS.JSON : Swift.RawRepresentable {
+  public init?(rawValue: Any)
+  public var rawValue: Any {
+    get
+  }
+  public func rawData(options opt: Foundation.JSONSerialization.WritingOptions = JSONSerialization.WritingOptions(rawValue: 0)) throws -> Foundation.Data
+  public func rawString(_ encoding: Swift.String.Encoding = .utf8, options opt: Foundation.JSONSerialization.WritingOptions = .prettyPrinted) -> Swift.String?
+  public func rawString(_ options: [MediastreamPlatformSDKiOS.writingOptionsKeys : Any]) -> Swift.String?
+  public typealias RawValue = Any
+}
+extension MediastreamPlatformSDKiOS.JSON : Swift.CustomStringConvertible, Swift.CustomDebugStringConvertible {
+  public var description: Swift.String {
+    get
+  }
+  public var debugDescription: Swift.String {
+    get
+  }
+}
+extension MediastreamPlatformSDKiOS.JSON {
+  public var array: [MediastreamPlatformSDKiOS.JSON]? {
+    get
+  }
+  public var arrayValue: [MediastreamPlatformSDKiOS.JSON] {
+    get
+  }
+  public var arrayObject: [Any]? {
+    get
+    set
+  }
+}
+extension MediastreamPlatformSDKiOS.JSON {
+  public var dictionary: [Swift.String : MediastreamPlatformSDKiOS.JSON]? {
+    get
+  }
+  public var dictionaryValue: [Swift.String : MediastreamPlatformSDKiOS.JSON] {
+    get
+  }
+  public var dictionaryObject: [Swift.String : Any]? {
+    get
+    set
+  }
+}
+extension MediastreamPlatformSDKiOS.JSON {
+  public var bool: Swift.Bool? {
+    get
+    set
+  }
+  public var boolValue: Swift.Bool {
+    get
+    set
+  }
+}
+extension MediastreamPlatformSDKiOS.JSON {
+  public var string: Swift.String? {
+    get
+    set
+  }
+  public var stringValue: Swift.String {
+    get
+    set
+  }
+}
+extension MediastreamPlatformSDKiOS.JSON {
+  public var number: Foundation.NSNumber? {
+    get
+    set
+  }
+  public var numberValue: Foundation.NSNumber {
+    get
+    set
+  }
+}
+extension MediastreamPlatformSDKiOS.JSON {
+  public var null: Foundation.NSNull? {
+    get
+    set
+  }
+  public func exists() -> Swift.Bool
+}
+extension MediastreamPlatformSDKiOS.JSON {
+  public var url: Foundation.URL? {
+    get
+    set
+  }
+}
+extension MediastreamPlatformSDKiOS.JSON {
+  public var double: Swift.Double? {
+    get
+    set
+  }
+  public var doubleValue: Swift.Double {
+    get
+    set
+  }
+  public var float: Swift.Float? {
+    get
+    set
+  }
+  public var floatValue: Swift.Float {
+    get
+    set
+  }
+  public var int: Swift.Int? {
+    get
+    set
+  }
+  public var intValue: Swift.Int {
+    get
+    set
+  }
+  public var uInt: Swift.UInt? {
+    get
+    set
+  }
+  public var uIntValue: Swift.UInt {
+    get
+    set
+  }
+  public var int8: Swift.Int8? {
+    get
+    set
+  }
+  public var int8Value: Swift.Int8 {
+    get
+    set
+  }
+  public var uInt8: Swift.UInt8? {
+    get
+    set
+  }
+  public var uInt8Value: Swift.UInt8 {
+    get
+    set
+  }
+  public var int16: Swift.Int16? {
+    get
+    set
+  }
+  public var int16Value: Swift.Int16 {
+    get
+    set
+  }
+  public var uInt16: Swift.UInt16? {
+    get
+    set
+  }
+  public var uInt16Value: Swift.UInt16 {
+    get
+    set
+  }
+  public var int32: Swift.Int32? {
+    get
+    set
+  }
+  public var int32Value: Swift.Int32 {
+    get
+    set
+  }
+  public var uInt32: Swift.UInt32? {
+    get
+    set
+  }
+  public var uInt32Value: Swift.UInt32 {
+    get
+    set
+  }
+  public var int64: Swift.Int64? {
+    get
+    set
+  }
+  public var int64Value: Swift.Int64 {
+    get
+    set
+  }
+  public var uInt64: Swift.UInt64? {
+    get
+    set
+  }
+  public var uInt64Value: Swift.UInt64 {
+    get
+    set
+  }
+}
+extension MediastreamPlatformSDKiOS.JSON : Swift.Comparable {
+}
+public func == (lhs: MediastreamPlatformSDKiOS.JSON, rhs: MediastreamPlatformSDKiOS.JSON) -> Swift.Bool
+public func <= (lhs: MediastreamPlatformSDKiOS.JSON, rhs: MediastreamPlatformSDKiOS.JSON) -> Swift.Bool
+public func >= (lhs: MediastreamPlatformSDKiOS.JSON, rhs: MediastreamPlatformSDKiOS.JSON) -> Swift.Bool
+public func > (lhs: MediastreamPlatformSDKiOS.JSON, rhs: MediastreamPlatformSDKiOS.JSON) -> Swift.Bool
+public func < (lhs: MediastreamPlatformSDKiOS.JSON, rhs: MediastreamPlatformSDKiOS.JSON) -> Swift.Bool
+public enum writingOptionsKeys {
+  case jsonSerialization
+  case castNilToNSNull
+  case maxObjextDepth
+  case encoding
+  public static func == (a: MediastreamPlatformSDKiOS.writingOptionsKeys, b: MediastreamPlatformSDKiOS.writingOptionsKeys) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+extension MediastreamPlatformSDKiOS.JSON : Swift.Codable {
+  public init(from decoder: any Swift.Decoder) throws
+  public func encode(to encoder: any Swift.Encoder) throws
+}
+extension MediastreamPlatformSDKiOS.MediastreamDAIConfig.Environments : Swift.Equatable {}
+extension MediastreamPlatformSDKiOS.MediastreamDAIConfig.Environments : Swift.Hashable {}
+extension MediastreamPlatformSDKiOS.MediastreamDAIConfig.Environments : Swift.RawRepresentable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlatformSDK.StaticUrl : Swift.Equatable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlatformSDK.StaticUrl : Swift.Hashable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlatformSDK.StaticUrl : Swift.RawRepresentable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlatformSDK.NowPlayingCropUrl : Swift.Equatable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlatformSDK.NowPlayingCropUrl : Swift.Hashable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlatformSDK.NowPlayingCropUrl : Swift.RawRepresentable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlayerConfig.VideoTypes : Swift.Equatable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlayerConfig.VideoTypes : Swift.Hashable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlayerConfig.VideoTypes : Swift.RawRepresentable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlayerConfig.Environments : Swift.Equatable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlayerConfig.Environments : Swift.Hashable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlayerConfig.Environments : Swift.RawRepresentable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlayerConfig.AudioVideoFormat : Swift.Equatable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlayerConfig.AudioVideoFormat : Swift.Hashable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlayerConfig.AudioVideoFormat : Swift.RawRepresentable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlayerReachability.NetworkStatus : Swift.Equatable {}
+extension MediastreamPlatformSDKiOS.MediastreamPlayerReachability.NetworkStatus : Swift.Hashable {}
+extension MediastreamPlatformSDKiOS.SwiftyJSONError : Swift.Equatable {}
+extension MediastreamPlatformSDKiOS.SwiftyJSONError : Swift.Hashable {}
+extension MediastreamPlatformSDKiOS.SwiftyJSONError : Swift.RawRepresentable {}
+extension MediastreamPlatformSDKiOS.`Type` : Swift.Equatable {}
+extension MediastreamPlatformSDKiOS.`Type` : Swift.Hashable {}
+extension MediastreamPlatformSDKiOS.`Type` : Swift.RawRepresentable {}
+extension MediastreamPlatformSDKiOS.writingOptionsKeys : Swift.Equatable {}
+extension MediastreamPlatformSDKiOS.writingOptionsKeys : Swift.Hashable {}

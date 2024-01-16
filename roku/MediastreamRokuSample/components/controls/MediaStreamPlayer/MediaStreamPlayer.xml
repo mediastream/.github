@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<component name="MediaStreamPlayer" extends="Group">
+    <script type="text/brightscript" uri="MediaStreamPlayer.brs" />
+    <script type="text/brightscript" uri="pkg:/components/controls/MediaPlayerConfig/VODPlayer.brs"/>
+    <script type="text/brightscript" uri="pkg:/components/controls/MediaPlayerConfig/LivePlayer.brs"/>
+    <interface>
+        <field id="SDKStatus" type="assocarray" alwaysNotify="true"/>
+        <field id="mediaStreamPlayerContent" type="assocarray" alwaysNotify="true"/>
+        <function name="eventCallBackHandler" />
+        <function name="callbackOnEventPlayerTimeupdate" />
+        <function name="destory" />
+        <function name="setupPlayer"/>
+        <function name="initializeSDK"/>
+        <function name="startPlayback"/>
+    </interface>
+
+    <children>
+    </children>
+</component>
