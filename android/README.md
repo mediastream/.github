@@ -242,6 +242,9 @@ Allows to reload the player with a new content without kill the player instance.
 
 When you are finished using this MediastreamPlayer, make sure to call this method to kill player instance.
 
+## `changeSpeed(playbackSpeed: Float)`
+
+Allows you to change the content playback speed.
 
 # Examples
 
