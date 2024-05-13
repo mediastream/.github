@@ -195,6 +195,14 @@ Seek to time established.
 
 Seeks to a position specified in milliseconds in the current video.
 
+## `startPiP()`
+
+Launches picture in picture functionality if available on the device.
+
+## `stopPiP()`
+
+Stopped picture in picture functionality.
+
 ## `reloadPlayer(config: MediastreamPlayerConfig)`
 
 Allows to reload the player with a new content without kill the player instance.
