@@ -88,13 +88,49 @@ class VideoActivity : AppCompatActivity() {
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <application ...
+    <application
+        ...
         <activity
-            android:name=".video.VideoOnDemandActivity"
+            android:name=".main.MainActivity"
             android:supportsPictureInPicture="true"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation" //To support Picture in Picture
             android:exported="false" />
-    ...
+        </activity>
+        <service android:name="am.mediastre.mediastreamplatformsdkandroid.MediastreamPlayerService" />
+        <meta-data android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
+            android:value="androidx.media3.cast.DefaultCastOptionsProvider"/>
+    </application>
+```
+
+### PiP Example
+
+```kotlin
+import android.content.res.Configuration
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+
+class YourPlayerActivity : AppCompatActivity() {
+    private lateinit var mediastreamPlayer: MediastreamPlayer
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_your_player)
+
+        mediastreamPlayer = MediastreamPlayer(this)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onUserLeaveHint() {
+        mediastreamPlayer.startPiP()
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        mediastreamPlayer.onPictureInPictureModeChanged(isInPictureInPictureMode)
+    }
+}
 ```
 
 # MediastreamPlayerConfig: Customizing Your Playback Experience
@@ -263,6 +299,10 @@ When you are finished using this MediastreamPlayer, make sure to call this metho
 ## `changeSpeed(playbackSpeed: Float)`
 
 Allows you to change the content playback speed.
+
+## `startPiP()`
+
+Available from Android O. Allows to manage the Picture in Picture functionality.
 
 # Examples
 
