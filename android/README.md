@@ -78,6 +78,24 @@ class VideoActivity : AppCompatActivity() {
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 ```
+### Manifest
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <application ...
+        <activity
+            android:name=".video.VideoOnDemandActivity"
+            android:supportsPictureInPicture="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation" //To support Picture in Picture
+            android:exported="false" />
+    ...
+```
 
 # MediastreamPlayerConfig: Customizing Your Playback Experience
 
