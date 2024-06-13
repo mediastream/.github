@@ -118,6 +118,20 @@ mdstrm.events.listenTo(eventName: "error", action: { (information: Any?) in
     }
 })
 ```
+# Reminder
+
+MediastreamPlayer is an instance of AVPlayer so it has all its features, it is extendable to other features such as AirPlay Cast, where it is only necessary to generate an instance of the button and add it to the player layer and it will work without problems.
+
+Example of Airplay Button on Custom UI or No Controls Enabled:
+
+```swift
+    func CreateAirPlayButton() {
+        let airPlayButton = AVRoutePickerView(frame: CGRect(x: 20, y: 50, width: 40, height: 40))
+        airPlayButton.activeTintColor = .blue
+        airPlayButton.tintColor = .gray
+        mainContainer.addSubview(airPlayButton)
+    }
+```
 
 # Event Listening in Mediastream SDK
 
@@ -202,6 +216,9 @@ Launches picture in picture functionality if available on the device.
 ## `stopPiP()`
 
 Stopped picture in picture functionality.
+## `changeSpeed(playbackSpeed: Float)`
+
+Allows you to change the content playback speed.
 
 ## `reloadPlayer(config: MediastreamPlayerConfig)`
 
