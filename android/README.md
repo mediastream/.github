@@ -5,7 +5,7 @@ Hello, Android Developer! 👋
 Welcome to the Mediastream SDK for Android, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is 9.0.0.
+- **Version:** The current version of the SDK is 9.2.0.
 - **Compatibility:** Compatible with Android API level 34 (Android 14)
 
 ## Adding Mediastream Platform SDK to Your Android Project
@@ -309,3 +309,226 @@ Available from Android O. Allows to manage the Picture in Picture functionality.
 In the following example, you'll find an application showcasing various uses of the Mediastream SDK for Android. This app provides practical examples of key functionalities, including audio playback, video playback, audio as a service, casting, and more. Make sure you enter the IDs corresponding to your ACCOUNT_ID and CONTENT_ID and enjoy.
 
 [Sample](/android/MediastreamSampleApp)
+
+# MediastreamPlayerServiceWithSync
+
+## Overview
+
+The MediastreamPlayerServiceWithSync is a service that supports audio playback with synchronization capabilities, including support for Android Auto. This guide will walk you through the steps to integrate this service into your Android application.
+
+## Prerequisites
+
+- Minimum SDK version set to 24 or higher
+- Necessary dependencies for Media3 and AndroidX libraries
+
+## Permissions
+
+Firstly, you need to request the FOREGROUND_SERVICE_MEDIA_PLAYBACK permission to allow your service to run as a foreground service for media playback.
+
+```java
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+```
+
+## Intent Queries
+
+Add intent queries to specify that your app can handle certain intents related to media playback and control. This is necessary for Android Auto to discover and interact with your media service.
+
+```java
+<queries>
+    <intent>
+        <action android:name="android.media.action.DISPLAY_AUDIO_EFFECT_CONTROL_PANEL" />
+    </intent>
+</queries>
+<queries>
+    <intent>
+        <action android:name="androidx.media3.session.MediaSessionService" />
+    </intent>
+</queries>
+```
+
+## Service Declaration
+
+Declare your media service (MediastreamPlayerServiceWithSync) in the manifest. This service will handle media playback and will be registered as a foreground service.
+
+```java
+<service
+    android:name="am.mediastre.mediastreamplatformsdkandroid.MediastreamPlayerServi ceWithSync"
+    android:exported="true" android:foregroundServiceType="mediaPlayback" android:stopWithTask="false">
+    <intent-filter>
+        <action android:name="androidx.media3.session.MediaSessionService" /> <action android:name="androidx.media3.session.MediaLibraryService" />
+        <action android:name="android.media.browse.MediaBrowserService" /> <action android:name="android.intent.action.MEDIA_BUTTON" />
+        <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
+    </intent-filter>
+</service>
+```
+
+## Media Button Receiver
+
+Declare a receiver for handling media button actions. This allows your app to respond to hardware media button presses.
+
+```java
+<receiver android:name="androidx.media3.session.MediaButtonReceiver" android:exported="true">
+    <intent-filter>
+        <action android:name="android.intent.action.MEDIA_BUTTON" />
+    </intent-filter>
+</receiver>
+```
+
+## Android Auto Metadata
+
+Include metadata for Android Auto, specifying the resource file that describes your app's automotive capabilities.
+
+```java
+<meta-data
+    android:name="com.google.android.gms.car.application"
+    android:resource="@xml/automotive_app_desc" />
+```
+
+Automotive_app_desc.xml
+```java
+<?xml version="1.0" encoding="utf-8"?>
+<automotiveApp>
+    <uses name="media" />
+</automotiveApp>
+```
+
+## Implement the Activity
+Create your Activity/Fragment that will use the MediastreamPlayerServiceWithSync. Here is a sample implementation:
+
+### Request Permission
+
+Request the necessary permissions at runtime, especially for posting notifications (required from Android 13 onwards):
+
+```java
+if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED){
+    requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), /*requestCode= */ 0)
+}
+```
+ 
+### Create MediastreamPlayerConfig Object
+
+Initialize the MediastreamPlayerConfig object with the necessary configurations for your player:
+
+```java
+private lateinit var miniPlayerConfig: MediastreamMiniPlayerConfig
+private var mBound: Boolean = false
+private lateinit var mService: MediastreamPlayerServiceWithSync
+val config = MediastreamPlayerConfig()
+config.accountID = ""
+config.id = ""
+config.type = MediastreamPlayerConfig.VideoTypes.VOD config.playerType = MediastreamPlayerConfig.PlayerType.
+config.videoFormat = MediastreamPlayerConfig.AudioVideoFormat.
+config.appName = ""
+startService(config)
+```
+
+### Service Connection
+
+Define a connection to handle binding and unbinding the service:
+
+```java
+/**
+* Create our connection to the service to be used in our bindService call. */
+
+private val connection = object : ServiceConnection {
+    override fun onServiceDisconnected(name: ComponentName?) {
+        mBound = false
+    }
+   /**
+    * Called after a successful bind with our VideoService.
+    */
+    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+        if (service is MediastreamPlayerServiceWithSync.MusicBinder) {
+            mService = service.service
+            mBound = true
+        }
+    }
+}
+```
+
+### Initialize and Start the Service
+
+Use the initializeService method to set up the service with the player configuration. This method prepares the service to handle media playback and synchronization. Define a MediastreamPlayerCallback callback interface to handle player events such as play, pause, buffering, errors, and more. This helps in managing and responding to different states of the player.
+
+```java
+val mediaStreamPlayerCallBack = object : MediastreamPlayerCallback {
+    // Implement the callback methods as needed
+}
+miniPlayerConfig = MediastreamMiniPlayerConfig()
+MediastreamPlayerServiceWithSync.initializeService(
+    context,
+    activityContext,
+    config,
+    container,
+    playerView, miniPlayerConfig,
+    false, config.accountID?:"", mediaStreamPlayerCallBack
+)
+try {
+    val intent = Intent(this, MediastreamPlayerServiceWithSync::class.java) ContextCompat.startForegroundService(this, intent)
+    bindService(intent, connection, BIND_AUTO_CREATE)
+} catch (e: Exception) {
+    println("Exception $e")
+}
+```
+
+### Unbind the Service to Stop the Player
+
+Ensure you unbind the service to stop the player properly:
+
+```java
+try {
+    val serviceIntent = Intent(this, MediastreamPlayerServiceWithSync::class.java) serviceIntent.setAction("$packageName.action.stopforeground")
+    try {
+        startService(serviceIntent)
+        unbindService(connection)
+    } catch (e: java.lang.Exception) {
+        e.printStackTrace() }
+    }
+catch (e: java.lang.Exception) {
+    println("Exception $e")
+}
+```
+
+### Update Content with overrideCurrentMiniPlayerConfig
+
+Use this method to update the content displayed in the mini-player notification:
+
+```java
+private fun updateMiniPlayerConfig() {
+    val miniPlayerConfig = MediastreamMiniPlayerConfig().apply {
+        songName = "" color =
+        albumName = "" description = "" imageUrl = "" imageIconUrl =
+    }
+    mService.overrideCurrentMiniPlayerConfig(miniPlayerConfig)
+}
+```
+
+### Reload Player with New Content
+
+To reload the player with a new configuration:
+
+```java
+val config = MediastreamPlayerConfig()
+config.id = ""
+config.type = MediastreamPlayerConfig.VideoTypes.EPISODE
+config.videoFormat = MediastreamPlayerConfig.AudioVideoFormat.M4A
+MediastreamPlayerServiceWithSync.getMsPlayer()?.reloadPlayer(config)
+```
+
+# Migration from old service to new service
+
+If you are migrating from an old service to the new MediastreamPlayerServiceWithSync, note the following changes:
+
+## Remove Action for Starting Foreground Service:
+    - Old: intent.action = "$packageName.action.startforeground"
+    - New: No need to set this action explicitly.
+
+## Remove Action for Stopping Foreground Service:
+    - Old:
+        serviceIntent.setAction("$packageName.action.stopforeground")
+    - New: No need to set this action explicitly.
+
+These changes simplify the integration and reduce the need for manual action setting for foreground services.
+
+### Summary
+By following these steps, you can integrate the MediastreamPlayerServiceWithSync into your Android application, ensuring support for Android Auto and efficient media playback with synchronization capabilities. The migration steps also ensure a smooth transition from the old service implementation to the new one.
