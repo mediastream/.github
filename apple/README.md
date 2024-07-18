@@ -26,7 +26,7 @@ pod 'MediastreamPlatformSDKxC', '~> 2.0.6'
 To integrate the Mediastream Platform SDK into your tvOS project, add the following dependency to your project's pod file:
 
 ```swift
-pod 'MediastreamPlatformSDKAppleTV', '~> 0.3.0'
+pod 'MediastreamPlatformSDKAppleTV', '~> 0.3.1'
 ```
 
 
