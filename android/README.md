@@ -13,7 +13,7 @@ Welcome to the Mediastream SDK for Android, designed to streamline the integrati
 To integrate the Mediastream Platform SDK into your Android project, add the following dependency to your project's build.gradle file:
 
 ```gradle
-implementation "io.github.mediastream:mediastreamplatformsdkandroid:9.0.0"
+implementation "io.github.mediastream:mediastreamplatformsdkandroid:9.2.0"
 ```
 
 ### Basic Implementation
