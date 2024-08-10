@@ -29,6 +29,7 @@ class AudioOnDemandAsServiceActivity : AppCompatActivity() {
     private val TAG = "SampleApp"
     private lateinit var container: FrameLayout
     private lateinit var playerView: PlayerView
+    //    private var player: MediastreamPlayer? = null
     private lateinit var miniPlayerConfig: MediastreamMiniPlayerConfig
 
     private var mBound: Boolean = false
@@ -44,6 +45,7 @@ class AudioOnDemandAsServiceActivity : AppCompatActivity() {
         config.type = MediastreamPlayerConfig.VideoTypes.VOD
         config.playerType = MediastreamPlayerConfig.PlayerType.AUDIO
         config.videoFormat = MediastreamPlayerConfig.AudioVideoFormat.MP3
+        //config.environment = MediastreamPlayerConfig.Environment.DEV
         config.isDebug = true
         config.trackEnable = false
         config.showControls = true
@@ -52,6 +54,7 @@ class AudioOnDemandAsServiceActivity : AppCompatActivity() {
         container = findViewById(R.id.main_media_frame)
 
         setupButtons()
+//        player = MediastreamPlayer(this, config, container, playerView)
         startService(config)
     }
 
@@ -222,6 +225,7 @@ class AudioOnDemandAsServiceActivity : AppCompatActivity() {
         btnGeo1.setOnClickListener {
             val config = MediastreamPlayerConfig()
             config.id = "CONTENT_ID"
+            config.accountID = "ACCOUNT_ID"
             config.type = MediastreamPlayerConfig.VideoTypes.EPISODE
             config.videoFormat = MediastreamPlayerConfig.AudioVideoFormat.M4A
             config.trackEnable = false

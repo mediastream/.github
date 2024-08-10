@@ -22,6 +22,7 @@ class EpisodeAudioAsServiceActivity : AppCompatActivity() {
     private val TAG = "SampleApp"
     private lateinit var container: FrameLayout
     private lateinit var playerView: PlayerView
+//    private var player: MediastreamPlayer? = null
     private lateinit var miniPlayerConfig: MediastreamMiniPlayerConfig
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,6 +41,7 @@ class EpisodeAudioAsServiceActivity : AppCompatActivity() {
         playerView = findViewById(R.id.player_view)
         container = findViewById(R.id.main_media_frame)
 
+//        player = MediastreamPlayer(this, config, container, playerView)
         startService(config)
     }
 

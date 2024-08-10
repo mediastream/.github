@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">MediastreamSampleApp</string>
     <string name="title_activity_main_new">MainActivityNew</string>
+    <string name="notification_permission_denied">"Without notification access the app can't warn about failed background operations"</string>
 </resources>

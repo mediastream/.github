@@ -5,6 +5,7 @@ import am.mediastre.mediastreamsampleapp.audio.AudioEpisodeActivity
 import am.mediastre.mediastreamsampleapp.audio.AudioLiveActivity
 import am.mediastre.mediastreamsampleapp.audio.AudioOnDemandActivity
 import am.mediastre.mediastreamsampleapp.audio.AudioOnDemandAsServiceActivity
+import am.mediastre.mediastreamsampleapp.audio.AudioWithSyncServiceActivity
 import am.mediastre.mediastreamsampleapp.audio.EpisodeAudioAsServiceActivity
 import am.mediastre.mediastreamsampleapp.ui.theme.Material3ComposeTheme
 import android.content.Intent
@@ -108,6 +109,19 @@ fun AudioScreen() {
             },
             onClick = {
                 context.startActivity(Intent(context, AudioEpisodeActivity::class.java))
+            }
+        )
+
+        Spacer(modifier = Modifier.height(5.dp))
+        RoundedCornerCard(
+            content = {
+                TextWithIconRow(
+                    text = "Audio With Sync Service",
+                    icon = Icons.Default.KeyboardArrowRight
+                )
+            },
+            onClick = {
+                context.startActivity(Intent(context, AudioWithSyncServiceActivity::class.java))
             }
         )
     }

@@ -1,5 +1,6 @@
 package am.mediastre.mediastreamsampleapp.video
 
+import am.mediastre.mediastreamplatformsdkandroid.MediastreamMiniPlayerConfig
 import am.mediastre.mediastreamplatformsdkandroid.MediastreamPlayer
 import am.mediastre.mediastreamplatformsdkandroid.MediastreamPlayerConfig
 import am.mediastre.mediastreamsampleapp.R
@@ -18,9 +19,11 @@ class VideoLiveActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_videoplayer)
         val config = MediastreamPlayerConfig()
+        val miniPlayerConfig = MediastreamMiniPlayerConfig()
+
         config.accountID = "ACCOUNT_ID"
         config.id = "CONTENT_ID"
-        config.type = MediastreamPlayerConfig.VideoTypes.VOD
+        config.type = MediastreamPlayerConfig.VideoTypes.LIVE
         config.videoFormat = MediastreamPlayerConfig.AudioVideoFormat.DEFAULT
         config.isDebug = true
         config.accessToken = "ACCESS_TOKEN"
@@ -28,7 +31,7 @@ class VideoLiveActivity : AppCompatActivity() {
         playerView = findViewById(R.id.player_view)
         container = findViewById(R.id.main_media_frame)
 
-        player = MediastreamPlayer(this, config, container, playerView)
+        player = MediastreamPlayer(this, config, container, playerView, miniPlayerConfig)
     }
 
     override fun onDestroy() {

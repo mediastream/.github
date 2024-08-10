@@ -27,6 +27,7 @@
             android:layout_gravity="bottom"
             android:visibility="gone"
             android:layout_marginBottom="70dp"/>
+
     </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

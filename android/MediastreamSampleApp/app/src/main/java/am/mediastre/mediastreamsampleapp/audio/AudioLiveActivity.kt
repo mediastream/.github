@@ -1,5 +1,6 @@
 package am.mediastre.mediastreamsampleapp.audio
 
+import am.mediastre.mediastreamplatformsdkandroid.MediastreamMiniPlayerConfig
 import am.mediastre.mediastreamplatformsdkandroid.MediastreamPlayer
 import am.mediastre.mediastreamplatformsdkandroid.MediastreamPlayerConfig
 import am.mediastre.mediastreamsampleapp.R
@@ -18,6 +19,8 @@ class AudioLiveActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_audioplayer)
         val config = MediastreamPlayerConfig()
+        val miniPlayerConfig = MediastreamMiniPlayerConfig()
+
         config.accountID = "ACCOUNT_ID"
         config.id = "CONTENT_ID"
         config.type = MediastreamPlayerConfig.VideoTypes.LIVE
@@ -27,8 +30,7 @@ class AudioLiveActivity : AppCompatActivity() {
         config.trackEnable = true
         playerView = findViewById(R.id.player_view)
         container = findViewById(R.id.main_media_frame)
-
-        player = MediastreamPlayer(this, config, container, playerView)
+        player = MediastreamPlayer(this, config, container, playerView, miniPlayerConfig)
     }
 
     override fun onDestroy() {

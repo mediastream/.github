@@ -7,8 +7,24 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <uses-feature
+        android:name="android.hardware.type.automotive"
+        android:required="false" />
+
+    <queries>
+        <intent>
+            <action android:name="android.media.action.DISPLAY_AUDIO_EFFECT_CONTROL_PANEL" />
+        </intent>
+    </queries>
+    <queries>
+        <intent>
+            <action android:name="androidx.media3.session.MediaSessionService" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -36,6 +52,9 @@
         <activity android:name=".audio.AudioOnDemandAsServiceActivity"
             android:exported="false"
             android:launchMode="singleTop"/>
+        <activity android:name=".audio.AudioWithSyncServiceActivity"
+            android:exported="false"
+            android:launchMode="singleTop"/>
         <activity android:name=".audio.EpisodeAudioAsServiceActivity"
             android:exported="false"
             android:launchMode="singleTop"/>
@@ -44,6 +63,8 @@
             android:exported="false" />
         <activity
             android:name=".video.VideoOnDemandActivity"
+            android:supportsPictureInPicture="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="false" />
         <activity
             android:name=".video.VideoLiveDvrActivity"
@@ -58,10 +79,36 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name="am.mediastre.mediastreamplatformsdkandroid.MediastreamPlayerService" />
+        <service android:name="am.mediastre.mediastreamplatformsdkandroid.MediastreamPlayerService"
+            android:foregroundServiceType="mediaPlayback"/>
+
+        <service
+            android:name="am.mediastre.mediastreamplatformsdkandroid.MediastreamPlayerServiceWithSync"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback"
+            android:stopWithTask="false">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+                <action android:name="androidx.media3.session.MediaLibraryService" />
+                <action android:name="android.media.browse.MediaBrowserService" />
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+                <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
+            </intent-filter>
+        </service>
 
         <meta-data android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
             android:value="androidx.media3.cast.DefaultCastOptionsProvider"/>
+
+        <receiver
+            android:name="androidx.media3.session.MediaButtonReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
     </application>
 
 </manifest>

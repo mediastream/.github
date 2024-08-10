@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "am.mediastre.mediastreamsampleapp"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "am.mediastre.mediastreamsampleapp"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -116,5 +116,5 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer-ima:$mediaVersion")
     implementation("androidx.media3:media3-exoplayer-smoothstreaming:$mediaVersion")*/
 
-    implementation("io.github.mediastream:mediastreamplatformsdkandroid:b9.1.0")
+    implementation("io.github.mediastream:mediastreamplatformsdkandroid:9.2.1")
 }

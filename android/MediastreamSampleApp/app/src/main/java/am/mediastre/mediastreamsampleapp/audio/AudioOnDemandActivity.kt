@@ -1,5 +1,6 @@
 package am.mediastre.mediastreamsampleapp.audio
 
+import am.mediastre.mediastreamplatformsdkandroid.MediastreamMiniPlayerConfig
 import am.mediastre.mediastreamplatformsdkandroid.MediastreamPlayer
 import am.mediastre.mediastreamplatformsdkandroid.MediastreamPlayerConfig
 import am.mediastre.mediastreamsampleapp.R
@@ -22,6 +23,8 @@ class AudioOnDemandActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_audio_on_demand_player)
+        val miniPlayerConfig = MediastreamMiniPlayerConfig()
+
         val config = MediastreamPlayerConfig()
         config.accountID = "ACCOUNT_ID"
         config.id = "CONTENT_ID"
@@ -36,7 +39,7 @@ class AudioOnDemandActivity : AppCompatActivity() {
 
         progressBarScrub()
 
-        player = MediastreamPlayer(this, config, container, playerView)
+        player = MediastreamPlayer(this, config, container, playerView, miniPlayerConfig)
     }
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
