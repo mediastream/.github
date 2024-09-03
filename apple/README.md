@@ -9,7 +9,7 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
 - **Compatibility:** Compatible with Swift Version > 5.9
 
 ## Version Apple TV
-- **Version:** The current version of the SDK is 0.3.0.
+- **Version:** The current version of the SDK is 0.3.1.
 - **Compatibility:** Compatible with Swift Version > 5.9
 
 
