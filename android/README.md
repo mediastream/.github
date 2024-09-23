@@ -304,11 +304,12 @@ Allows you to change the content playback speed.
 
 Available from Android O. Allows to manage the Picture in Picture functionality.
 
-# Examples
+# Examples 
 
 In the following example, you'll find an application showcasing various uses of the Mediastream SDK for Android. This app provides practical examples of key functionalities, including audio playback, video playback, audio as a service, casting, and more. Make sure you enter the IDs corresponding to your ACCOUNT_ID and CONTENT_ID and enjoy.
 
 [Sample App](/android/MediastreamSampleApp)
+
 [Sample AndroidTV](/android/MediastreamAndroidTVSample)
 
 # MediastreamPlayerServiceWithSync
