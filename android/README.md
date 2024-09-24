@@ -23,7 +23,7 @@ In your settings.gradle include:
         maven { url = uri("https://npaw.jfrog.io/artifactory/youbora/") }
 ```
 
-You can see fully file on the examples in this documents.
+You can see fully file on the examples in this document.
 
 ### Basic Implementation
 
