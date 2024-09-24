@@ -16,6 +16,15 @@ To integrate the Mediastream Platform SDK into your Android project, add the fol
 implementation "io.github.mediastream:mediastreamplatformsdkandroid:9.2.3"
 ```
 
+In your settings.gradle include:
+
+```gradle
+        jcenter()
+        maven { url = uri("https://npaw.jfrog.io/artifactory/youbora/") }
+```
+
+You can see fully file on the examples in this documents.
+
 ### Basic Implementation
 
 In this minimal setup, the SDK takes care of various intricate processes, leveraging the provided account ID, content ID, and content type to ensure a seamless experience. This simplicity enables you to focus on creating engaging applications without the need for extensive configurations.
