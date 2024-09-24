@@ -543,3 +543,34 @@ These changes simplify the integration and reduce the need for manual action set
 
 ### Summary
 By following these steps, you can integrate the MediastreamPlayerServiceWithSync into your Android application, ensuring support for Android Auto and efficient media playback with synchronization capabilities. The migration steps also ensure a smooth transition from the old service implementation to the new one.
+
+#Release Notes
+## [Versión 9.2.3] - 2024-08-22
+### Bug Fixes
+- Fix Ads Client Side
+
+## [Versión 9.2.2] - 2024-08-14
+### Features
+- Updated media3.exoplayer version from 1.3.0 to 1.4.0
+- Internal improvements to bitrate management
+
+### Bug Fixes
+- Retrieve metadata for live and non DVR content to update notification 
+
+## [Versión 9.2.1] - 2024-08-02
+### Bug Fixes
+- Fix android auto sync song issue
+
+## [Versión 9.2.0] - 2024-07-13
+### Features
+- Added support for Android Auto
+- Updated media3.exoplayer version from 1.1.0 to 1.3.0
+- Added new service for notifications and background applications
+
+## [Versión 9.1.0] - 2024-05-23
+### Features
+- Picture in Picture functionality is added
+
+## [Versión 9.0.0] - 2024-02-28
+### Features
+- Codebase is changed to use Kotlin instead of Android
