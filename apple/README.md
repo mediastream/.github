@@ -5,11 +5,11 @@ Hello, Apple Developer! 👋
 Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version iOS
-- **Version:** The current version of the SDK is 2.0.9.
+- **Version:** The current version of the SDK is 2.1.0.
 - **Compatibility:** Compatible with Swift Version > 5.9
 
 ## Version Apple TV
-- **Version:** The current version of the SDK is 0.3.1.
+- **Version:** The current version of the SDK is 0.3.2.
 - **Compatibility:** Compatible with Swift Version > 5.9
 
 
@@ -18,7 +18,7 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
 To integrate the Mediastream Platform SDK into your iOS project, add the following dependency to your project's pod file:
 
 ```swift
-pod 'MediastreamPlatformSDKxC', '~> 2.0.9'
+pod 'MediastreamPlatformSDKxC', '~> 2.1.0'
 ```
 
 ## Adding Mediastream Platform SDK to Your Apple TV Project
@@ -26,7 +26,7 @@ pod 'MediastreamPlatformSDKxC', '~> 2.0.9'
 To integrate the Mediastream Platform SDK into your tvOS project, add the following dependency to your project's pod file:
 
 ```swift
-pod 'MediastreamPlatformSDKAppleTV', '~> 0.3.1'
+pod 'MediastreamPlatformSDKAppleTV', '~> 0.3.2'
 ```
 
 
@@ -94,6 +94,7 @@ The `MediastreamPlayerConfig` class in the Mediastream iOS|Apple TV SDK provides
 - **`playerId` (String):** Takes player configuration from platform settings.
 - **`tryToGetMetadataFromLiveWhenAudio` (boolean):** If your live content contains TPE1 and TIT2 tags on the manifest, this metadata will be parsed and sent on `onLiveAudioCurrentSongChanged` event. Default: true.
 - **`googleImaPPID` (String):** Allows to set PPID (Publisher Provided Identification) to IMA SDK.
+- **`googleImaLanguage` (String):** Allows to set language to IMA SDK UI. Default: en.
 
 # Implementing Event Handling with `MediastreamPlayerCallback`
 
