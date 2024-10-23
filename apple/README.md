@@ -5,7 +5,7 @@ Hello, Apple Developer! 👋
 Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version iOS
-- **Version:** The current version of the SDK is 2.1.0.
+- **Version:** The current version of the SDK is 2.1.1.
 - **Compatibility:** Compatible with Swift Version > 5.9
 
 ## Version Apple TV
@@ -18,7 +18,7 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
 To integrate the Mediastream Platform SDK into your iOS project, add the following dependency to your project's pod file:
 
 ```swift
-pod 'MediastreamPlatformSDKxC', '~> 2.1.0'
+pod 'MediastreamPlatformSDKxC', '~> 2.1.1'
 ```
 
 ## Adding Mediastream Platform SDK to Your Apple TV Project
