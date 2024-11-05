@@ -19,7 +19,7 @@ Currently the API allow you to select a specific version in url if you want. Lat
 ### Resource:
   `https://player.cdn.mdstrm.com/tizen_player/<VERSION>/player.js`
 ### Example:
-Using latest: `https://player.cdn.mdstrm.com/tizen_player/player.js` Using 1.0.0 `https://player.cdn.mdstrm.com/tizen_player/1.0.0/player.js`
+Using latest: `https://player.cdn.mdstrm.com/tizen_player/player.js` Using v1.0.1 `https://player.cdn.mdstrm.com/tizen_player/v1.0.1/player.js`
 
 # Usage
 
