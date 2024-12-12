@@ -95,6 +95,7 @@ The `MediastreamPlayerConfig` class in the Mediastream iOS|Apple TV SDK provides
 - **`tryToGetMetadataFromLiveWhenAudio` (boolean):** If your live content contains TPE1 and TIT2 tags on the manifest, this metadata will be parsed and sent on `onLiveAudioCurrentSongChanged` event. Default: true.
 - **`googleImaPPID` (String):** Allows to set PPID (Publisher Provided Identification) to IMA SDK.
 - **`googleImaLanguage` (String):** Allows to set language to IMA SDK UI. Default: en.
+- **`addAdCustomAttribute`(key <String>, value <String>):** Allows sending custom parameters in an advertising VAST. To make it work, you need to include the *cust.* query in the VAST query strings, followed by the key you want to replace. Example: *&cust.test_ca=*. To replace it, call *config.addAdCustomAttribute("test_ca", "hi")*, which will result in the final URL being: *&cust.test_ca=hi*. (Just works if adurl is comming on the config.)
 
 # Implementing Event Handling with `MediastreamPlayerCallback`
 
