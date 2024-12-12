@@ -538,6 +538,13 @@ These changes simplify the integration and reduce the need for manual action set
 By following these steps, you can integrate the MediastreamPlayerServiceWithSync into your Android application, ensuring support for Android Auto and efficient media playback with synchronization capabilities. The migration steps also ensure a smooth transition from the old service implementation to the new one.
 
 # Release Notes
+## [Versión 9.2.8] - 2024-12-12
+- Improvements have been made to the code to improve compatibility with Fire Stick devices.
+
+## [Versión 9.2.7] - 2024-12-05
+- A framelayout is allowed as a parameter instead of just a player view to generate greater customization options for the player view.
+- Improvements to playback notification behavior.
+
 ## [Versión 9.2.6] - 2024-10-04
 ### Bug Fixes
 - Removed deprecated youbora dependency
