@@ -169,7 +169,7 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 - **`playerId` (String):** Takes player configuration from platform settings.
 - **`tryToGetMetadataFromLiveWhenAudio` (boolean):** If your live content contains TPE1 and TIT2 tags on the manifest, this metadata will be parsed and sent on `onLiveAudioCurrentSongChanged` event. Default: true.
 - **`fillAutomaticallyAudioNotification` (boolean):** Show the current song playing on live content audio notification if your live content contains TPE1 and TIT2 tags on the manifest. Default: true.
-- **`addAdCustomAttribute`(key <String>, value <String>):** Allows sending custom parameters in an advertising VAST. To make it work, you need to include the *custom.* query in the VAST query strings, followed by the key you want to replace. Example: *&cust.test_ca=*. To replace it, call *config.addAdCustomAttribute("test_ca", "hi")*, which will result in the final URL being: *&cust.test_ca=hi*. (Just works if adurl is comming on the config.)
+- **`addAdCustomAttribute`(key <String>, value <String>):** Allows sending custom parameters in an advertising VAST. To make it work, you need to include the *custom.* query in the VAST query strings, followed by the key you want to replace. Example: *&custom.test_ca=*. To replace it, call *config.addAdCustomAttribute("test_ca", "hi")*, which will result in the final URL being: *&custom.test_ca=hi*. (Just works if adurl is comming on the config.)
 
 # Implementing Event Handling with `MediastreamPlayerCallback`
 
