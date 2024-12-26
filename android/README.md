@@ -103,6 +103,29 @@ class VideoActivity : AppCompatActivity() {
             android:value="androidx.media3.cast.DefaultCastOptionsProvider"/>
     </application>
 ```
+### Settings Gradle
+In order to get youbora analytics remember add nicepeople dependencies on your graddle seetings.
+```java
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        jcenter()
+        maven { url = uri("https://npaw.jfrog.io/artifactory/youbora/") }
+    }
+}
+
+rootProject.name = "MediastreamAndroidTVSample"
+include(":app")
+```
 
 ### PiP Example
 
