@@ -5,7 +5,7 @@ Hello, Android Developer! 👋
 Welcome to the Mediastream SDK for Android, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is 9.3.0.
+- **Version:** The current version of the SDK is 9.3.2.
 - **Compatibility:** Compatible with Android API level 34 (Android 14)
 
 ## Adding Mediastream Platform SDK to Your Android Project
@@ -13,7 +13,7 @@ Welcome to the Mediastream SDK for Android, designed to streamline the integrati
 To integrate the Mediastream Platform SDK into your Android project, add the following dependency to your project's build.gradle file:
 
 ```gradle
-implementation "io.github.mediastream:mediastreamplatformsdkandroid:9.3.0"
+implementation "io.github.mediastream:mediastreamplatformsdkandroid:9.3.2"
 ```
 
 You can see fully file on the examples in this document.
@@ -192,7 +192,8 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 - **`playerId` (String):** Takes player configuration from platform settings.
 - **`tryToGetMetadataFromLiveWhenAudio` (boolean):** If your live content contains TPE1 and TIT2 tags on the manifest, this metadata will be parsed and sent on `onLiveAudioCurrentSongChanged` event. Default: true.
 - **`fillAutomaticallyAudioNotification` (boolean):** Show the current song playing on live content audio notification if your live content contains TPE1 and TIT2 tags on the manifest. Default: true.
-- **`addAdCustomAttribute`(key <String>, value <String>):** Allows sending custom parameters in an advertising VAST. To make it work, you need to include the *custom.* query in the VAST query strings, followed by the key you want to replace. Example: *&custom.test_ca=*. To replace it, call *config.addAdCustomAttribute("test_ca", "hi")*, which will result in the final URL being: *&custom.test_ca=hi*. (Just works if adurl is comming on the config.)
+- **`addAdCustomAttribute`(key <String>, value <String>):** Allows sending custom parameters in an advertising VAST (Client Side). To make it work, you need to include the *custom.* query in the VAST query strings, followed by the key you want to replace. Example: *&custom.test_ca=*. To replace it, call *config.addAdCustomAttribute("test_ca", "hi")*, which will result in the final URL being: *&custom.test_ca=hi*. (Just works if adurl is comming on the config.)
+- **`googleImaPpid` (String):** Allow to pass Google IMA PPID.
 
 # Implementing Event Handling with `MediastreamPlayerCallback`
 
@@ -255,37 +256,19 @@ The Mediastream SDK allows you to listen to various events emitted by the player
 7. **`onLocalSourceAdded():`**
    - Called when a local source is set.
 
-8. **`onAdPlay():`**
-    - Called when an Ad starts to play.
+8. **`onAdEvents(AdEvent.AdEventType):`**
+    - Callback triggered when an ad event occurs, such as LOADED, STARTED, COMPLETED, etc.
+  
+9. **`onAdErrorEvent(AdError):`**
+    - Callback triggered when an ad error occurs.
 
-9. **`onAdPause():`**
-    - Called when an Ad is paused.
-
-10. **`onAdLoaded():`**
-    - Called when an Ad is loaded.
-
-11. **`onAdResume():`**
-    - Called when an Ad is in resume mode.
-
-12. **`onAdEnded():`**
-    - Called when an Ad finishes.
-
-13. **`onAdError():`**
-    - Called when an Ad fails.
-
-14. **`onAdSkipped():`**
-    - Called when an Ad is skipped.
-
-15. **`onAdSkippableStateChanged():`**
-    - Called when the skippable state of an Ad changes.
-
-16. **`onPlaybackErrors(JsonObject error):`**
+10. **`onPlaybackErrors(JsonObject error):`**
     - Called when a playback error occurs.
 
-17. **`onEmbedErrors(JsonObject error):`**
+11. **`onEmbedErrors(JsonObject error):`**
     - Called when an embed error occurs.
 
-28. **`onLiveAudioCurrentSongChanged(JsonObject data):`**
+12. **`onLiveAudioCurrentSongChanged(JsonObject data):`**
     - Called when a song changes on audio live content.
 
 These events allow you to respond dynamically to various states and actions during playback.
@@ -562,6 +545,12 @@ These changes simplify the integration and reduce the need for manual action set
 By following these steps, you can integrate the MediastreamPlayerServiceWithSync into your Android application, ensuring support for Android Auto and efficient media playback with synchronization capabilities. The migration steps also ensure a smooth transition from the old service implementation to the new one.
 
 # Release Notes
+## [Versión 9.3.2] - 2025-01-31
+- Allow to send custom google ima ppid.
+
+## [Versión 9.3.1] - 2025-01-24
+- Added Focus actions for TV
+
 ## [Versión 9.3.0] - 2025-01-03
 - Improvements on UI.
 
