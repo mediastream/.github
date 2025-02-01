@@ -5,7 +5,7 @@ Hello, Android Developer! 👋
 Welcome to the Mediastream SDK for Android, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is 9.3.2.
+- **Version:** The current version of the SDK is 9.3.3.
 - **Compatibility:** Compatible with Android API level 34 (Android 14)
 
 ## Adding Mediastream Platform SDK to Your Android Project
@@ -13,7 +13,7 @@ Welcome to the Mediastream SDK for Android, designed to streamline the integrati
 To integrate the Mediastream Platform SDK into your Android project, add the following dependency to your project's build.gradle file:
 
 ```gradle
-implementation "io.github.mediastream:mediastreamplatformsdkandroid:9.3.2"
+implementation "io.github.mediastream:mediastreamplatformsdkandroid:9.3.3"
 ```
 
 You can see fully file on the examples in this document.
@@ -194,6 +194,7 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 - **`fillAutomaticallyAudioNotification` (boolean):** Show the current song playing on live content audio notification if your live content contains TPE1 and TIT2 tags on the manifest. Default: true.
 - **`addAdCustomAttribute`(key <String>, value <String>):** Allows sending custom parameters in an advertising VAST (Client Side). To make it work, you need to include the *custom.* query in the VAST query strings, followed by the key you want to replace. Example: *&custom.test_ca=*. To replace it, call *config.addAdCustomAttribute("test_ca", "hi")*, which will result in the final URL being: *&custom.test_ca=hi*. (Just works if adurl is comming on the config.)
 - **`googleImaPpid` (String):** Allow to pass Google IMA PPID.
+- **`adTagParameters` (MutableMap<Util.AdTagParameter, String>):** Allows you to set the parameters of the url tag when there is google dai, any field that appears in the enum will be appended or replaced in the original url tag. For example: `adTagParamsMap[Util.AdTagParameter.CUST_PARAMS] = "ge=0&gr=2&gt=3"` then `config.adTagParameters = adTagParamsMap`
 
 # Implementing Event Handling with `MediastreamPlayerCallback`
 
@@ -545,6 +546,9 @@ These changes simplify the integration and reduce the need for manual action set
 By following these steps, you can integrate the MediastreamPlayerServiceWithSync into your Android application, ensuring support for Android Auto and efficient media playback with synchronization capabilities. The migration steps also ensure a smooth transition from the old service implementation to the new one.
 
 # Release Notes
+## [Versión 9.3.3] - 2025-01-31
+- Ad tag replacement for google dai
+
 ## [Versión 9.3.2] - 2025-01-31
 - Allow to send custom google ima ppid.
 
