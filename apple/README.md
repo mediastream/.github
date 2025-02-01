@@ -5,7 +5,7 @@ Hello, Apple Developer! 👋
 Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version iOS
-- **Version:** The current version of the SDK is 2.1.2.
+- **Version:** The current version of the SDK is 2.2.1.
 - **Compatibility:** Compatible with Swift Version > 5.9
 
 ## Version Apple TV
@@ -96,6 +96,7 @@ The `MediastreamPlayerConfig` class in the Mediastream iOS|Apple TV SDK provides
 - **`googleImaPPID` (String):** Allows to set PPID (Publisher Provided Identification) to IMA SDK.
 - **`googleImaLanguage` (String):** Allows to set language to IMA SDK UI. Default: en.
 - **`addAdCustomAttribute`(key <String>, value <String>):** Allows sending custom parameters in an advertising VAST. To make it work, you need to include the *cust.* query in the VAST query strings, followed by the key you want to replace. Example: *&cust.test_ca=*. To replace it, call *config.addAdCustomAttribute("test_ca", "hi")*, which will result in the final URL being: *&cust.test_ca=hi*. (Just works if adurl is comming on the config.)
+- **`adTagParameters`([AdRequestParam: String]):** Allows you to set the parameters of the url tag when there is google dai, any field that appears in the enum will be appended or replaced in the original url tag.
 
 # Implementing Event Handling with `MediastreamPlayerCallback`
 
@@ -117,6 +118,12 @@ mdstrm.events.listenTo(eventName: "error", action: { (information: Any?) in
         if let info = information as? String {
             NSLog("ERROR: \(info)")
         }
+    }
+})
+
+mdstrm.events.listenTo(eventName: "onDAIAdEvent", action: { (information: Any?) in
+    if (information != nil) {
+        print("onDAIAdEvent: \(information)")
     }
 })
 ```
@@ -183,6 +190,8 @@ The Mediastream SDK allows you to listen to various events emitted by the player
 
 15. **`seek:`**
     - Called when the user is seeking.
+16. **`onDAIAdEvent`**
+    - Called when DAI AD START, AD is IN PROGRESS or is COMPLETED.
 
 
 These events allow you to respond dynamically to various states and actions during playback.
