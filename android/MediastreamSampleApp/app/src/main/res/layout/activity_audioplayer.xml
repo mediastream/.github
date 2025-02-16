@@ -13,11 +13,11 @@
         android:layout_height="match_parent"
         android:background="#000000"
         android:keepScreenOn="true">
-        <androidx.media3.ui.PlayerView
-            android:id="@+id/player_view"
+        <FrameLayout
+            android:id="@+id/playerContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-        </androidx.media3.ui.PlayerView>
+        </FrameLayout>
     </FrameLayout>
 
 </LinearLayout>

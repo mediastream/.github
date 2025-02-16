@@ -21,7 +21,7 @@ class LiveAudioAsServiceActivity : AppCompatActivity() {
 
     private val TAG = "SampleApp"
     private lateinit var container: FrameLayout
-    private lateinit var playerView: PlayerView
+    private lateinit var playerContainer: FrameLayout
 //    private var player: MediastreamPlayer? = null
     private lateinit var miniPlayerConfig: MediastreamMiniPlayerConfig
 
@@ -29,8 +29,8 @@ class LiveAudioAsServiceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_audioplayer)
         val config = MediastreamPlayerConfig()
-        config.accountID = "ACCOUNT_ID"
         config.id = "CONTENT_ID"
+        config.accountID = "ACCOUNT_ID"
         config.type = MediastreamPlayerConfig.VideoTypes.LIVE
         config.playerType = MediastreamPlayerConfig.PlayerType.AUDIO
         //config.environment = MediastreamPlayerConfig.Environment.DEV
@@ -38,7 +38,7 @@ class LiveAudioAsServiceActivity : AppCompatActivity() {
         config.trackEnable = false
         config.showControls = true
         config.appName = "MediastreamAppTest"
-        playerView = findViewById(R.id.player_view)
+        playerContainer = findViewById(R.id.playerContainer)
         container = findViewById(R.id.main_media_frame)
 
 //        player = MediastreamPlayer(this, config, container, playerView)
@@ -59,6 +59,10 @@ class LiveAudioAsServiceActivity : AppCompatActivity() {
 
             override fun onReady() {
                 Log.d(TAG, "READY_EVENT")
+            }
+
+            override fun playerViewReady(msplayerView: PlayerView?) {
+
             }
 
             override fun onEnd() {
@@ -111,6 +115,10 @@ class LiveAudioAsServiceActivity : AppCompatActivity() {
 
             }
 
+            override fun onDismissButton() {
+
+            }
+
             override fun onCastAvailable(state: Boolean?) {
 
             }
@@ -155,6 +163,10 @@ class LiveAudioAsServiceActivity : AppCompatActivity() {
                 Log.d(TAG, "PLAYBACK_ERRORS_EVENT$error")
             }
 
+            override fun onPlayerClosed() {
+                TODO("Not yet implemented")
+            }
+
             override fun onEmbedErrors(error: JSONObject?) {
                 Log.d(TAG, "EMBED_ERRORS_EVENT$error")
             }
@@ -169,7 +181,7 @@ class LiveAudioAsServiceActivity : AppCompatActivity() {
             this@LiveAudioAsServiceActivity,
             config,
             container,
-            playerView,
+            playerContainer,
             miniPlayerConfig,
             false,
             config.accountID?:"",

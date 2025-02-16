@@ -10,15 +10,13 @@
     <FrameLayout
         android:id="@+id/main_media_frame"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.5"
+        android:layout_height="match_parent"
         android:background="#000000"
         android:keepScreenOn="true">
-        <androidx.media3.ui.PlayerView
-            android:id="@+id/player_view"
+        <FrameLayout
+            android:id="@+id/playerContainer"
             android:layout_width="match_parent"
-            app:controller_layout_id="@layout/exo_playback_control_view"
             android:layout_height="match_parent">
-        </androidx.media3.ui.PlayerView>
+        </FrameLayout>
     </FrameLayout>
 </LinearLayout>

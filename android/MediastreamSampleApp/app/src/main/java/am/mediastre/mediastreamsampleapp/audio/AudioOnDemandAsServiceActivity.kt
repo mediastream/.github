@@ -28,7 +28,7 @@ class AudioOnDemandAsServiceActivity : AppCompatActivity() {
 
     private val TAG = "SampleApp"
     private lateinit var container: FrameLayout
-    private lateinit var playerView: PlayerView
+    private lateinit var playerContainer: FrameLayout
     //    private var player: MediastreamPlayer? = null
     private lateinit var miniPlayerConfig: MediastreamMiniPlayerConfig
 
@@ -40,8 +40,8 @@ class AudioOnDemandAsServiceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_audioasserviceplayer)
         val config = MediastreamPlayerConfig()
-        config.accountID = "ACCOUNT_ID"
         config.id = "CONTENT_ID"
+        config.accountID = "ACCOUNT_ID"
         config.type = MediastreamPlayerConfig.VideoTypes.VOD
         config.playerType = MediastreamPlayerConfig.PlayerType.AUDIO
         config.videoFormat = MediastreamPlayerConfig.AudioVideoFormat.MP3
@@ -50,7 +50,7 @@ class AudioOnDemandAsServiceActivity : AppCompatActivity() {
         config.trackEnable = false
         config.showControls = true
         config.appName = "MediastreamAppTest"
-        playerView = findViewById(R.id.player_view)
+        playerContainer = findViewById(R.id.playerContainer)
         container = findViewById(R.id.main_media_frame)
 
         setupButtons()
@@ -91,6 +91,10 @@ class AudioOnDemandAsServiceActivity : AppCompatActivity() {
 
             override fun onReady() {
                 Log.d(TAG, "READY_EVENT")
+            }
+
+            override fun playerViewReady(msplayerView: PlayerView?) {
+                Log.d(TAG, "PLAYER_VIEW_READY")
             }
 
             override fun onEnd() {
@@ -143,6 +147,10 @@ class AudioOnDemandAsServiceActivity : AppCompatActivity() {
 
             }
 
+            override fun onDismissButton() {
+
+            }
+
             override fun onCastAvailable(state: Boolean?) {
 
             }
@@ -187,12 +195,16 @@ class AudioOnDemandAsServiceActivity : AppCompatActivity() {
                 Log.d(TAG, "PLAYBACK_ERRORS_EVENT$error")
             }
 
+            override fun onPlayerClosed() {
+                TODO("Not yet implemented")
+            }
+
             override fun onEmbedErrors(error: JSONObject?) {
                 Log.d(TAG, "EMBED_ERRORS_EVENT$error")
             }
 
             override fun onLiveAudioCurrentSongChanged(data: JSONObject?) {
-                println("<<<<<<currentSong: $data")
+                println("onLiveAudioCurrentSongChanged: $data")
             }
         }
 
@@ -201,7 +213,7 @@ class AudioOnDemandAsServiceActivity : AppCompatActivity() {
             this@AudioOnDemandAsServiceActivity,
             config,
             container,
-            playerView,
+            playerContainer,
             miniPlayerConfig,
             false,
             config.accountID?:"",

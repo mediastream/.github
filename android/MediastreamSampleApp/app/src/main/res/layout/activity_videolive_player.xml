@@ -13,12 +13,11 @@
         android:layout_weight="0.5"
         android:background="#000000"
         android:keepScreenOn="true">
-        <androidx.media3.ui.PlayerView
-            android:id="@+id/player_view"
+        <FrameLayout
+            android:id="@+id/playerContainer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:surface_type="texture_view">
-        </androidx.media3.ui.PlayerView>
+            android:layout_height="match_parent">
+        </FrameLayout>
 
         <fragment
             android:id="@+id/castMiniController"
@@ -30,5 +29,13 @@
             android:layout_marginBottom="70dp"/>
 
     </FrameLayout>
-
+    <Button
+        android:id="@+id/my_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reload Test"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

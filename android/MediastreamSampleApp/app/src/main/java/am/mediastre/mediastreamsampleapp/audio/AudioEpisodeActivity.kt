@@ -12,7 +12,7 @@ class AudioEpisodeActivity : AppCompatActivity() {
 
     private val TAG = "SampleApp"
     private lateinit var container: FrameLayout
-    private lateinit var playerView: PlayerView
+    private lateinit var playerContainer: FrameLayout
     private var player: MediastreamPlayer? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,11 +25,11 @@ class AudioEpisodeActivity : AppCompatActivity() {
         config.isDebug = true
         config.loadNextAutomatically = true
         config.trackEnable = false
-        playerView = findViewById(R.id.player_view)
+        playerContainer = findViewById(R.id.playerContainer)
         container = findViewById(R.id.main_media_frame)
 
         // Pass required FragmentManager if you want to show track selection dialog
-        player = MediastreamPlayer(this, config, container, playerView, supportFragmentManager)
+        player = MediastreamPlayer(this, config, container, playerContainer, supportFragmentManager)
     }
 
     override fun onDestroy() {

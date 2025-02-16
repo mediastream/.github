@@ -29,23 +29,21 @@ class VideoOnDemandActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_videoplayer)
+        playerView = findViewById(R.id.player_view)
         val config = MediastreamPlayerConfig()
-        config.accountID = "ACCOUNT_ID"
-        config.id = "CONTENT_ID"
+        config.accountID = "5fbfd5b96660885379e1a129"
+        config.id = "67af84c8a2bf689d94a78f57"
         config.type = MediastreamPlayerConfig.VideoTypes.VOD
         config.isDebug = true
         config.trackEnable = false
         config.castAvailable = true
+        config.customPlayerView = playerView
         val drmHeaders: MutableMap<String, String> = HashMap()
         drmHeaders["X-AxDRM-Message"] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYzliNGZiYzctYmJhZC00MzEyLThiOGUtYWY4MTAxNzA5NzE1IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsInZlcnNpb24iOjEsImV4cGlyYXRpb25fZGF0ZSI6IjIwMjMtMDEtMTJUMTk6NDg6MTUuNjE2WiIsImtleXMiOlt7ImlkIjoiNTBCNURFREYtNDE5Qy00NjdGLTlBMjgtOURFRUQ0RUREQjRGIn1dfX0.gBBaKBKloGE5t2aBkrkHsIhDfixfDdWdi6xA6yEWsdM"
         config.drmData = DrmData("https://1c4e622f-drm-widevine-licensing.axprod.net/AcquireLicense", drmHeaders)
-
-        playerView = findViewById(R.id.player_view)
         container = findViewById(R.id.main_media_frame)
 
         player = MediastreamPlayer(this, config, container, playerView, supportFragmentManager)
-
-
 
         val mediaStreamPlayerCallBack = object : MediastreamPlayerCallback {
             override fun onPlay() {
@@ -57,6 +55,11 @@ class VideoOnDemandActivity : AppCompatActivity() {
             override fun onReady() {
                 Log.d(TAG, "mediaStreamPlayerCallBack: onReady")
             }
+
+            override fun playerViewReady(msplayerView: PlayerView?) {
+                Log.d(TAG, "mediaStreamPlayerCallBack: onPlayerViewReady")
+            }
+
             override fun onEnd() {
                 Log.d(TAG, "mediaStreamPlayerCallBack: onEnd")
             }
@@ -71,6 +74,7 @@ class VideoOnDemandActivity : AppCompatActivity() {
             override fun onAdEvents(type: AdEvent.AdEventType) {}
             override fun onAdErrorEvent(error: AdError) {}
             override fun onConfigChange(config: MediastreamMiniPlayerConfig?) {}
+            override fun onDismissButton() {}
             override fun onCastAvailable(state: Boolean?) {}
             override fun onCastSessionStarting() {}
             override fun onCastSessionStarted() {}
@@ -82,13 +86,12 @@ class VideoOnDemandActivity : AppCompatActivity() {
             override fun onCastSessionResumeFailed() {}
             override fun onCastSessionSuspended() {}
             override fun onPlaybackErrors(error: JSONObject?) {}
+            override fun onPlayerClosed() {}
             override fun onEmbedErrors(error: JSONObject?) {}
             override fun onLiveAudioCurrentSongChanged(data: JSONObject?) {}
-
         }
 
         player?.addPlayerCallback(mediaStreamPlayerCallBack)
-
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

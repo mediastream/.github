@@ -26,8 +26,8 @@ class AudioOnDemandActivity : AppCompatActivity() {
         val miniPlayerConfig = MediastreamMiniPlayerConfig()
 
         val config = MediastreamPlayerConfig()
-        config.accountID = "ACCOUNT_ID"
         config.id = "CONTENT_ID"
+        config.accountID = "ACCOUNT_ID"
         config.type = MediastreamPlayerConfig.VideoTypes.VOD
         config.videoFormat = MediastreamPlayerConfig.AudioVideoFormat.MP3
         config.loadNextAutomatically = true

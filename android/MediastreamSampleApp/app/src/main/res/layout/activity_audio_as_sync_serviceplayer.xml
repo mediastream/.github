@@ -14,13 +14,13 @@
         android:layout_weight="0.5"
         android:background="#000000"
         android:keepScreenOn="true">
-        <FrameLayout
-            android:id="@+id/playerContainer"
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/player_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-        </FrameLayout>
+        </androidx.media3.ui.PlayerView>
     </FrameLayout>
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/buttons_bottom"
         android:layout_width="match_parent"
         android:layout_height="100dp"
@@ -38,7 +38,15 @@
             android:layout_gravity="right"
             android:id="@+id/updateContent"
             android:text="Update notification content"/>
-
-    </FrameLayout>
+        <ImageButton
+            android:id="@+id/playOrpause"
+            android:layout_width="44dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:background="?attr/colorPrimary"
+            android:shape="oval"
+            android:contentDescription="Play / Pause"
+            android:src="@drawable/ic_loading"/>
+    </LinearLayout>
 
 </LinearLayout>
