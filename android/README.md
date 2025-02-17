@@ -5,7 +5,7 @@ Hello, Android Developer! 👋
 Welcome to the Mediastream SDK for Android, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is 9.3.3.
+- **Version:** The current version of the SDK is 9.3.4.
 - **Compatibility:** Compatible with Android API level 34 (Android 14)
 
 ## Adding Mediastream Platform SDK to Your Android Project
@@ -13,7 +13,7 @@ Welcome to the Mediastream SDK for Android, designed to streamline the integrati
 To integrate the Mediastream Platform SDK into your Android project, add the following dependency to your project's build.gradle file:
 
 ```gradle
-implementation "io.github.mediastream:mediastreamplatformsdkandroid:9.3.3"
+implementation "io.github.mediastream:mediastreamplatformsdkandroid:9.3.4"
 ```
 
 You can see fully file on the examples in this document.
@@ -591,6 +591,10 @@ These changes simplify the integration and reduce the need for manual action set
 By following these steps, you can integrate the MediastreamPlayerServiceWithSync into your Android application, ensuring support for Android Auto and efficient media playback with synchronization capabilities. The migration steps also ensure a smooth transition from the old service implementation to the new one.
 
 # Release Notes
+## [Versión 9.3.4] - 2025-02-14
+### Bug Fixes
+- Fix seekTo when audio service init
+
 ## [Versión 9.3.3] - 2025-01-31
 - Ad tag replacement for google dai
 
