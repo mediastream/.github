@@ -248,3 +248,15 @@ In the following example, you'll find an application showcasing various uses of 
 Remember do a `pod install` before run the example.
 
 [Sample](/apple/Sample)
+
+# Release Notes iOS
+## [Versión 2.3.0] - 2025-02-18
+### Features
+- Update Google IMA SDK to 3.24.0 version
+### Bug Fixes
+- NSRange Exception when move faster on timeline
+
+# Release Notes AppleTV
+## [Versión 0.3.4] - 2025-02-12
+### Features
+- Google DAI replace ad tag paraemeters option.
