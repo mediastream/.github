@@ -617,6 +617,7 @@ By following these steps, you can integrate the MediastreamPlayerServiceWithSync
 - Added Focus actions for TV
 
 ## [Versión 9.3.0] - 2025-01-03
+- Google DAI with IMASDK instead Google DAI API.
 - Improvements on UI.
 
 ## [Versión 9.2.9] - 2024-12-23
