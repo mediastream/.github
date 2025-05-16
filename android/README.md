@@ -223,7 +223,6 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 - **`dvr` (boolean):** Player starts prepared to use DVR. Default: false.
 - **`windowDVR` (int):** Window DVR voiced in seconds.
 - **`showControls` (boolean):** Hide the controls of the player. Default: true.
-- **`AdPreloadTimeoutMs` (Long):** Allows changing the default duration (in milliseconds) for which the player must buffer while preloading an ad group before that ad group is skipped. Default: 10000ms.
 - **`referer` (string):** Allows setting a custom referrer for statistics.
 - **`src` (string):** Arbitrary source to reproduce.
 - **`loadNextAutomatically` (boolean):** Allows playing the next episode if it exists. Available only when the EPISODE type is set. Default: false.
