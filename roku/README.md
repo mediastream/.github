@@ -5,7 +5,7 @@ Hello, Roku Developer! 👋
 Welcome to the Mediastream SDK for Roku, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is 7.0.5.
+- **Version:** The current version of the SDK is 7.0.10.
 
 ## Adding Mediastream Platform SDK to Your Roku Project
 
@@ -18,7 +18,7 @@ https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 
 Specific Version:
 ```brightscript
-https://player.cdn.mdstrm.com/roku_sdk/7.0.5/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/7.0.10/MediaStreamPlayer.pkg
 ```
 
 ### Basic Implementation
@@ -82,6 +82,11 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 - **`appName` (string):** Very useful to identify traffic in platform analytics. Example: "mediastream-app-tv" or "mediastream-app-mobile".
 - **`playerId` (String):** Takes player configuration from platform settings.
 - **`startAt`(Number):** Skip or seek at starting, used in keep watching so this starts the video at the same point where the user left it.
+
+## **Debug Parameters:**
+- **`setAdsDebugOutput` (boolean):** Enables or disables verbose logging for the ad system. When `true`, the SDK will print detailed information about ad events, ad break scheduling, and any errors encountered during ad playback. Useful for debugging ad-related issues during development. (Default false)
+- **`setAdMeasurements` (boolean):** Enables or disables ad measurement tracking integrations (e.g., Nielsen, Moat, etc.). When true, the SDK will activate measurement pings and tracking events required by third-party measurement vendors. Set to false if measurement is not needed or during debugging to avoid sending real data. (Default false)
+- **`setJITPods` (boolean):** Enables Just-In-Time (JIT) ad pod insertion. When true, the SDK will request and insert ad pods dynamically at playback time, rather than pre-fetching them all in advance. This is typically used to ensure fresher ad content or in environments with dynamic ad decisions. (Default false)
 
 # Implementing Event Handling
 
