@@ -5,7 +5,7 @@ Hello, Roku Developer! 👋
 Welcome to the Mediastream SDK for Roku, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is 7.0.10.
+- **Version:** The current version of the SDK is 7.0.11.
 
 ## Adding Mediastream Platform SDK to Your Roku Project
 
@@ -18,7 +18,7 @@ https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 
 Specific Version:
 ```brightscript
-https://player.cdn.mdstrm.com/roku_sdk/7.0.10/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/7.0.11/MediaStreamPlayer.pkg
 ```
 
 ### Basic Implementation
@@ -87,6 +87,9 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 - **`setAdsDebugOutput` (boolean):** Enables or disables verbose logging for the ad system. When `true`, the SDK will print detailed information about ad events, ad break scheduling, and any errors encountered during ad playback. Useful for debugging ad-related issues during development. (Default false)
 - **`setAdMeasurements` (boolean):** Enables or disables ad measurement tracking integrations (e.g., Nielsen, Moat, etc.). When true, the SDK will activate measurement pings and tracking events required by third-party measurement vendors. Set to false if measurement is not needed or during debugging to avoid sending real data. (Default false)
 - **`setJITPods` (boolean):** Enables Just-In-Time (JIT) ad pod insertion. When true, the SDK will request and insert ad pods dynamically at playback time, rather than pre-fetching them all in advance. This is typically used to ensure fresher ad content or in environments with dynamic ad decisions. (Default false)
+- **`enableNielsenDAR` (boolean):** Enables Nielsen Digital Ad Ratings (DAR) integration. When true, the SDK will include DAR-specific tracking events during ad playback to support Nielsen audience measurement. This should be enabled only if the client requires DAR reporting.
+- **`nielsenAppId` (boolean):** Sets the unique application identifier used by Nielsen for audience measurement. This ID is provided by Nielsen and must be configured correctly to ensure accurate tracking and reporting.
+- **`contentGenres` (string):** Specifies the content genre for the current playback session. This value is used by third-party measurement services like Nielsen to categorize content appropriately (e.g., "GV" for General Viewing, "CL" for Children).
 
 # Implementing Event Handling
 
