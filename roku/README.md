@@ -5,7 +5,7 @@ Hello, Roku Developer! 👋
 Welcome to the Mediastream SDK for Roku, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is 7.0.11.
+- **Version:** The current version of the SDK is 7.0.12.
 
 ## Adding Mediastream Platform SDK to Your Roku Project
 
@@ -18,7 +18,7 @@ https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 
 Specific Version:
 ```brightscript
-https://player.cdn.mdstrm.com/roku_sdk/7.0.11/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/7.0.12/MediaStreamPlayer.pkg
 ```
 
 ### Basic Implementation
@@ -90,6 +90,7 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 - **`enableNielsenDAR` (boolean):** Enables Nielsen Digital Ad Ratings (DAR) integration. When true, the SDK will include DAR-specific tracking events during ad playback to support Nielsen audience measurement. This should be enabled only if the client requires DAR reporting.
 - **`nielsenAppId` (boolean):** Sets the unique application identifier used by Nielsen for audience measurement. This ID is provided by Nielsen and must be configured correctly to ensure accurate tracking and reporting.
 - **`contentGenres` (string):** Specifies the content genre for the current playback session. This value is used by third-party measurement services like Nielsen to categorize content appropriately (e.g., "GV" for General Viewing, "CL" for Children).
+- **`nielsenProgramId`(string):** Sets the program identifier used for Nielsen tracking. Internally, the SDK uses this value to call setNielsenProgramId, which helps Nielsen attribute viewership to specific programs or episodes.
 
 # Implementing Event Handling
 
