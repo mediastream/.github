@@ -5,7 +5,7 @@ Hello, Roku Developer! 👋
 Welcome to the Mediastream SDK for Roku, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is 7.0.12.
+- **Version:** The current version of the SDK is 7.0.13.
 
 ## Adding Mediastream Platform SDK to Your Roku Project
 
@@ -18,7 +18,7 @@ https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 
 Specific Version:
 ```brightscript
-https://player.cdn.mdstrm.com/roku_sdk/7.0.12/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/7.0.13/MediaStreamPlayer.pkg
 ```
 
 ### Basic Implementation
