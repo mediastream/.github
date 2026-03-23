@@ -5,7 +5,7 @@ Hello, Android Developer! 👋
 Welcome to the Mediastream SDK for Android, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is **10.0.0** (see `MediastreamPlayer.getVersion()`).
+- **Version:** The current version of the SDK is **10.0.1** (see `MediastreamPlayer.getVersion()`).
 - **Compatibility:** Targets **compileSdk 35** (Android 15). **minSdk 24**. Java **17** is required for consuming projects using the same toolchain as the SDK.
 
 ## Adding Mediastream Platform SDK to Your Android Project
@@ -13,10 +13,10 @@ Welcome to the Mediastream SDK for Android, designed to streamline the integrati
 To integrate the Mediastream Platform SDK into your Android project, add the following dependency to your project's build.gradle file:
 
 ```gradle
-implementation "io.github.mediastream:mediastreamplatformsdkandroid:10.0.0"
+implementation "io.github.mediastream:mediastreamplatformsdkandroid:10.0.1"
 ```
 
-## Highlights in 10.0.0
+## Highlights in 10.0.1
 
 Major themes in this release:
 
@@ -30,7 +30,7 @@ Major themes in this release:
 - **Subtitles & UI:** Custom **ASS** styling support, **localization** of player UI (English, Spanish, Portuguese), **edge-to-edge** / window insets on Android 15+, optional **brightness** bar and **pinch-to-zoom** on the player surface.
 - **Android Auto & notifications:** Continued improvements for browsing, episodes, podcasts, and sync service flows (see service section below).
 
-## Breaking changes (upgrading from 9.x to 10.0.0)
+## Breaking changes (upgrading from 9.x to 10.0.1)
 
 These are the integration points that most often require code or build changes:
 
@@ -480,7 +480,7 @@ The Mediastream player exposes playback control, fullscreen, PiP, Cast, next-epi
 
 ## Introspection
 
-- **`getVersion()`** — SDK version string (e.g. `"10.0.0"`).
+- **`getVersion()`** — SDK version string (e.g. `"10.0.1"`).
 - **`getPlayerView()`**, **`getCurrentUrl()`**, **`getCurrentMediaConfig()`**, **`getMediaTitle()`**, **`getMediaPoster()`**, **`getCurrentPosition()`**, **`getDuration()`**, **`getContentDuration()`**, **`getResolution()`**, **`getBitrate()`**, **`getBandwidth()`**, **`getCurrentMsPlayer()`** — Debug and UI integration helpers.
 
 ## Other
@@ -721,6 +721,10 @@ By following these steps, you can integrate the MediastreamPlayerServiceWithSync
 
 # Release Notes
 
+## [Version 10.0.1] - 2025-03-23
+### Fixes:
+- **Live Service Audio Sync:** Fixed an issue where the player wouldn't start due to audio sync problems.
+
 ## [Version 10.0.0] - 2025-03-23
 ### Features
 - **Reels V2:** Vertical feed when platform configures Reels skin/type; ads, analytics, Cast, and playback stability improvements.
@@ -734,7 +738,7 @@ By following these steps, you can integrate the MediastreamPlayerServiceWithSync
 - **Config:** `FlagStatus` toggles, `customBackgroundForAudioPlayer`, `adaptResizeModeToOrientation`, `appHandlesWindowInsets`, `vastLoadTimeoutMs` / `adPreloadTimeoutMs`, `maxAllowedReelsTags`, and expanded `getAdQueryString` / DAI helpers.
 
 ### Notes
-- **compileSdk 35**, **minSdk 24**, **Java 17**; dependency coordinates `io.github.mediastream:mediastreamplatformsdkandroid:10.0.0`.
+- **compileSdk 35**, **minSdk 24**, **Java 17**; dependency coordinates `io.github.mediastream:mediastreamplatformsdkandroid:10.0.1`.
 
 ## [Versión 9.3.3] - 2025-01-31
 - Ad tag replacement for google dai
