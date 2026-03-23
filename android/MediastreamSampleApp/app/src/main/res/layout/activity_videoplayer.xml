@@ -13,6 +13,7 @@
         android:layout_weight="0.5"
         android:background="#000000"
         android:keepScreenOn="true">
+        <!--You need to pass this as config.customPlayerView!-->
         <androidx.media3.ui.PlayerView
             android:id="@+id/player_view"
             android:layout_width="match_parent"

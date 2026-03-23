@@ -5,16 +5,48 @@ Hello, Android Developer! 👋
 Welcome to the Mediastream SDK for Android, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is 9.6.0.
-- **Compatibility:** Compatible with Android API level 34 (Android 14)
+- **Version:** The current version of the SDK is **10.0.0** (see `MediastreamPlayer.getVersion()`).
+- **Compatibility:** Targets **compileSdk 35** (Android 15). **minSdk 24**. Java **17** is required for consuming projects using the same toolchain as the SDK.
 
 ## Adding Mediastream Platform SDK to Your Android Project
 
 To integrate the Mediastream Platform SDK into your Android project, add the following dependency to your project's build.gradle file:
 
 ```gradle
-implementation "io.github.mediastream:mediastreamplatformsdkandroid:9.6.0"
+implementation "io.github.mediastream:mediastreamplatformsdkandroid:10.0.0"
 ```
+
+## Highlights in 10.0.0
+
+Major themes in this release:
+
+- **Reels:** Vertical short-form experience when the platform configures the player as Reels (`player_skin=reels` / type `REELS` in API). Includes ads (VAST/VMAP), analytics hooks, and TV/mobile refinements.
+- **Next episode:** Preview overlay before the end of VOD/EPISODE, optional **manual** flow when the app supplies `nextEpisodeId` (`nextEpisodeIncoming` → `updateNextEpisode()`), and automatic flow when the API drives the next item.
+- **Picture-in-Picture:** Optional **fullscreen before PiP**, **replace Activity content** so PiP shows only the video, and correct interaction with **zoom** and **controller** visibility.
+- **DVR (live):** Rich timeline and scrubbing on supported setups; **programmatic API** for custom UI (`switchToDvr`, `switchToLive`, `seekInDvr`, `isInDvrMode`, etc.) when `showControls = false` or for advanced integrations.
+- **TV:** Dedicated settings and subtitle/audio dialogs, D-pad handling, focus management, and safer controller behavior during ads.
+- **Ads:** Improved client- and server-side ad flows (including DAI/SSAI), **autoplay** alignment with preroll, device IDs (`rdid` / `is_lat`) for CSAI and DAI tag fallbacks (including **Fire TV** AAID where applicable).
+- **Analytics & partners:** **Comscore** and **In The Game (ITG)** when enabled in platform/player configuration.
+- **Subtitles & UI:** Custom **ASS** styling support, **localization** of player UI (English, Spanish, Portuguese), **edge-to-edge** / window insets on Android 15+, optional **brightness** bar and **pinch-to-zoom** on the player surface.
+- **Android Auto & notifications:** Continued improvements for browsing, episodes, podcasts, and sync service flows (see service section below).
+
+## Breaking changes (upgrading from 9.x to 10.0.0)
+
+These are the integration points that most often require code or build changes:
+
+1. **Build toolchain** — The SDK is built with **Java 17** and targets **compileSdk 35**. Your app module should use **Java 17** (or compatible toolchain) and **compileSdk 35** (or higher) to avoid class file / API mismatches with current AndroidX and Media3 dependencies.
+
+2. **`MediastreamPlayerCallback`** — New methods were added over the 9.x line (e.g. `playerViewReady`, `onPlayerReload`, full Cast session callbacks, `onDismissButton`, etc.). Only **`nextEpisodeIncoming`** and **`nextEpisodeLoadRequested`** have empty default implementations in Kotlin (optional overrides). **All other methods must still be implemented** in Kotlin. **`onFullscreen`** takes **`enteredForPip: Boolean`** (including for Java: `onFullscreen(boolean)`). If you upgrade from an older callback class, **add the missing overrides** or your project will fail to compile.
+
+3. **Edge-to-edge / window insets (Android 15+)** — Padding for system bars can be applied by the SDK when **`appHandlesWindowInsets = false`** on `MediastreamPlayerConfig`. The default is **`true`**, meaning **your activity is expected to handle insets** if you use edge-to-edge. If the player draws under the status bar after upgrading, set `appHandlesWindowInsets = false` on the config **or** apply insets in your own layout.
+
+4. **Platform-driven Reels** — When the embed API returns a Reels-type player skin, the SDK may **hand off the UI to the Reels flow** instead of the standard `PlayerView` path. Apps that share one screen for all formats should account for this (callbacks and layout may differ).
+
+5. **Next-episode and ads** — New flows (preview overlay, manual `nextEpisodeId` + `updateNextEpisode`, preroll/autoplay ordering) can change when **`onEnd`**, **`nextEpisodeIncoming`**, and ad-related callbacks fire compared to older builds. Review any logic that assumed a single `onEnd` at content finish.
+
+6. **Documentation correction** — The config field is **`accountID`**, not `account`. Older snippets were wrong; the API did not rename a property—only the docs were inaccurate.
+
+If your project already used Java 17, compileSdk 35, and a complete callback implementation, you may only need dependency version and regression testing on fullscreen/insets and next-episode behavior.
 
 You can see fully file on the examples in this document.
 
@@ -205,161 +237,258 @@ class YourPlayerActivity : AppCompatActivity() {
 
 # MediastreamPlayerConfig: Customizing Your Playback Experience
 
-The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a range of properties for tailoring and enhancing your playback experience. Here's an overview of the current properties:
+The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a range of properties for tailoring and enhancing your playback experience. Many UI and behavior toggles use **`FlagStatus`**: `ENABLE`, `DISABLE`, or `NONE` (inherit from platform/API when applicable).
 
-## **Required Parameters:**
+## **Required parameters**
 
-- **`id` (String):** Video, Audio, Live or Episode ID. You can get it from Mediastream Platform.
-- **`account` (String):** Account ID. You can get it from Mediastream Platform.
-- **`type` (MediastreamPlayerConfig.VideoTypes):** Video type. Possible values: VOD, LIVE, EPISODE. Tells the player what type of content is going to be played.
+- **`id` (String):** Video, audio, live, or episode content ID from Mediastream Platform.
+- **`accountID` (String):** Platform account ID.
+- **`type` (`MediastreamPlayerConfig.VideoTypes`):** `VOD`, `LIVE`, or `EPISODE`.
 
-## **Optional Parameters:**
+## **Core playback & environment**
 
-- **`adUrl` (String):** AdURL (e.g., VAST). If not specified, will play ads configured in the Mediastream Platform.
-- **`accessToken` (String):** Access token for restricted videos.
-- **`autoplay` (boolean):** Autoplay video if true. Default: false.
-- **`videoFormat` (MediastreamPlayerConfig.AudioVideoFormat):** Type of video (e.g., DASH). Possible values: DASH, MP4, M4A, ICECAST. Default: HLS.
-- **`mute` (boolean):** Player starts muted. Default: false.
-- **`dvr` (boolean):** Player starts prepared to use DVR. Default: false.
-- **`windowDVR` (int):** Window DVR voiced in seconds.
-- **`showControls` (boolean):** Hide the controls of the player. Default: true.
-- **`referer` (string):** Allows setting a custom referrer for statistics.
-- **`src` (string):** Arbitrary source to reproduce.
-- **`loadNextAutomatically` (boolean):** Allows playing the next episode if it exists. Available only when the EPISODE type is set. Default: false.
-- **`NotificationColor` (Integer):** Allows changing Notification background color when using the player as a service.
-- **`NotificationImageUrl` (String):** Allows changing Notification image when using the player as a service.
-- **`NotificationDescription` (String):** Allows changing Notification description when using the player as a service.
-- **`NotificationSongName` (String):** Allows changing Notification song name when using the player as a service.
-- **`NotificationAlbumName` (String):** Allows changing Notification album name when using the player as a service.
-- **`NotificationIconUrl` (String):** Allows changing Notification icon when using the player as a service.
-- **`appName` (string):** Very useful to identify traffic in platform analytics. Example: "mediastream-app-tv" or "mediastream-app-mobile".
-- **`playerId` (String):** Takes player configuration from platform settings.
-- **`tryToGetMetadataFromLiveWhenAudio` (boolean):** If your live content contains TPE1 and TIT2 tags on the manifest, this metadata will be parsed and sent on `onLiveAudioCurrentSongChanged` event. Default: true.
-- **`fillAutomaticallyAudioNotification` (boolean):** Show the current song playing on live content audio notification if your live content contains TPE1 and TIT2 tags on the manifest. Default: true.
-- **`addAdCustomAttribute`(key <String>, value <String>):** Allows sending custom parameters in an advertising VAST (Client Side). To make it work, you need to include the *custom.* query in the VAST query strings, followed by the key you want to replace. Example: *&custom.test_ca=*. To replace it, call *config.addAdCustomAttribute("test_ca", "hi")*, which will result in the final URL being: *&custom.test_ca=hi*. (Just works if adurl is comming on the config.)
-- **`googleImaPpid` (String):** Allow to pass Google IMA PPID.
-- **`adTagParametersForDAI` (MutableMap<Util.AdTagParameter, String>):** Allows you to set the parameters of the url tag when there is google dai, any field that appears in the enum will be appended or replaced in the original url tag. For example: `adTagParamsMap[Util.AdTagParameter.CUST_PARAMS] = "ge=0&gr=2&gt=3"` then `config.adTagParameters = adTagParamsMap`
-- **`adPreloadTimeoutMs` (Long):** Maximum time in milliseconds to preload an ad using the IMA SDK before it gets cancelled. If not set or ≤ 0, the IMA SDK’s default value will be used.
+- **`environment` (`Environment`):** `DEV` or `PRODUCTION` API/embed host. Default: `PRODUCTION`.
+- **`videoFormat` (`AudioVideoFormat`):** e.g. `DASH`, `MP4`, `M4A`, `MP3`, `ICECAST`, or `DEFAULT` (HLS).
+- **`playerType` (`PlayerType`):** `AUDIO` or `VIDEO` / `DEFAULT` — affects UI (e.g. brightness bar, background).
+- **`protocol` (String):** Default `"https"`.
+- **`src` (String):** Direct media URL; skips platform JSON when set.
+- **`accessToken` (String):** Access token for restricted content.
+- **`referer` (String):** Custom referrer for statistics (also sent as header where applicable).
+- **`autoplay` (Boolean):** Default `true`.
+- **`startAt` (Int):** Start position in **seconds** (negative means not set). Works with DVR/VOD per SDK rules.
+- **`volume` (Float?):** `0f`–`100f`, or `-1` to use platform default.
+- **`loop` (Boolean):** Loop current item.
+- **`needReload` (Boolean):** Internal use when reloading with an already-built player.
+- **`playlistVideoFormat` (`AudioVideoFormat?`):** Format for playlist / next-episode transitions when applicable.
+- **`drmData` (`DrmData`):** Widevine license URL and optional headers.
+
+## **DVR & live**
+
+- **`dvr` (Boolean):** Enable DVR-capable live behavior.
+- **`windowDvr` (Int):** DVR window in **minutes** (used with API/account limits).
+- **`dvrStart` / `dvrEnd` (String?):** ISO8601 timestamps for DVR window (e.g. VOD-style range or custom UI).
+
+## **Ads**
+
+- **`adURL` (String):** Client-side ad tag (VAST/VMAP); platform ads apply if omitted.
+- **`muteAds` (`FlagStatus`):** Mute ads; `NONE` follows platform.
+- **`mute`:** Not a top-level property in current config; use **`volume`** or platform settings.
+- **`adPreloadTimeoutMs` (Long?):** IMA ad preload timeout (ms).
+- **`vastLoadTimeoutMs` (Int?):** VAST load timeout (ms).
+- **`googleImaPpid` (String):** Google IMA PPID.
+- **`adTagParametersForDAI` (`MutableMap<Util.AdTagParameter, String>`):** Google DAI **setAdTagParameters** map (PPID, `cust_params`, etc.).
+- **`addAdCustomAttribute(key, value)`:** Adds `custom.<key>` parameters for CSAI VAST URLs (requires matching `custom.*` placeholders in the tag).
+- **`fetchDeviceIdsAsync` / `waitForDeviceIdsCache`:** Cache GAID (or Amazon AAID on Fire TV) for `rdid` / `is_lat` in **getAdQueryString** and DAI fallbacks.
+- **`ensureDAITagParamsFallback(platform)`:** Fills missing PPID/RDID/IDTYPE/IS_LAT for DAI from SDK cache.
+
+## **Next / previous episode**
+
+- **`loadNextAutomatically` (Boolean):** Auto-advance to next episode when allowed.
+- **`nextEpisodeId` (String?):** Manual next id (app-driven flow; triggers confirmation callbacks).
+- **`nextEpisodeTime` (Int?):** Seconds before end to show preview / callbacks (default applied by SDK if missing).
+- **`nextPrevAutomatically` (Boolean):** Related next/prev behavior flags.
+- **`showDismissButton` (Boolean):** Dismiss control visibility.
+
+## **UI & device**
+
+- **`showControls` (Boolean):** Show built-in controls. Default `true`. Set `false` for fully custom UI (still use DVR APIs if needed).
+- **`showFullScreenButton` (Boolean):** Show fullscreen button where applicable.
+- **`showBrightnessBar` (Boolean):** Brightness slider in fullscreen (not for `AUDIO` player type).
+- **`initialHideController` (Boolean):** Start with controller hidden, then show after a short delay (when controls are enabled).
+- **`enablePlayerZoom` (Boolean):** Pinch-to-zoom on the video surface (when not disabled).
+- **`adaptResizeModeToOrientation` (Boolean):** Adjust resize mode on rotation. Default `true`.
+- **`appHandlesWindowInsets` (Boolean):** If `true`, the SDK **does not** apply system-bar padding on the player container (your app handles edge-to-edge). Default `true` in code — set to `false` to let the SDK pad for API 35+ edge-to-edge.
+- **`applyEdgeSafeMargins` (Boolean):** Extra safe margins for dismiss/cast on edge displays.
+- **`customPlayerView` (`PlayerView?`):** Inject your own `PlayerView` layout.
+- **`language` (`Language`):** `ENGLISH`, `SPANISH`, `PORTUGUESE` — localized strings for settings/subtitles UI.
+- **`baseColor` (Int):** Accent color (`-1` = use platform/API).
+- **`showSubtitles` / `speedInControlBar` / `pauseOnScreenClick` / `pip` (`FlagStatus`):** Override platform for subtitles button, speed menu, tap-to-pause, PiP.
+- **`pipExpandToFullscreenFirst` (Boolean):** Enter fullscreen briefly before PiP so PiP crops only the video.
+- **`pipReplaceActivityContentWithPlayer` (Boolean):** Replace Activity content with the player before PiP (requires `Activity` context).
+- **`customBackgroundForAudioPlayer` (String?):** Background image URL for **audio** content when you want a custom still instead of poster-only.
+- **`forceBackPressedWhenFullScreen` (Boolean):** Forward back press after closing fullscreen.
+- **`showPlaybackErrorsOnScreen` (Boolean):** Map ExoPlayer errors to on-screen messages.
+- **`isDebug` (Boolean):** Verbose SDK logging.
+
+## **Reels (platform-driven)**
+
+- **`maxAllowedReelsTags` (Int?):** Max tags shown per reel item (default `10` in config).
+
+## **Cast, notifications, analytics**
+
+- **`castAvailable` (Boolean):** Enable Cast integration.
+- **`playerId` (String):** Player ID from platform for skin, ads, logos, etc.
+- **`appName` / `appVersion`:** Sent in analytics and stream URLs.
+- **`customerID` / `distributorId` / `maxProfile`:** Business and quality parameters.
+- **`notificationColor`**, **`notificationSongName`**, **`notificationDescription`**, **`notificationAlbumName`**, **`notificationImageUrl`**, **`notificationIconUrl`**, **`notificationHasNext`**, **`notificationHasPrevious`:** Notification and mini-player metadata when using the service.
+- **`tryToGetMetadataFromLiveWhenAudio` / `fillAutomaticallyAudioNotification`:** Live audio metadata and notification updates.
+
+## **Resilience & quality**
+
+- **`automaticallyReconect` (Boolean):** Retry when offline (typo preserved in API).
+- **`tryToReconnectOnPlaybackError` (Boolean):** Retry or skip on recoverable playback errors.
+- **`denyAdaptativeMode` / `isMaxResolutionBasedOnScreenSize` / `isForceHighestSupportedBitrateEnabled`:** ABR / quality hints.
+- **`trackEnable` (Boolean):** Collector/analytics enablement.
+
+## **Helpers**
+
+- **`mergePersistentFrom(previous)`:** Used on reload to keep volume, language, debug flags, etc. Consistent with `reloadPlayer` / `reloadPlayerForNextAndPrevious` behavior.
+- **`toDebugString()`:** Multi-line dump for logging when `isDebug` is true.
 
 # Implementing Event Handling with `MediastreamPlayerCallback`
 
-The `MediastreamPlayerCallback` interface in the Mediastream SDK serves as the contract for handling various player events. By implementing this interface, you can listen to and respond to different states and actions during playback. Here's how you can use it:
+The `MediastreamPlayerCallback` interface is the contract for player events. Implement it in Kotlin or Java and register with `MediastreamPlayer.addPlayerCallback(callback)`.
 
-```java
-import com.mediastream.MediastreamPlayerCallback;
+**Playback & UI**
 
-public class YourPlayerCallback implements MediastreamPlayerCallback {
+- **`playerViewReady(PlayerView?)`** — Player view is ready (delayed until after setup).
+- **`onPlay()` / `onPause()`** — Playback started / stopped (including after seeks where applicable).
+- **`onReady()`** — Player is ready (e.g. first `STATE_READY`); also used when config propagates to mini-player.
+- **`onEnd()`** — Content finished (not during mid-roll ad handoff when preroll player is active).
+- **`onBuffering()`** — Entering buffering.
+- **`onError(String?)`** — Non-playback or configuration errors surfaced as string messages.
+- **`onPlaybackErrors(JSONObject?)`** — ExoPlayer error details (code, message).
+- **`onEmbedErrors(JSONObject?)`** — Embed / API JSON errors from the platform.
 
-    @Override
-    public void onEnd() {
-        // Called when the current video has completed playback to the end.
-    }
+**Next episode (VOD / EPISODE)**
 
-    @Override
-    public void onError() {
-        // Called when an error not related to playback occurs.
-    }
+- **`nextEpisodeIncoming(nextEpisodeId: String)`** — Fires when the SDK is about to show the next-episode UI or when the user taps Next in **manual** mode; respond with `updateNextEpisode(MediastreamPlayerConfig)` to confirm.
+- **`nextEpisodeLoadRequested(nextEpisodeId: String)`** — Fires when the user chooses to load the next item from the overlay (before `reload`).
 
-    @Override
-    public void onPause() {
-        // Called when the current video pauses playback.
-    }
+**Fullscreen & PiP**
 
-    // Implement other methods based on your event handling needs...
+- **`onFullscreen(enteredForPip: Boolean)`** — Entered fullscreen dialog; `enteredForPip` is `true` when fullscreen was opened only as a step before PiP (`pipExpandToFullscreenFirst`).
+- **`offFullscreen()`** — Left fullscreen.
 
+**Source & lifecycle**
+
+- **`onNewSourceAdded(MediastreamPlayerConfig)`** — New config applied (e.g. episode change).
+- **`onLocalSourceAdded()`** — Playing from `config.src`.
+- **`onPlayerReload()`** — After a full `reloadPlayer` teardown/rebuild.
+- **`onPlayerClosed()`** — User dismissed / closed flows tied to blocking dialogs.
+- **`onDismissButton()`** — Dismiss control used (e.g. close fullscreen / back).
+
+**Ads**
+
+- **`onAdEvents(AdEvent.AdEventType)`** — IMA ad lifecycle.
+- **`onAdErrorEvent(AdError)`** — IMA ad error.
+
+**Cast**
+
+- **`onCastAvailable(Boolean?)`**, **`onCastSessionStarting`**, **`onCastSessionStarted`**, **`onCastSessionStartFailed`**, **`onCastSessionEnding`**, **`onCastSessionEnded`**, **`onCastSessionResuming`**, **`onCastSessionResumed`**, **`onCastSessionResumeFailed`**, **`onCastSessionSuspended`** — Cast discovery and session lifecycle.
+
+**Other**
+
+- **`onConfigChange(MediastreamMiniPlayerConfig?)`** — Mini-player metadata (title, artwork, next/prev availability).
+- **`onLiveAudioCurrentSongChanged(JSONObject?)`** — Live audio metadata (API + ID3 where enabled).
+- **`onNext()` / `onPrevious()`** — Legacy hooks for next/previous actions from the host.
+
+Default empty implementations exist for optional methods in Kotlin; in Java implement all methods.
+
+Example registration:
+
+```kotlin
+val callback = object : MediastreamPlayerCallback {
+    override fun playerViewReady(msplayerView: PlayerView?) { }
+    override fun onPlay() { }
+    override fun onPause() { }
+    override fun onReady() { }
+    override fun onEnd() { }
+    override fun onPlayerClosed() { }
+    override fun onBuffering() { }
+    override fun onError(error: String?) { }
+    override fun onNext() { }
+    override fun onPrevious() { }
+    override fun onFullscreen(enteredForPip: Boolean) { }
+    override fun offFullscreen() { }
+    override fun onNewSourceAdded(config: MediastreamPlayerConfig) { }
+    override fun onLocalSourceAdded() { }
+    override fun onAdEvents(type: AdEvent.AdEventType) { }
+    override fun onAdErrorEvent(error: AdError) { }
+    override fun onConfigChange(config: MediastreamMiniPlayerConfig?) { }
+    override fun onCastAvailable(state: Boolean?) { }
+    override fun onCastSessionStarting() { }
+    override fun onCastSessionStarted() { }
+    override fun onCastSessionStartFailed() { }
+    override fun onCastSessionEnding() { }
+    override fun onCastSessionEnded() { }
+    override fun onCastSessionResuming() { }
+    override fun onCastSessionResumed() { }
+    override fun onCastSessionResumeFailed() { }
+    override fun onCastSessionSuspended() { }
+    override fun onPlaybackErrors(error: JSONObject?) { }
+    override fun onEmbedErrors(error: JSONObject?) { }
+    override fun onLiveAudioCurrentSongChanged(data: JSONObject?) { }
+    override fun onDismissButton() { }
+    override fun onPlayerReload() { }
 }
+player.addPlayerCallback(callback)
 ```
-
-In your activity or fragment, set an instance of this callback to your Mediastream instance:
-
-```android
-MediastreamPlayerCallback playerCallback = new YourPlayerCallback();
-Mediastream.addPlayerCallback(playerCallback);
-```
-
-# Event Listening in Mediastream SDK
-
-The Mediastream SDK allows you to listen to various events emitted by the player, providing valuable hooks into the playback lifecycle. Here are the available events:
-
-1. **`onEnd():`**
-   - Called when the current video has completed playback to the end of the video.
-
-2. **`onError():`**
-   - Called when an error not related to playback occurs.
-
-3. **`onPause():`**
-   - Called when the current video pauses playback.
-
-4. **`onPlay():`**
-   - Called when the current video starts playing from the beginning.
-
-5. **`onReady():`**
-   - Called when the current video resumes playing from a paused state.
-
-6. **`onNewSourceAdded():`**
-   - Called when new settings are set.
-
-7. **`onLocalSourceAdded():`**
-   - Called when a local source is set.
-
-8. **`onAdEvents(AdEvent.AdEventType):`**
-    - Callback triggered when an ad event occurs, such as LOADED, STARTED, COMPLETED, etc.
-  
-9. **`onAdErrorEvent(AdError):`**
-    - Callback triggered when an ad error occurs.
-
-10. **`onPlaybackErrors(JsonObject error):`**
-    - Called when a playback error occurs.
-
-11. **`onEmbedErrors(JsonObject error):`**
-    - Called when an embed error occurs.
-
-12. **`onLiveAudioCurrentSongChanged(JsonObject data):`**
-    - Called when a song changes on audio live content.
-
-These events allow you to respond dynamically to various states and actions during playback.
 
 # Player Methods
 
-The Mediastream player provides several methods that you can use to control playback and access various functionalities. Here is an overview of the main methods available:
+The Mediastream player exposes playback control, fullscreen, PiP, Cast, next-episode helpers, DVR (live), TV key handling, and accessors. Names below match the Kotlin API.
 
-## `play()`
+## Playback
 
-Starts playback of the current content.
+- **`play()` / `pause()`** — Start or pause (respects Cast, Reels, preroll, network).
+- **`forward(amount: Long)` / `backward(amount: Long)`** — Seek by delta (ms) on VOD-like timelines.
+- **`seekTo(position: Long)`** — Seek to position in milliseconds.
+- **`changeSpeed(playbackSpeed: Float)`** — Playback speed (e.g. 1.0f).
 
-## `pause()`
+## Reload & lifecycle
 
-Pauses playback of the current content.
+- **`reloadPlayer(config: MediastreamPlayerConfig)`** — Full re-init (destroy + setup); use when changing type/DVR/src incompatibilities.
+- **`reloadPlayerForNextAndPrevious(config)`** — Lighter reload for episode changes when the SDK can reuse the same player stack.
+- **`releasePlayer()`** — Release all resources; **must** be called when the screen is destroyed.
+- **`updateMsConfig(config)`** — Update in-memory config reference only (does not reload media by itself).
 
-## `forward(amount: Long)`
+## Picture-in-picture & fullscreen
 
-Seek to time established.
+- **`startPiP()`** — Android O+; respects `pip`, `pipExpandToFullscreenFirst`, `pipReplaceActivityContentWithPlayer`.
+- **`onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean)`** — Call from `Activity` to sync controller and PiP content swap.
+- **`enterFullscreen()` / `exitFullscreen()`** — Programmatic fullscreen dialog.
+- **`dismissButton()`** — Dismiss UX (brightness reset, callbacks, optional back).
 
-## `backward(amount: Long)`
+## Next episode
 
-Seek to time established.
+- **`updateNextEpisode(config: MediastreamPlayerConfig)`** — Confirm next episode in **manual** mode or refresh next metadata.
+- **`handleNextButtonClick()`** — Use if you wire a custom Next button to the same logic as the built-in control.
+- **`playNext()` / `playPrev()`** — Load next/previous episode when configured.
 
-## `seekTo(position: Long)`
+## DVR (live, `type == LIVE` with DVR enabled)
 
-Seeks to a position specified in milliseconds in the current video.
+- **`switchToDvr(startTime: String, endTime: String? = null)`** — Jump to DVR by ISO8601 window (custom UI).
+- **`switchToDvrByOffset(secondsAgo: Long, durationSeconds: Long? = null)`** — Convenience around `switchToDvr`.
+- **`switchToLive()`** — Return from DVR to live when in DVR mode.
+- **`isInDvrMode()`** — Whether the internal DVR state machine is active.
+- **`getCurrentDvrPosition()`** — Current position (ms) in DVR window.
+- **`getDvrDuration()` / `getDvrWindowDurationSeconds()`** — Window size helpers.
+- **`seekInDvr(positionMs: Long)`** — Seek inside DVR stream.
+- **`seekBackward(seekBackMs: Long = 10_000)` / `seekForward(seekForwardMs: Long = 10_000)`** — Live DVR ±10s style navigation (also handles non-live as simple seek where applicable).
 
-## `reloadPlayer(config: MediastreamPlayerConfig)`
+## TV
 
-Allows to reload the player with a new content without kill the player instance.
+- **`handleTVKeyEvent(keyCode: Int, event: KeyEvent): Boolean`** — Optional dispatch from `Activity` for D-pad when the default listener is not enough.
+- **`showSettingsMenu()`** — Opens track/speed settings (`FragmentManager` constructor required).
+- **`showSubtitleAudioMenuForTV()`** — TV subtitle/audio picker.
 
-## `releasePlayer()`
+## Cast & Chrome
 
-When you are finished using this MediastreamPlayer, make sure to call this method to kill player instance.
+- **`showChromeCastDialog()`** — Opens Cast device picker.
+- **`SendCurrentItemToCast()`** — Reload current item on Cast.
 
-## `changeSpeed(playbackSpeed: Float)`
+## Introspection
 
-Allows you to change the content playback speed.
+- **`getVersion()`** — SDK version string (e.g. `"10.0.0"`).
+- **`getPlayerView()`**, **`getCurrentUrl()`**, **`getCurrentMediaConfig()`**, **`getMediaTitle()`**, **`getMediaPoster()`**, **`getCurrentPosition()`**, **`getDuration()`**, **`getContentDuration()`**, **`getResolution()`**, **`getBitrate()`**, **`getBandwidth()`**, **`getCurrentMsPlayer()`** — Debug and UI integration helpers.
 
-## `startPiP()`
+## Other
 
-Available from Android O. Allows to manage the Picture in Picture functionality.
+- **`addPlayerCallback` / callbacks list** — Register `MediastreamPlayerCallback`.
+- **`getMediastreamCallbacks()`** — Access registered callbacks.
 
-# Examples 
+# Examples
 
 In the following example, you'll find an application showcasing various uses of the Mediastream SDK for Android. This app provides practical examples of key functionalities, including audio playback, video playback, audio as a service, casting, and more. Make sure you enter the IDs corresponding to your ACCOUNT_ID and CONTENT_ID and enjoy.
 
@@ -409,7 +538,7 @@ Declare your media service (MediastreamPlayerServiceWithSync) in the manifest. T
 
 ```java
 <service
-    android:name="am.mediastre.mediastreamplatformsdkandroid.MediastreamPlayerServi ceWithSync"
+    android:name="am.mediastre.mediastreamplatformsdkandroid.MediastreamPlayerServiceWithSync"
     android:exported="true" android:foregroundServiceType="mediaPlayback" android:stopWithTask="false">
     <intent-filter>
         <action android:name="androidx.media3.session.MediaSessionService" /> <action android:name="androidx.media3.session.MediaLibraryService" />
@@ -461,7 +590,7 @@ if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_
     requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), /*requestCode= */ 0)
 }
 ```
- 
+
 ### Create MediastreamPlayerConfig Object
 
 Initialize the MediastreamPlayerConfig object with the necessary configurations for your player:
@@ -591,29 +720,21 @@ These changes simplify the integration and reduce the need for manual action set
 By following these steps, you can integrate the MediastreamPlayerServiceWithSync into your Android application, ensuring support for Android Auto and efficient media playback with synchronization capabilities. The migration steps also ensure a smooth transition from the old service implementation to the new one.
 
 # Release Notes
-## [Versión 9.3.10] - 2025-02-24
-### Bug Fixes
-- Fix play next episode when ads ended.
 
-## [Versión 9.3.8] - 2025-02-24
-### Bug Fixes
-- Force client-side ad event (CONTENT_RESUME_REQUESTED) when it fails and Google IMA is not able to emit them.
+## [Version 10.0.0] - 2025-03-23
+### Features
+- **Reels V2:** Vertical feed when platform configures Reels skin/type; ads, analytics, Cast, and playback stability improvements.
+- **Next episode:** Preview overlay, `nextEpisodeIncoming` / `nextEpisodeLoadRequested`, manual confirmation via `updateNextEpisode`, and `mergePersistentFrom`-aware reloads.
+- **PiP:** Fullscreen-first PiP, replace-activity-content mode, zoom reset, `onFullscreen(enteredForPip)`.
+- **DVR:** Programmatic `switchToDvr` / `switchToLive` / `seekInDvr` and TV timeline behavior; live configuration for video streams.
+- **TV:** Settings and subtitle/audio dialogs, D-pad handling, focus and ad-interaction safeguards.
+- **Ads:** CSAI/SSAI/DAI improvements, device IDs for VAST/DAI (`fetchDeviceIdsAsync`), autoplay alignment with preroll.
+- **Analytics:** Comscore and ITG integrations when enabled in platform config.
+- **Subtitles & UI:** ASS color support, English/Spanish/Portuguese UI strings, edge-to-edge / window insets (API 35+), optional brightness bar and pinch zoom.
+- **Config:** `FlagStatus` toggles, `customBackgroundForAudioPlayer`, `adaptResizeModeToOrientation`, `appHandlesWindowInsets`, `vastLoadTimeoutMs` / `adPreloadTimeoutMs`, `maxAllowedReelsTags`, and expanded `getAdQueryString` / DAI helpers.
 
-## [Versión 9.3.7] - 2025-02-21
-### Bug Fixes
-- Support Client Side Ads Pre-roll when Server Side Google DAI.
-
-## [Versión 9.3.6] - 2025-02-20
-### Bug Fixes
-- Fix click on previous button notification when live
-
-## [Versión 9.3.5] - 2025-02-18
-### Bug Fixes
-- Disable click on notification buttons (prev|next) when live
-
-## [Versión 9.3.4] - 2025-02-14
-### Bug Fixes
-- Fix seekTo when audio service init
+### Notes
+- **compileSdk 35**, **minSdk 24**, **Java 17**; dependency coordinates `io.github.mediastream:mediastreamplatformsdkandroid:10.0.0`.
 
 ## [Versión 9.3.3] - 2025-01-31
 - Ad tag replacement for google dai
@@ -663,7 +784,7 @@ By following these steps, you can integrate the MediastreamPlayerServiceWithSync
 - Internal improvements to bitrate management
 
 ### Bug Fixes
-- Retrieve metadata for live and non DVR content to update notification 
+- Retrieve metadata for live and non DVR content to update notification
 
 ## [Versión 9.2.1] - 2024-08-02
 ### Bug Fixes
