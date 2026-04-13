@@ -5,7 +5,7 @@ Hello, Android Developer! 👋
 Welcome to the Mediastream SDK for Android, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is **10.0.1** (see `MediastreamPlayer.getVersion()`).
+- **Version:** The current version of the SDK is **10.0.3** (see `MediastreamPlayer.getVersion()`).
 - **Compatibility:** Targets **compileSdk 35** (Android 15). **minSdk 24**. Java **17** is required for consuming projects using the same toolchain as the SDK.
 
 ## Adding Mediastream Platform SDK to Your Android Project
@@ -13,12 +13,25 @@ Welcome to the Mediastream SDK for Android, designed to streamline the integrati
 To integrate the Mediastream Platform SDK into your Android project, add the following dependency to your project's build.gradle file:
 
 ```gradle
-implementation "io.github.mediastream:mediastreamplatformsdkandroid:10.0.1"
+implementation "io.github.mediastream:mediastreamplatformsdkandroid:10.0.3"
 ```
 
-## Highlights in 10.0.1
+## What's new in 10.0.3 and 10.0.2
 
-Major themes in this release:
+Patch releases on top of **10.0.1** (no new public API breaks documented below):
+
+- **10.0.3 — Volume:** Volume is **persisted for the session** across reloads and transitions where the SDK merges config.
+- **10.0.3 — Local source (`config.src`):** Initial **setup skips unnecessary network/embed** work when the item is played from a direct local URL.
+- **10.0.3 — Ads & DVR:** **AdsLoader** is reset when **DVR mode** is activated to avoid stale ad state.
+- **10.0.3 — Google DAI + VOD:** Fix for **indefinite loading** on some VOD items using **Google DAI**.
+- **10.0.3 — Preroll & audio background:** Fixes for **end of preroll** handoff; **background image** sizing and **fullscreen** resize behavior for the audio player background.
+- **10.0.3 — Tracks UI:** Clearer **audio track labels** in the track selection dialog.
+- **10.0.3 — Metadata:** Correct handling when **metadata from the content source** was incorrectly overridden (custom/local media source path).
+- **10.0.2 — Display:** `PlayerView` **`keepScreenOn`** follows **actual playback** (`onIsPlayingChanged`), including **preroll** listeners, so the device is less likely to dim or sleep while content or ads are playing.
+
+## Highlights in the 10.0.x line
+
+Major themes in the **10.0** release family (see release notes for patch details):
 
 - **Reels:** Vertical short-form experience when the platform configures the player as Reels (`player_skin=reels` / type `REELS` in API). Includes ads (VAST/VMAP), analytics hooks, and TV/mobile refinements.
 - **Next episode:** Preview overlay before the end of VOD/EPISODE, optional **manual** flow when the app supplies `nextEpisodeId` (`nextEpisodeIncoming` → `updateNextEpisode()`), and automatic flow when the API drives the next item.
@@ -30,9 +43,9 @@ Major themes in this release:
 - **Subtitles & UI:** Custom **ASS** styling support, **localization** of player UI (English, Spanish, Portuguese), **edge-to-edge** / window insets on Android 15+, optional **brightness** bar and **pinch-to-zoom** on the player surface.
 - **Android Auto & notifications:** Continued improvements for browsing, episodes, podcasts, and sync service flows (see service section below).
 
-## Breaking changes (upgrading from 9.x to 10.0.1)
+## Breaking changes (upgrading from 9.x to 10.0.x)
 
-These are the integration points that most often require code or build changes:
+These are the integration points that most often require code or build changes when moving from **9.x** to **10.0.x**. Patch releases **10.0.2** and **10.0.3** are **bugfix and behavior refinements** relative to **10.0.1**; they do not add new breaking items to this list.
 
 1. **Build toolchain** — The SDK is built with **Java 17** and targets **compileSdk 35**. Your app module should use **Java 17** (or compatible toolchain) and **compileSdk 35** (or higher) to avoid class file / API mismatches with current AndroidX and Media3 dependencies.
 
@@ -46,7 +59,7 @@ These are the integration points that most often require code or build changes:
 
 6. **Documentation correction** — The config field is **`accountID`**, not `account`. Older snippets were wrong; the API did not rename a property—only the docs were inaccurate.
 
-If your project already used Java 17, compileSdk 35, and a complete callback implementation, you may only need dependency version and regression testing on fullscreen/insets and next-episode behavior.
+If your project already used Java 17, compileSdk 35, and a complete callback implementation, you may only need to bump the dependency to **10.0.3** and run regression tests (ads, DVR, local `src`, metadata, and audio background in fullscreen).
 
 You can see fully file on the examples in this document.
 
@@ -480,7 +493,7 @@ The Mediastream player exposes playback control, fullscreen, PiP, Cast, next-epi
 
 ## Introspection
 
-- **`getVersion()`** — SDK version string (e.g. `"10.0.1"`).
+- **`getVersion()`** — SDK version string (e.g. `"10.0.3"`).
 - **`getPlayerView()`**, **`getCurrentUrl()`**, **`getCurrentMediaConfig()`**, **`getMediaTitle()`**, **`getMediaPoster()`**, **`getCurrentPosition()`**, **`getDuration()`**, **`getContentDuration()`**, **`getResolution()`**, **`getBitrate()`**, **`getBandwidth()`**, **`getCurrentMsPlayer()`** — Debug and UI integration helpers.
 
 ## Other
@@ -721,6 +734,20 @@ By following these steps, you can integrate the MediastreamPlayerServiceWithSync
 
 # Release Notes
 
+## [Version 10.0.3] - 2026-04-13
+### Fixes and improvements
+- **Volume:** Persist volume during the session when merging/reloading config.
+- **Local source:** Skip unnecessary embed/network setup when `config.src` is set (local playback).
+- **Ads + DVR:** Clean up **AdsLoader** when entering DVR mode.
+- **Google DAI:** Fix infinite loading on some **VOD + Google DAI** combinations.
+- **Preroll & audio UI:** End-of-preroll fixes; restore and improve **background image** dimensions and **fullscreen** resize behavior.
+- **Tracks:** Improved **audio track labels** in `TrackSelectionDialog`.
+- **Metadata:** Avoid incorrectly overriding metadata from the content source (`CustomMediaSourceFactory` / player path).
+
+## [Version 10.0.2] - 2026-03-24
+### Fixes
+- **Screen on while playing:** Set `msplayerView.keepScreenOn` from `onIsPlayingChanged` on main and preroll player listeners so the screen stays on consistently during content and ads.
+
 ## [Version 10.0.1] - 2025-03-23
 ### Fixes:
 - **Live Service Audio Sync:** Fixed an issue where the player wouldn't start due to audio sync problems.
@@ -738,7 +765,7 @@ By following these steps, you can integrate the MediastreamPlayerServiceWithSync
 - **Config:** `FlagStatus` toggles, `customBackgroundForAudioPlayer`, `adaptResizeModeToOrientation`, `appHandlesWindowInsets`, `vastLoadTimeoutMs` / `adPreloadTimeoutMs`, `maxAllowedReelsTags`, and expanded `getAdQueryString` / DAI helpers.
 
 ### Notes
-- **compileSdk 35**, **minSdk 24**, **Java 17**; dependency coordinates `io.github.mediastream:mediastreamplatformsdkandroid:10.0.1`.
+- **compileSdk 35**, **minSdk 24**, **Java 17**; current coordinates: `io.github.mediastream:mediastreamplatformsdkandroid:10.0.3`.
 
 ## [Versión 9.3.3] - 2025-01-31
 - Ad tag replacement for google dai
