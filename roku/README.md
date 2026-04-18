@@ -1,110 +1,111 @@
-# Welcome to the Mediastream ROKU SDK
+# Mediastream Roku SDK
 
-Hello, Roku Developer! 👋
-
-Welcome to the Mediastream SDK for Roku, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
+Official Mediastream **SceneGraph** SDK for Roku: VOD, live, episodes, and audio with ads (RAF, Google DAI), optional Widevine DRM, analytics, and localization (EN / ES / PT). This guide matches the **current `master`** of the Mediastream Roku SDK package.
 
 ## Version
-- **Version:** The current version of the SDK is 7.0.14.
 
-## Adding Mediastream Platform SDK to Your Roku Project
+| Field | Value |
+|--------|--------|
+| **Semantic version** | **9.0.0** |
+| **Package build** | `202604180` (from SDK `manifest`) |
+| **Component library ID** | `MediastreamRokuPlayerSDK` |
+| **Core node** | `MediaStreamPlayer` (inside the loaded package) |
 
-To integrate the Mediastream Platform SDK into your Roku project, you need to download the package form the following links:
+---
 
-Latest Version:
-```brightscript
+## Capabilities (SDK `master`)
+
+- **Content types:** VOD (`video`), live (`live-stream`), episode, audio (`audio`)
+- **Streaming formats:** HLS (default), DASH (`videoFormat` / `src` keys), MP4, MP3
+- **Ads:** Roku Ads Framework (VAST) and **Google DAI** (live + VOD where configured)
+- **Google DAI live + DASH:** When `videoFormat` is DASH and the Mediastream API returns `ad_insertion_google.asset_key_dash`, the SDK uses that **DASH asset key** for IMA; otherwise it uses `asset_key` (HLS-oriented key).
+- **DRM:** Widevine (`drmData` + `drmToken` for license requests, e.g. Axinom-style headers)
+- **Subtitles:** External WebVTT and in-stream EIA-608/708
+- **Analytics:** Playback, buffering, errors, device context
+- **Up Next:** Next episode flow and overlay hooks
+- **Optional:** Nielsen DAR, InTheGame (ITG) interactive ads (when enabled in content/config)
+
+---
+
+## Requirements
+
+Add the following to your channel **`manifest`** (same as the distributable SDK):
+
+```ini
+bs_libs_required=roku_ads_lib,googleima3
+```
+
+The SDK package may declare **Verimatrix** DRM requirements; include those lines only if your channel uses that stack:
+
+```ini
+requires_verimatrix_drm=1
+requires_verimatrix_version=1.0
+```
+
+| Requirement | Notes |
+|-------------|--------|
+| Roku OS | SceneGraph (`rsg_version` 1.2+ as in SDK manifest) |
+| Libraries | `roku_ads_lib`, `googleima3` (Google IMA DAI) |
+
+---
+
+## Adding the SDK to your project
+
+Download the **`.pkg`** from CDN and host it locally in your project (for example `pkg:/source/packageFile/MediaStreamPlayer.pkg`).
+
+**Latest (floating):**
+
+```text
 https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 ```
 
-Specific Version:
-```brightscript
-https://player.cdn.mdstrm.com/roku_sdk/7.0.14/MediaStreamPlayer.pkg
+**Pinned to 9.0.0:**
+
+```text
+https://player.cdn.mdstrm.com/roku_sdk/9.0.0/MediaStreamPlayer.pkg
 ```
 
-### Basic Implementation
+Typical layout: create `source/packageFile/` at the channel root and place `MediaStreamPlayer.pkg` there.
 
-Once downloaded we need to add it to our project. To do this we need to create a folder called source at the base of our project and inside this folder create a new folder called packageFile and place MediaStreamPlayer.pkg inside it.
+![Adding the Mediastream package](/images/AddingMediastreampkg.png)
 
-![Sample](/images/AddingMediastreampkg.png)
+---
 
-Then the sdk must be included to the channel. To do this we need to incorporate the following into your MainScene.xml
+## Scene and fields (host app)
+
+In your main scene (e.g. `MainScene.xml`), expose fields the sample app uses for status and position, and a container for the player host node:
 
 ```xml
-  <interface>
-    <field id="msPlayerVideoStatus" type="assocarray" alwaysNotify="true"/>
-    <field id="msPlayerVideoPosition" type="assocarray" alwaysNotify="true"/>
-  </interface>
-  <children>
-    <Group id="msRokuPlayerContainer"></Group>
-  </children>
+<interface>
+  <field id="msPlayerVideoStatus" type="assocarray" alwaysNotify="true"/>
+  <field id="msPlayerVideoPosition" type="assocarray" alwaysNotify="true"/>
+</interface>
+<children>
+  <Group id="msRokuPlayerContainer" />
+</children>
 ```
 
-Now it's time to initialize the SDK, to do it we need:
-* Set `m.SDKPath` with the path of where Mediastream.pkg is located
-* Create an object of type `MediastreamPlayer`
-* Attach the created object to the `msRokuPlayerContainer` container
-* Set the `msPlayerVideoPosition`, `SDKStatus` and `msPlayerVideoStatus` observers with functions that allow us to handle these events.
+The **reference application** in the SDK repo uses a thin **wrapper** component also named `MediaStreamPlayer` that loads the package via `ComponentLibrary` and then creates `mediastreamRokuPlayerSDK:MediaStreamPlayer`. You can copy that pattern or load the library yourself.
 
-For example, we create a function initPlayer and set Observers to exemplify:
+---
+
+## Initialization (ComponentLibrary + SDK player)
+
+1. Set the **URI** of the downloaded `.pkg` (local `pkg:` path or HTTPS URL).
+2. Create a `ComponentLibrary` node, set `uri`, and wait until `loadStatus` is `"ready"`.
+3. Instantiate the SDK player: `CreateObject("roSGNode", "mediastreamRokuPlayerSDK:MediaStreamPlayer")` (prefix must match your loaded library; the sample uses this casing).
+4. Set `content` on that node with the config associative array (see below), then call `startPlayback`.
+
+Minimal BrightScript pattern (aligned with the SDK **Example** `MainScene` / wrapper):
 
 ```brightscript
 function initPlayer()
-    print "MainScene : initPlayer"
     m.SDKPath = "pkg:/source/packageFile/MediaStreamPlayer.pkg"
-    if(m.mediaStreamPlayer <> invalid)
-       m.msRokuPlayerContainer.removeChild(m.mediaStreamPlayer)
-       m.mediaStreamPlayer = invalid
+    if m.mediaStreamPlayer <> invalid
+        m.msRokuPlayerContainer.removeChild(m.mediaStreamPlayer)
+        m.mediaStreamPlayer = invalid
     end if
-    m.mediaStreamPlayer = CreateObject("roSGNode", "MediaStreamPlayer")
-    m.mediaStreamPlayer.id = "mediaStreamPlayer"
-    m.mediaStreamPlayer.callFunc("initializeSDK", m.SDKPath)
-    m.msRokuPlayerContainer.appendChild(m.mediaStreamPlayer)
-end function
-```
-
-# MediastreamPlayerConfig: Customizing Your Playback Experience
-
-The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a range of properties for tailoring and enhancing your playback experience. Here's an overview of the current properties:
-
-## **Required Parameters:**
-
-- **`id` (String):** Video, Audio, Live or Episode ID. You can get it from Mediastream Platform.
-- **`account` (String):** Account ID. You can get it from Mediastream Platform.
-- **`type` (MediastreamPlayerConfig.VideoTypes):** Video type. Possible values: VOD, LIVE, EPISODE. Tells the player what type of content is going to be played.
-
-## **Optional Parameters:**
-
-- **`adUrl` (String):** AdURL (e.g., VAST). If not specified, will play ads configured in the Mediastream Platform.
-- **`accessToken` (String):** Access token for restricted videos.
-- **`autoplay` (boolean):** Autoplay video if true. Default: false.
-- **`dvr` (boolean):** Player starts prepared to use DVR. Default: false.
-- **`windowDVR` (int):** Window DVR voiced in seconds.
-- **`appName` (string):** Very useful to identify traffic in platform analytics. Example: "mediastream-app-tv" or "mediastream-app-mobile".
-- **`playerId` (String):** Takes player configuration from platform settings.
-- **`startAt`(Number):** Skip or seek at starting, used in keep watching so this starts the video at the same point where the user left it.
-
-## **Debug Parameters:**
-- **`setAdsDebugOutput` (boolean):** Enables or disables verbose logging for the ad system. When `true`, the SDK will print detailed information about ad events, ad break scheduling, and any errors encountered during ad playback. Useful for debugging ad-related issues during development. (Default false)
-- **`setAdMeasurements` (boolean):** Enables or disables ad measurement tracking integrations (e.g., Nielsen, Moat, etc.). When true, the SDK will activate measurement pings and tracking events required by third-party measurement vendors. Set to false if measurement is not needed or during debugging to avoid sending real data. (Default false)
-- **`setJITPods` (boolean):** Enables Just-In-Time (JIT) ad pod insertion. When true, the SDK will request and insert ad pods dynamically at playback time, rather than pre-fetching them all in advance. This is typically used to ensure fresher ad content or in environments with dynamic ad decisions. (Default false)
-- **`enableNielsenDAR` (boolean):** Enables Nielsen Digital Ad Ratings (DAR) integration. When true, the SDK will include DAR-specific tracking events during ad playback to support Nielsen audience measurement. This should be enabled only if the client requires DAR reporting.
-- **`nielsenAppId` (boolean):** Sets the unique application identifier used by Nielsen for audience measurement. This ID is provided by Nielsen and must be configured correctly to ensure accurate tracking and reporting.
-- **`contentGenres` (string):** Specifies the content genre for the current playback session. This value is used by third-party measurement services like Nielsen to categorize content appropriately (e.g., "GV" for General Viewing, "CL" for Children).
-- **`nielsenProgramId`(string):** Sets the program identifier used for Nielsen tracking. Internally, the SDK uses this value to call setNielsenProgramId, which helps Nielsen attribute viewership to specific programs or episodes.
-
-# Implementing Event Handling
-
-You can subscribe to different events with the Mediastream SDK for Roku, for example:
-
-```brightscript
-function initPlayer()
-    print "MainScene : initPlayer"
-    m.SDKPath = "pkg:/source/packageFile/MediaStreamPlayer.pkg"
-    if(m.mediaStreamPlayer <> invalid)
-       m.msRokuPlayerContainer.removeChild(m.mediaStreamPlayer)
-       m.mediaStreamPlayer = invalid
-    end if
-    m.mediaStreamPlayer = CreateObject("roSGNode", "MediaStreamPlayer")
+    m.mediaStreamPlayer = CreateObject("roSGNode", "MediaStreamPlayer") ' wrapper in sample; or your own host
     m.mediaStreamPlayer.id = "mediaStreamPlayer"
     m.mediaStreamPlayer.callFunc("initializeSDK", m.SDKPath)
     m.msRokuPlayerContainer.appendChild(m.mediaStreamPlayer)
@@ -112,49 +113,95 @@ function initPlayer()
 end function
 ```
 
+After `SDKStatus` reports **Loaded**, the sample calls into the wrapper’s `setupPlayer(playerType)` which builds `content` and assigns it to the real SDK node, then `startPlayback`. If you talk to the **SDK node directly**, use:
+
+- `getMediaPlayerConfig()` — returns `msConfig` (defaults + enums).
+- Populate `msConfig.mediaStreamPlayerConfig` (or the flat structure your merge uses) with `id`, `type`, `environmentType`, etc.
+- Set `player.content = config` and `player.callFunc("startPlayback")`.
+
+---
+
+## Configuration overview
+
+The **`MediastreamPlayerConfig`** shape is documented in detail in the SDK repository [README.md — configuration reference](https://github.com/mediastream/MediastreamPlatformSDKRokuTV/blob/master/README.md#configuration-reference). Summary:
+
+### Required for playback via Mediastream API
+
+- **`id` (string):** Content ID from Mediastream Platform.
+- **`type` (string):** One of `video`, `live-stream`, `episode`, `audio`.
+- **`environmentType`:** Use your `msConfig.environmentType.PRODUCTION` or `msConfig.environmentType.DEV` (maps to production vs develop API hosts).
+
+### Common optional fields
+
+- **`accessToken`:** For protected / entitlements flows.
+- **`videoFormat`:** e.g. `msConfig.audioVideoFormat.DASH` for DASH (`mpd`); default is HLS.
+- **`adUrl`:** Client-side VAST; platform ads apply when omitted (per SDK behavior).
+- **`appName` / `appVersion`:** Analytics and ad tagging.
+- **`startAt`:** Start position (e.g. continue watching).
+- **`dvr` / `windowDvr` / `dvrStart` / `dvrEnd`:** Live DVR window parameters when supported.
+- **Google DAI:** Values are usually filled from the **Mediastream stream API** (`ad_insertion_google`). For live **DASH + DAI**, ensure `asset_key_dash` is present in the API payload when using DASH; the SDK maps it to `google_dai_assetKeyDash` and selects it when `videoFormat` is DASH.
+- **DRM:** `drmData` (Widevine `serverURL` under `widevine`) and `drmToken` as required by your DRM provider (SDK sends the token in the license request path it implements).
+
+### Debug / measurement
+
+- **`setAdsDebugOutput`**, **`setAdMeasurements`**, **`setJITPods`**
+- **Nielsen DAR:** `enableNielsenDAR`, `nielsenAppId` (string), `nielsenProgramId`, `contentGenres`
+
+---
+
+## Event handling (host scene)
+
+Observe SDK status on your host node, and player status on the scene fields you defined:
+
 ```brightscript
 sub setObservers()
     m.top.observeField("msPlayerVideoPosition", "onMsPlayerVideoPositionChanged")
     m.top.observeField("msPlayerVideoStatus", "onMsPlayerVideoStatusChanged")
 end sub
-```
 
-```brightscript
-function onMsPlayerVideoStatusChanged(eventData as dynamic)
-    print "MainScene : onMsPlayerVideoStatusChanged " eventData.getData()
-end function
+sub onMsPlayerVideoStatusChanged(eventData as dynamic)
+    print "MainScene : onMsPlayerVideoStatusChanged "; eventData.getData()
+end sub
 
-function onMsPlayerVideoPositionChanged(eventData as dynamic)
-    print "MainScene : onMsPlayerVideoPositionChanged " eventData.getData()
-end function
+sub onMsPlayerVideoPositionChanged(eventData as dynamic)
+    print "MainScene : onMsPlayerVideoPositionChanged "; eventData.getData()
+end sub
 
-function onSDKStatusChanged(event as Dynamic)
+sub onSDKStatusChanged(event as dynamic)
     payload = event.getData()
-    print "MainScene : onSDKStatusChanged : payload : " payload
+    print "MainScene : onSDKStatusChanged : "; payload
     if payload.status = "Loaded" then m.isSDKLoaded = true
-end function
+end sub
 ```
 
-# Event Listening in Mediastream SDK
+---
 
-The Mediastream SDK allows you to listen to various events emitted by the player, providing valuable hooks into the playback lifecycle. Here are the available events:
+## Player events (`addEventListener` on SDK `MediaStreamPlayer`)
 
-1. **`playing:`**
-   - Called whenever the video starts playing.
+Subscribe with the SDK node’s `callFunc("addEventListener", eventName, handlerName, contextNode)` (see SDK README for the exact signature). Events include:
 
-2. **`paused:`**
-   - Called whenever the video stops playing.
+| Event | When |
+|--------|------|
+| `playing` | Playback started or resumed |
+| `paused` | Paused |
+| `stopped` | Stopped |
+| `buffering` | Buffering |
+| `timeupdate` | Periodic time / duration updates |
+| `error` | Error |
+| `ended` | Content finished |
+| `bitratechange` | ABR ladder change |
+| `seeked` | Seek completed |
 
-3. **`finished:`**
-   - Called whenever the video ends playing.
+---
 
-4. **`buffering:`**
-   - Called when player enters buffering state.
+## Example project
 
-These events allow you to respond dynamically to various states and actions during playback.
+The **[Mediastream Roku SDK sample](https://github.com/mediastream/MediastreamPlatformSDKRokuTV)** (`Example/` in the same repository as the SDK) demonstrates VOD, live, episode, AOD, and player-type–specific config under `Example/components/controls/MediaPlayerConfig/`. Use your own **account** and **content IDs** from Mediastream Platform.
 
-# Examples
+[Sample documentation](/roku/MediastreamRokuSample)
 
-In the following example, you'll find an application showcasing various uses of the Mediastream SDK for Roku. This app provides practical examples of key functionalities, including audio playback, video playback, audio as a service, casting, and more. Make sure you enter the IDs corresponding to your ACCOUNT_ID and CONTENT_ID and enjoy.
+---
 
-[Sample](/roku/MediastreamRokuSample)
+## Support
+
+For the latest API surface, configuration keys, and troubleshooting, keep this doc in sync with **`README.md`** and **`SDK/manifest`** on **`master`** in [MediastreamPlatformSDKRokuTV](https://github.com/mediastream/MediastreamPlatformSDKRokuTV).
