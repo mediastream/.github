@@ -59,10 +59,10 @@ Download the **`.pkg`** from CDN and host it locally in your project (for exampl
 https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 ```
 
-**Pinned to 9.0.0:**
+**Pinned to 9.0.1:**
 
 ```text
-https://player.cdn.mdstrm.com/roku_sdk/9.0.0/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/9.0.1/MediaStreamPlayer.pkg
 ```
 
 Typical layout: create `source/packageFile/` at the channel root and place `MediaStreamPlayer.pkg` there.
