@@ -5,7 +5,7 @@ Hello, Apple Developer! 👋
 Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version iOS
-- **Version:** The current version of the SDK is 3.0.0.
+- **Version:** The current version of the SDK is 3.0.2.
 - **Compatibility:** Compatible with Swift Version > 5.9
 
 ## Version Apple TV
@@ -18,7 +18,7 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
 To integrate the Mediastream Platform SDK into your iOS project, add the following dependency to your project's pod file:
 
 ```swift
-pod 'MediastreamPlatformSDKxC', '~> 3.0.0'
+pod 'MediastreamPlatformSDKxC', '~> 3.0.2'
 ```
 
 ## Adding Mediastream Platform SDK to Your Apple TV Project
@@ -105,6 +105,8 @@ The `MediastreamPlayerConfig` class in the Mediastream iOS|Apple TV SDK provides
 - **`showTitle`**, **`showSubtitles`:** `ENABLE` / `DISABLE` / `NONE` (inherit from platform JSON when `NONE`).
 - **`showDismissButton`**, **`showFullScreenButton`**, **`forceBackPressedWhenFullScreen`**, **`showBackgroundOnTitleAndControls`**, **`defaultOrientation`:** Custom UI layout and dismiss behavior.
 - **`showCastButton`**, **`useCustomCastButton`:** Chromecast-style button; optional custom `UIButton` host.
+- **`showAirplayButton` (Bool):** Show a native `AVRoutePickerView` (AirPlay button) in the custom UI controls bar. Default: **`false`**. Only applies when `customUI = true`.
+- **`useCustomAirplayButton` (UIButton?):** Supply your own button to host the AirPlay route picker overlay when using custom UI. When set, the SDK attaches the `AVRoutePickerView` to your button's frame instead of the built-in control.
 - **`showReplayView` (Bool):** After VOD/episode ends, show in-player replay UI when enabled.
 - **`language` (MediastreamPlayerConfig.Language):** SDK strings (e.g. LIVE, settings). **ENGLISH**, **SPANISH**, **PORTUGUESE**.
 - **`enablePlayerZoom` (Bool):** Pinch zoom on video (custom UI only). Default: **`false`**.
@@ -255,6 +257,9 @@ The Mediastream SDK allows you to listen to various events emitted by the player
 20. **`currentTimeUpdate` / `durationUpdated`**
     - Periodic time label updates for custom UI integrations.
 
+21. **`externalPlaybackActiveChanged`**
+    - Fired when AirPlay external playback state changes (video handoff via `AVPlayer.isExternalPlaybackActive` or system audio route switches to/from AirPlay). The `information` payload is a dictionary: `["external_playback_active": Bool]`. Emissions are coalesced to avoid redundant callbacks during AirPlay teardown.
+
 These events allow you to respond dynamically to various states and actions during playback.
 
 # Player Methods
@@ -298,6 +303,7 @@ Tears down observers, ads, PiP, and the player. Call when you remove the player 
 
 ## Other useful APIs
 
+- **`isPlayerExternalPlaybackActive: Bool`** (read-only): `true` when AirPlay video (`AVPlayer.isExternalPlaybackActive`) **or** the system audio route is AirPlay. Useful to check state before the player is initialized (e.g. audio re-entering while the TV is still paired).
 - **`setCastingModeEnabled(_ enabled: Bool)`** / **`isCastingModeEnabled`:** Local player stays paused; `play()` / `pause()` / seek emit events for an external Cast implementation.
 - **`skipAdAndResumeContent()`:** Skip the current IMA ad and resume main content (e.g. video ad on audio).
 - **`playNext()`** / **`playPrev()`:** Jump to configured next/previous episode (`reloadPlayer` under the hood).
@@ -318,6 +324,21 @@ Remember do a `pod install` before run the example.
 [Sample](/apple/Sample)
 
 # Release Notes iOS
+## [Versión 3.0.2] - 2026-04-30
+### Notes
+- Pod-only release. No code changes from 3.0.1. Resolves a CocoaPods publishing issue that prevented 3.0.1 from being consumed correctly.
+
+## [Versión 3.0.1] - 2026-04-25
+### Features
+- **AirPlay native button on Custom UI:** New `showAirplayButton` config property adds a native `AVRoutePickerView` to the custom UI controls bar without any host-app code. Use `useCustomAirplayButton` to supply your own `UIButton` as the host for the route picker instead.
+- **External playback state property:** `isPlayerExternalPlaybackActive` (read-only) combines `AVPlayer.isExternalPlaybackActive` with the system audio route so you can check AirPlay state even before the player is initialized.
+- **`externalPlaybackActiveChanged` event:** Fires with a `["external_playback_active": Bool]` payload whenever AirPlay video or audio routing changes. Coalesced to avoid redundant callbacks during teardown.
+- **AirPlay metrics:** Internal metrics now include an `ext_pb=1` flag in the analytics query when external playback is active.
+### Bug Fixes
+- **DAI + DRM (FairPlay):** Fixed streams that combine Google DAI with FairPlay. IMA `loadStream` uses a plain `https://` asset (no custom loader), then the SDK hands off to `initAssetLoader` once the stitched URL is known, ensuring `play()` is triggered correctly after the handoff.
+- **DVR + DRM:** `AssetLoaderDelegate` for DVR streams is now held with a strong reference, preventing early deallocation during live/DVR mode switches.
+- **DVR start+end window:** Fixed slider and current-time display when `asset.duration` is indefinite (live HLS); the SDK now uses the seekable range duration instead. DVR start+end streams automatically seek to the window start on load.
+
 ## [Versión 3.0.0] - 2026-04-15
 ### Features
 - **Reload without tearing down the player:** `reloadPlayer(config:)` can reuse the same `AVPlayer` / `AVPlayerViewController` and replace only the current item, which keeps PiP and UI transitions smoother (especially for next episode).
