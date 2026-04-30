@@ -6,8 +6,8 @@ Official Mediastream **SceneGraph** SDK for Roku: VOD, live, episodes, and audio
 
 | Field | Value |
 |--------|--------|
-| **Semantic version** | **9.0.0** |
-| **Package build** | `202604180` (from SDK `manifest`) |
+| **Semantic version** | **9.0.1** |
+| **Package build** | `202604300` (from SDK `manifest`) |
 | **Component library ID** | `MediastreamRokuPlayerSDK` |
 | **Core node** | `MediaStreamPlayer` (inside the loaded package) |
 
