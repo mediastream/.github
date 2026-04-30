@@ -5,7 +5,7 @@ Hello, Android Developer! 👋
 Welcome to the Mediastream SDK for Android, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is **10.0.3** (see `MediastreamPlayer.getVersion()`).
+- **Version:** The current version of the SDK is **10.0.4** (see `MediastreamPlayer.getVersion()`).
 - **Compatibility:** Targets **compileSdk 35** (Android 15). **minSdk 24**. Java **17** is required for consuming projects using the same toolchain as the SDK.
 
 ## Adding Mediastream Platform SDK to Your Android Project
@@ -13,8 +13,17 @@ Welcome to the Mediastream SDK for Android, designed to streamline the integrati
 To integrate the Mediastream Platform SDK into your Android project, add the following dependency to your project's build.gradle file:
 
 ```gradle
-implementation "io.github.mediastream:mediastreamplatformsdkandroid:10.0.3"
+implementation "io.github.mediastream:mediastreamplatformsdkandroid:10.0.4"
 ```
+
+## What's new in 10.0.4
+
+- **10.0.4 — Profile ID (`profileID`):** New analytics field on `MediastreamPlayerConfig`. Pass a viewer or subscriber profile identifier to include it in platform analytics calls.
+- **10.0.4 — `onFullscreenOffClick` (config):** New `onFullscreenOffClick: Consumer<MediastreamPlayer>?` property on `MediastreamPlayerConfig`. When set, this consumer fires instead of the default `exitFullscreen()` when the fullscreen-off button is tapped — useful for React Native or other bridge environments where a direct synchronous call avoids event-delay issues.
+- **10.0.4 — Google DAI DASH support:** The SDK now resolves the correct asset key for **DASH** DAI streams using the platform-supplied `google_dai_assetKey_dash` field. Format selection (HLS vs. DASH) is driven automatically by `videoFormat` / `playlistVideoFormat`.
+- **10.0.4 — Google DAI + DRM fix:** Widevine DRM is now correctly applied to DAI/SSAI streams during DVR transitions. `CustomMediaSourceFactory` uses a DRM supplier so the license is preserved even when the IMA-based MediaItem carries no DRM in its `localConfiguration`.
+- **10.0.4 — DVR seeking (TV):** Fixed an intermittent DVR seeking failure on TV devices.
+- **10.0.4 — NPAW/Youbora upgrade to v7.3:** The SDK migrated from the old Youbora v6 library (`com.nicepeopleatwork:media3-adapter`) to **NPAW Plugin v7.3** (`com.npaw.plugin:plugin:7.3.25`). If you pin the Youbora Maven repository in your project, **update the URL** (see Settings Gradle section below). Ad events (quartiles, skip, click, pause/resume, ad-break boundaries) are now forwarded to the analytics SDK.
 
 ## What's new in 10.0.3 and 10.0.2
 
@@ -59,7 +68,9 @@ These are the integration points that most often require code or build changes w
 
 6. **Documentation correction** — The config field is **`accountID`**, not `account`. Older snippets were wrong; the API did not rename a property—only the docs were inaccurate.
 
-If your project already used Java 17, compileSdk 35, and a complete callback implementation, you may only need to bump the dependency to **10.0.3** and run regression tests (ads, DVR, local `src`, metadata, and audio background in fullscreen).
+If your project already used Java 17, compileSdk 35, and a complete callback implementation, you may only need to bump the dependency to **10.0.4** and run regression tests (ads, DVR, local `src`, metadata, and audio background in fullscreen).
+
+7. **NPAW/Youbora v7.3 (10.0.4)** — The SDK replaced the Youbora v6 library with the **NPAW Plugin v7.3** dependency. If your project explicitly added the old `https://npaw.jfrog.io/artifactory/youbora/` Maven repository, **update it** to `https://artifact.plugin.npaw.com/artifactory/plugins/android`. Apps that did not manually pin the Youbora repo (most projects using the AAR from Maven Central) are not affected.
 
 You can see fully file on the examples in this document.
 
@@ -194,7 +205,7 @@ class VideoActivity : AppCompatActivity() {
     </application>
 ```
 ### Settings Gradle
-In order to get youbora analytics remember add nicepeople dependencies on your graddle seetings.
+To include the NPAW/Youbora analytics library (upgraded to v7.3 in **10.0.4**), add the NPAW Maven repository to your `settings.gradle` / `settings.gradle.kts`:
 ```java
 pluginManagement {
     repositories {
@@ -208,14 +219,15 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        jcenter()
-        maven { url = uri("https://npaw.jfrog.io/artifactory/youbora/") }
+        maven { url = uri("https://artifact.plugin.npaw.com/artifactory/plugins/android") }
     }
 }
 
 rootProject.name = "MediastreamAndroidTVSample"
 include(":app")
 ```
+
+> **Migrating from 10.0.3 or earlier?** Replace the old Youbora repository URL (`https://npaw.jfrog.io/artifactory/youbora/`) with the one above. The `jcenter()` entry is no longer needed for the SDK's analytics dependency.
 
 ### PiP Example
 
@@ -306,6 +318,7 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 
 - **`showControls` (Boolean):** Show built-in controls. Default `true`. Set `false` for fully custom UI (still use DVR APIs if needed).
 - **`showFullScreenButton` (Boolean):** Show fullscreen button where applicable.
+- **`onFullscreenOffClick` (`Consumer<MediastreamPlayer>?`):** When set, this consumer is called instead of the built-in `exitFullscreen()` when the fullscreen-off button is tapped. Intended for React Native bridges or custom integrations where a synchronous consumer avoids callback-delay issues.
 - **`showBrightnessBar` (Boolean):** Brightness slider in fullscreen (not for `AUDIO` player type).
 - **`initialHideController` (Boolean):** Start with controller hidden, then show after a short delay (when controls are enabled).
 - **`enablePlayerZoom` (Boolean):** Pinch-to-zoom on the video surface (when not disabled).
@@ -333,6 +346,7 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 - **`playerId` (String):** Player ID from platform for skin, ads, logos, etc.
 - **`appName` / `appVersion`:** Sent in analytics and stream URLs.
 - **`customerID` / `distributorId` / `maxProfile`:** Business and quality parameters.
+- **`profileID` (String?):** Optional viewer / subscriber profile identifier forwarded to platform analytics.
 - **`notificationColor`**, **`notificationSongName`**, **`notificationDescription`**, **`notificationAlbumName`**, **`notificationImageUrl`**, **`notificationIconUrl`**, **`notificationHasNext`**, **`notificationHasPrevious`:** Notification and mini-player metadata when using the service.
 - **`tryToGetMetadataFromLiveWhenAudio` / `fillAutomaticallyAudioNotification`:** Live audio metadata and notification updates.
 
@@ -493,7 +507,7 @@ The Mediastream player exposes playback control, fullscreen, PiP, Cast, next-epi
 
 ## Introspection
 
-- **`getVersion()`** — SDK version string (e.g. `"10.0.3"`).
+- **`getVersion()`** — SDK version string (e.g. `"10.0.4"`).
 - **`getPlayerView()`**, **`getCurrentUrl()`**, **`getCurrentMediaConfig()`**, **`getMediaTitle()`**, **`getMediaPoster()`**, **`getCurrentPosition()`**, **`getDuration()`**, **`getContentDuration()`**, **`getResolution()`**, **`getBitrate()`**, **`getBandwidth()`**, **`getCurrentMsPlayer()`** — Debug and UI integration helpers.
 
 ## Other
@@ -734,6 +748,19 @@ By following these steps, you can integrate the MediastreamPlayerServiceWithSync
 
 # Release Notes
 
+## [Version 10.0.4] - 2026-04-30
+### Features
+- **Profile ID (`profileID`):** New `MediastreamPlayerConfig.profileID` field forwarded to platform analytics to identify viewer / subscriber profiles.
+- **`onFullscreenOffClick` (config):** New `Consumer<MediastreamPlayer>?` on config — overrides the built-in `exitFullscreen()` for the fullscreen-off button tap. Designed for React Native bridges to avoid callback delays.
+- **Google DAI — DASH support:** The SDK now reads `google_dai_assetKey_dash` from the platform config and automatically selects HLS or DASH IMA content type based on `videoFormat`.
+
+### Fixes
+- **Google DAI + DRM:** DRM (Widevine) is now correctly preserved for DAI/SSAI streams when entering DVR mode. `CustomMediaSourceFactory` receives DRM via a supplier so the license is not lost when the IMA MediaItem carries no `localConfiguration` DRM.
+- **DVR seeking (TV):** Fixed an intermittent DVR seek failure on Android TV devices.
+
+### Dependency upgrade
+- **NPAW/Youbora v7.3:** Migrated from `com.nicepeopleatwork:media3-adapter:6.8.7` to `com.npaw.plugin:plugin:7.3.25` + `com.npaw.plugin:plugin-media3-exoplayer:1.9.0-7.3.25`. Ad-event quartiles, skip, click, pause/resume, and ad-break events are now forwarded to the NPAW SDK. Update your Maven repository URL if you pinned the old Youbora endpoint (see Settings Gradle section).
+
 ## [Version 10.0.3] - 2026-04-13
 ### Fixes and improvements
 - **Volume:** Persist volume during the session when merging/reloading config.
@@ -765,7 +792,7 @@ By following these steps, you can integrate the MediastreamPlayerServiceWithSync
 - **Config:** `FlagStatus` toggles, `customBackgroundForAudioPlayer`, `adaptResizeModeToOrientation`, `appHandlesWindowInsets`, `vastLoadTimeoutMs` / `adPreloadTimeoutMs`, `maxAllowedReelsTags`, and expanded `getAdQueryString` / DAI helpers.
 
 ### Notes
-- **compileSdk 35**, **minSdk 24**, **Java 17**; current coordinates: `io.github.mediastream:mediastreamplatformsdkandroid:10.0.3`.
+- **compileSdk 35**, **minSdk 24**, **Java 17**; current coordinates: `io.github.mediastream:mediastreamplatformsdkandroid:10.0.4`.
 
 ## [Versión 9.3.3] - 2025-01-31
 - Ad tag replacement for google dai
