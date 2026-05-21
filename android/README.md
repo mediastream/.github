@@ -5,7 +5,7 @@ Hello, Android Developer! 👋
 Welcome to the Mediastream SDK for Android, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is **10.0.4** (see `MediastreamPlayer.getVersion()`).
+- **Version:** The current version of the SDK is **10.0.5** (see `MediastreamPlayer.getVersion()`).
 - **Compatibility:** Targets **compileSdk 35** (Android 15). **minSdk 24**. Java **17** is required for consuming projects using the same toolchain as the SDK.
 
 ## Adding Mediastream Platform SDK to Your Android Project
@@ -13,8 +13,15 @@ Welcome to the Mediastream SDK for Android, designed to streamline the integrati
 To integrate the Mediastream Platform SDK into your Android project, add the following dependency to your project's build.gradle file:
 
 ```gradle
-implementation "io.github.mediastream:mediastreamplatformsdkandroid:10.0.4"
+implementation "io.github.mediastream:mediastreamplatformsdkandroid:10.0.5"
 ```
+
+## What's new in 10.0.5
+
+- **10.0.5 — `onFullscreenOnClick` (config):** New `onFullscreenOnClick: Consumer<MediastreamPlayer>?` property on `MediastreamPlayerConfig`. When set, this consumer fires instead of the default `enterFullscreen()` when the fullscreen-on button is tapped. Designed for the same React Native / bridge use cases as `onFullscreenOffClick`.
+- **10.0.5 — TV remote debounce seek:** D-pad left/right on TV remotes now debounces seeks for both VOD and Live+DVR streams. Prevents multiple rapid seek events when the user holds or quickly taps the D-pad direction keys, improving seek accuracy on TV devices.
+- **10.0.5 — Notification next/previous buttons (service):** Fixed `NEXT_BUTTON` and `PREVIOUS_BUTTON` custom session commands in `MediastreamPlayerServiceWithSync` that were incorrectly disabled. The next-button handler now requires both `loadNextAutomatically == true` and `msMiniPlayerConfig.setStateNext == true` to trigger auto-advance, aligning the notification behavior with the player config. `onConfigChange` now preserves `songName` and `imageUrl` in the mini-player config when `loadNextAutomatically` is `false`, so the notification stays current on content changes.
+- **10.0.5 — Notification update fix:** `UpdateNotificationEvent` now correctly refreshes notification actions (previously the action list could become stale after a config update).
 
 ## What's new in 10.0.4
 
@@ -318,6 +325,7 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 
 - **`showControls` (Boolean):** Show built-in controls. Default `true`. Set `false` for fully custom UI (still use DVR APIs if needed).
 - **`showFullScreenButton` (Boolean):** Show fullscreen button where applicable.
+- **`onFullscreenOnClick` (`Consumer<MediastreamPlayer>?`):** When set, this consumer is called instead of the built-in `enterFullscreen()` when the fullscreen-on button is tapped. Intended for React Native bridges or custom integrations.
 - **`onFullscreenOffClick` (`Consumer<MediastreamPlayer>?`):** When set, this consumer is called instead of the built-in `exitFullscreen()` when the fullscreen-off button is tapped. Intended for React Native bridges or custom integrations where a synchronous consumer avoids callback-delay issues.
 - **`showBrightnessBar` (Boolean):** Brightness slider in fullscreen (not for `AUDIO` player type).
 - **`initialHideController` (Boolean):** Start with controller hidden, then show after a short delay (when controls are enabled).
@@ -507,7 +515,7 @@ The Mediastream player exposes playback control, fullscreen, PiP, Cast, next-epi
 
 ## Introspection
 
-- **`getVersion()`** — SDK version string (e.g. `"10.0.4"`).
+- **`getVersion()`** — SDK version string (e.g. `"10.0.5"`).
 - **`getPlayerView()`**, **`getCurrentUrl()`**, **`getCurrentMediaConfig()`**, **`getMediaTitle()`**, **`getMediaPoster()`**, **`getCurrentPosition()`**, **`getDuration()`**, **`getContentDuration()`**, **`getResolution()`**, **`getBitrate()`**, **`getBandwidth()`**, **`getCurrentMsPlayer()`** — Debug and UI integration helpers.
 
 ## Other
@@ -748,6 +756,16 @@ By following these steps, you can integrate the MediastreamPlayerServiceWithSync
 
 # Release Notes
 
+## [Version 10.0.5] - 2026-05-21
+### Features
+- **`onFullscreenOnClick` (config):** New `Consumer<MediastreamPlayer>?` on `MediastreamPlayerConfig` — overrides the built-in `enterFullscreen()` for the fullscreen-on button tap. Complements the existing `onFullscreenOffClick`. Designed for React Native bridges and custom integrations.
+- **TV remote debounce seek:** D-pad left/right on TV remotes now debounces seeks for VOD and Live+DVR streams. Prevents rapid-fire seek events on key-repeat, improving seeking accuracy on Android TV / Fire TV devices.
+
+### Fixes
+- **Notification next/previous buttons:** Re-enabled `NEXT_BUTTON` and `PREVIOUS_BUTTON` custom session commands in `MediastreamPlayerServiceWithSync` that were inadvertently disabled. Next-button auto-advance now requires both `loadNextAutomatically == true` and `msMiniPlayerConfig.setStateNext == true`.
+- **Notification `onConfigChange`:** When `loadNextAutomatically` is `false`, `songName` and `imageUrl` are now updated in the mini-player config so the notification reflects the current playing content.
+- **Notification actions stale on update:** `UpdateNotificationEvent` now correctly refreshes the notification action list after a config change.
+
 ## [Version 10.0.4] - 2026-04-30
 ### Features
 - **Profile ID (`profileID`):** New `MediastreamPlayerConfig.profileID` field forwarded to platform analytics to identify viewer / subscriber profiles.
@@ -792,7 +810,7 @@ By following these steps, you can integrate the MediastreamPlayerServiceWithSync
 - **Config:** `FlagStatus` toggles, `customBackgroundForAudioPlayer`, `adaptResizeModeToOrientation`, `appHandlesWindowInsets`, `vastLoadTimeoutMs` / `adPreloadTimeoutMs`, `maxAllowedReelsTags`, and expanded `getAdQueryString` / DAI helpers.
 
 ### Notes
-- **compileSdk 35**, **minSdk 24**, **Java 17**; current coordinates: `io.github.mediastream:mediastreamplatformsdkandroid:10.0.4`.
+- **compileSdk 35**, **minSdk 24**, **Java 17**; current coordinates: `io.github.mediastream:mediastreamplatformsdkandroid:10.0.5`.
 
 ## [Versión 9.3.3] - 2025-01-31
 - Ad tag replacement for google dai
