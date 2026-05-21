@@ -5,7 +5,7 @@ Hello, Android Developer! 👋
 Welcome to the Mediastream SDK for Android, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is **10.0.5** (see `MediastreamPlayer.getVersion()`).
+- **Version:** The current version of the SDK is **10.0.6** (see `MediastreamPlayer.getVersion()`).
 - **Compatibility:** Targets **compileSdk 35** (Android 15). **minSdk 24**. Java **17** is required for consuming projects using the same toolchain as the SDK.
 
 ## Adding Mediastream Platform SDK to Your Android Project
@@ -13,8 +13,13 @@ Welcome to the Mediastream SDK for Android, designed to streamline the integrati
 To integrate the Mediastream Platform SDK into your Android project, add the following dependency to your project's build.gradle file:
 
 ```gradle
-implementation "io.github.mediastream:mediastreamplatformsdkandroid:10.0.5"
+implementation "io.github.mediastream:mediastreamplatformsdkandroid:10.0.6"
 ```
+
+## What's new in 10.0.6
+
+- **10.0.6 — Konodrac analytics:** New analytics partner integration. When the platform player config includes `tracking.konodrac.enabled = true` and a `dataset_id`, the SDK automatically sends playback events to Konodrac (play, pause, seek, fullscreen, mute, end, heartbeat, DVR/catchup transitions, and dispose). No code change required for most apps — the integration is platform-configured.
+- **10.0.6 — `konodracChannel` (config):** New optional `konodracChannel: String?` on `MediastreamPlayerConfig`. Overrides the channel identifier sent to Konodrac. Falls back to `appName` if not set, then defaults to `"mdstrm-android-player"`.
 
 ## What's new in 10.0.5
 
@@ -353,6 +358,7 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 - **`castAvailable` (Boolean):** Enable Cast integration.
 - **`playerId` (String):** Player ID from platform for skin, ads, logos, etc.
 - **`appName` / `appVersion`:** Sent in analytics and stream URLs.
+- **`konodracChannel` (String?):** Optional channel override for Konodrac analytics. Falls back to `appName`, then `"mdstrm-android-player"`. Only used when Konodrac is enabled via platform config.
 - **`customerID` / `distributorId` / `maxProfile`:** Business and quality parameters.
 - **`profileID` (String?):** Optional viewer / subscriber profile identifier forwarded to platform analytics.
 - **`notificationColor`**, **`notificationSongName`**, **`notificationDescription`**, **`notificationAlbumName`**, **`notificationImageUrl`**, **`notificationIconUrl`**, **`notificationHasNext`**, **`notificationHasPrevious`:** Notification and mini-player metadata when using the service.
@@ -515,7 +521,7 @@ The Mediastream player exposes playback control, fullscreen, PiP, Cast, next-epi
 
 ## Introspection
 
-- **`getVersion()`** — SDK version string (e.g. `"10.0.5"`).
+- **`getVersion()`** — SDK version string (e.g. `"10.0.6"`).
 - **`getPlayerView()`**, **`getCurrentUrl()`**, **`getCurrentMediaConfig()`**, **`getMediaTitle()`**, **`getMediaPoster()`**, **`getCurrentPosition()`**, **`getDuration()`**, **`getContentDuration()`**, **`getResolution()`**, **`getBitrate()`**, **`getBandwidth()`**, **`getCurrentMsPlayer()`** — Debug and UI integration helpers.
 
 ## Other
@@ -756,6 +762,11 @@ By following these steps, you can integrate the MediastreamPlayerServiceWithSync
 
 # Release Notes
 
+## [Version 10.0.6] - 2026-05-21
+### Features
+- **Konodrac analytics:** New analytics partner integration activated via platform player config (`tracking.konodrac.enabled = true` + `dataset_id`). The SDK tracks play, pause, seek, fullscreen, mute, end, heartbeat (every 50 s), DVR/catchup mode transitions, and dispose events to `marker.konograma.com/track`. No code change required for most integrations.
+- **`konodracChannel` (config):** New `konodracChannel: String?` on `MediastreamPlayerConfig` to override the Konodrac channel identifier. Falls back to `appName` if not set, then `"mdstrm-android-player"`.
+
 ## [Version 10.0.5] - 2026-05-21
 ### Features
 - **`onFullscreenOnClick` (config):** New `Consumer<MediastreamPlayer>?` on `MediastreamPlayerConfig` — overrides the built-in `enterFullscreen()` for the fullscreen-on button tap. Complements the existing `onFullscreenOffClick`. Designed for React Native bridges and custom integrations.
@@ -810,7 +821,7 @@ By following these steps, you can integrate the MediastreamPlayerServiceWithSync
 - **Config:** `FlagStatus` toggles, `customBackgroundForAudioPlayer`, `adaptResizeModeToOrientation`, `appHandlesWindowInsets`, `vastLoadTimeoutMs` / `adPreloadTimeoutMs`, `maxAllowedReelsTags`, and expanded `getAdQueryString` / DAI helpers.
 
 ### Notes
-- **compileSdk 35**, **minSdk 24**, **Java 17**; current coordinates: `io.github.mediastream:mediastreamplatformsdkandroid:10.0.5`.
+- **compileSdk 35**, **minSdk 24**, **Java 17**; current coordinates: `io.github.mediastream:mediastreamplatformsdkandroid:10.0.6`.
 
 ## [Versión 9.3.3] - 2025-01-31
 - Ad tag replacement for google dai
