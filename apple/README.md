@@ -18,7 +18,7 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
 To integrate the Mediastream Platform SDK into your iOS project, add the following dependency to your project's pod file:
 
 ```swift
-pod 'MediastreamPlatformSDKxC', '~> 3.0.2'
+pod 'MediastreamPlatformSDKxC', '~> 3.0.3'
 ```
 
 ## Adding Mediastream Platform SDK to Your Apple TV Project
