@@ -62,7 +62,7 @@ https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 **Pinned to 9.0.1:**
 
 ```text
-https://player.cdn.mdstrm.com/roku_sdk/9.1.202607020/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/9.2.202607080/MediaStreamPlayer.pkg
 ```
 
 Typical layout: create `source/packageFile/` at the channel root and place `MediaStreamPlayer.pkg` there.
