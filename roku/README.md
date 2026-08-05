@@ -6,7 +6,7 @@ Official Mediastream **SceneGraph** SDK for Roku: VOD, live, episodes, and audio
 
 | Field | Value |
 |--------|--------|
-| **Semantic version** | **9.6.202608040** |
+| **Semantic version** | **9.7.202608050** |
 | **Package build** | `202604300` (from SDK `manifest`) |
 | **Component library ID** | `MediastreamRokuPlayerSDK` |
 | **Core node** | `MediaStreamPlayer` (inside the loaded package) |
@@ -59,10 +59,10 @@ Download the **`.pkg`** from CDN and host it locally in your project (for exampl
 https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 ```
 
-**Pinned to 9.6.202608040:**
+**Pinned to 9.7.202608050:**
 
 ```text
-https://player.cdn.mdstrm.com/roku_sdk/9.6.202608040/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/9.7.202608050/MediaStreamPlayer.pkg
 ```
 
 Typical layout: create `source/packageFile/` at the channel root and place `MediaStreamPlayer.pkg` there.
