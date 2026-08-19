@@ -48,7 +48,7 @@ Welcome to the compatibility summary of features across various Mediastream SDKs
 | Mediastream Platform Analytics| ✔️           | ✔️           | ✔️       | ✔️        | ✔️            | ✔️               | ✔️               | ✔️               | ✔️               |
 | Access Restrictions | ✔️           | ✔️           | ✔️       | ✔️        | ✔️            | ✔️               | ✔️               | ✔️               | ✔️               |
 | Allows Custom UI              | ✔️           | ✔️           | ✔️       | ✔️        | ✔️            | ✔️               | ✔️               | ✔️               | ✔️               |
-| Digital Rights Management (DRM)              | ✔️           | ❌           | ✔️       | ✔️        | ❌            | ❌               | ❌               | ❌               | ✔️               |
+| Digital Rights Management (DRM)              | ✔️           | ❌           | ✔️       | ✔️        | ✔️            | ❌               | ❌               | ❌               | ✔️               |
 
 # Seamless Integration with Mediastream Platform
 
