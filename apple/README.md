@@ -4,30 +4,131 @@ Hello, Apple Developer! 👋
 
 Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
+> ### ⚠️ CocoaPods is being deprecated — both SDKs move to Swift Package Manager
+>
+> **CocoaPods trunk becomes read-only on December 2, 2026.** After that date no new
+> versions can be published there by anyone. Both Apple SDKs are therefore distributed
+> through **Swift Package Manager**, and CocoaPods no longer receives new versions.
+>
+> | | Last CocoaPods version | New Swift Package |
+> |---|---|---|
+> | iOS | `MediastreamPlatformSDKxC` **5.0.1** | [MediastreamPlatformSDKiOS-spm](https://github.com/mediastream/MediastreamPlatformSDKiOS-spm) |
+> | Apple TV | `MediastreamPlatformSDKAppleTV` **2.0.0-qa.02** | [MediastreamPlatformSDKAppleTV-spm](https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm) |
+>
+> Versions already published to CocoaPods stay installable, but **they will not receive
+> fixes**. Migrating requires **no code changes**: the public API and the `import` are the
+> same. See [Migrating from CocoaPods](#migrating-from-cocoapods) below.
+
 ## Version iOS
-- **Version:** The current version of the SDK is 3.0.3.
-- **Compatibility:** Compatible with Swift Version > 5.9
+- **Version:** 5.1.0, distributed through Swift Package Manager.
+- **Requirements:** iOS 12.0 or later, Xcode 15 or later, Swift 5.9 or later.
+- **Status:** 5.1.0 is in QA validation. Until it ships, the latest generally available
+  version is `MediastreamPlatformSDKxC` 5.0.1 on CocoaPods.
 
 ## Version Apple TV
-- **Version:** The current version of the SDK is 1.0.0.
-- **Compatibility:** Compatible with Swift Version > 5.9
-
+- **Version:** 2.1.0, distributed through Swift Package Manager.
+- **Requirements:** **tvOS 15.0** or later, Xcode 15 or later, Swift 5.9 or later.
+- **Note:** The deployment floor moved from tvOS 14 to tvOS 15. This is not a preference —
+  Google's IMA SDK for tvOS requires it from version 4.16.0 onward. Apps that must keep
+  supporting tvOS 14 have to stay on the CocoaPods version.
 
 ## Adding Mediastream Platform SDK to Your iOS Project
 
-To integrate the Mediastream Platform SDK into your iOS project, add the following dependency to your project's pod file:
+In Xcode, choose **File → Add Package Dependencies…** and paste:
+
+```
+https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git
+```
+
+Pick **Up to Next Major Version** from `5.1.0` and add the `MediastreamPlatformSDKiOS`
+product to your app target. Or, in a `Package.swift`:
 
 ```swift
-pod 'MediastreamPlatformSDKxC', '~> 3.0.3'
+dependencies: [
+  .package(
+    url: "https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git",
+    from: "5.1.0"
+  )
+]
 ```
+
+Then:
+
+```swift
+import MediastreamPlatformSDKiOS
+```
+
+> **While 5.1.0 is in QA validation**, that version does not resolve yet — the snippet above
+> becomes valid when it ships. Until then, stay on `MediastreamPlatformSDKxC` 5.0.1 via
+> CocoaPods, or pin the release candidate explicitly to try the package early:
+> `.package(url: "…-spm.git", exact: "5.1.0-rc.2")`. A version range never resolves a
+> pre-release, so `from:` will not pick up an `-rc` or `-dev` build by accident.
+
+Full installation guide, dependency version ranges and per-release compatibility table:
+<https://github.com/mediastream/MediastreamPlatformSDKiOS-spm#readme>
+
+**If your app uses Chromecast**, note that Google does not publish a Swift Package for the
+Cast SDK. Keep `google-cast-sdk` on CocoaPods — both dependency managers coexist in the same
+project — or add the Cast `.xcframework` manually. Details in
+[CAST_INTEGRATION.md](https://github.com/mediastream/MediastreamPlatformSDKiOS-spm/blob/master/CAST_INTEGRATION.md).
 
 ## Adding Mediastream Platform SDK to Your Apple TV Project
 
-To integrate the Mediastream Platform SDK into your tvOS project, add the following dependency to your project's pod file:
+In Xcode, choose **File → Add Package Dependencies…** and paste:
+
+```
+https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm.git
+```
+
+Pick **Up to Next Major Version** from `2.1.0` and add the
+`MediastreamPlatformSDKAppleTV` product to your app target. Or, in a `Package.swift`:
 
 ```swift
-pod 'MediastreamPlatformSDKAppleTV', '~> 1.0.0'
+dependencies: [
+  .package(
+    url: "https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm.git",
+    from: "2.1.0"
+  )
+]
 ```
+
+Then:
+
+```swift
+import MediastreamPlatformSDKAppleTV
+```
+
+Full installation guide and per-release compatibility table:
+<https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm#readme>
+
+Chromecast does not apply on tvOS: an Apple TV is a Cast *receiver*, not a sender, and
+Google's sender SDK is not published for tvOS.
+
+## Migrating from CocoaPods
+
+The same three steps on both platforms, and **no code changes**:
+
+1. Remove the pod from your `Podfile` — `MediastreamPlatformSDKxC` on iOS,
+   `MediastreamPlatformSDKAppleTV` on Apple TV — and run `pod install`.
+2. Add the Swift Package as shown above.
+3. Build. The `import` and the public API are unchanged.
+
+If your project has no other pods left, you can delete the `Podfile` and the
+`.xcworkspace` and go back to opening the `.xcodeproj` directly.
+
+Two things improve on the way out, and both were imposed on your app by the pod:
+
+- **Apple TV: the tvOS simulator works on Apple Silicon again.** The published podspec set
+  `EXCLUDED_ARCHS[sdk=tvossimulator*] = arm64` on *your* target, not just its own, which
+  left anyone on an M-series Mac unable to run a tvOS simulator. The Swift Package ships an
+  `arm64` simulator slice and excludes nothing.
+- **Your build no longer needs CocoaPods to resolve our SDK**, which removes `pod install`
+  from CI for projects that only used it for this dependency.
+
+**If your build environment restricts outbound network access**, allow `bitbucket.org`:
+NPAW distributes YouboraLib from there and it is a transitive dependency. If you filter
+outbound traffic, also allow `a-fds.youborafds01.com`, which is where Youbora moved its
+configuration endpoint.
 
 
 ### Basic Implementation
@@ -324,6 +425,26 @@ Remember do a `pod install` before run the example.
 [Sample](/apple/Sample)
 
 # Release Notes iOS
+## [Versión 5.1.0] - 2026-08
+### Distribution
+- **The SDK is now distributed through Swift Package Manager.** `MediastreamPlatformSDKxC`
+  5.0.1 is the last version published to CocoaPods. Migrating needs no code changes — see
+  [Migrating from CocoaPods](#migrating-from-cocoapods).
+- Installation, dependency ranges and a per-release compatibility table are now public in
+  the [distribution repository](https://github.com/mediastream/MediastreamPlatformSDKiOS-spm#readme).
+### Analytics
+- Youbora updated from 6.3.9 to 6.7.23. Nothing stopped being reported; `/init` grew from 16
+  to 21 fields.
+- **Behaviour change to be aware of:** Youbora 6.7 reports recoverable playback stalls as
+  fatal errors, which 6.3 ignored entirely. On the dashboard a transient hiccup now counts as
+  an error and splits one view into two sessions. This is a change in NPAW's adapter, not a
+  regression in the SDK.
+- Youbora's configuration endpoint moved to `a-fds.youborafds01.com`. Allow it if you filter
+  outbound traffic.
+### Notes
+- `getVersion()` now reads the version from the framework bundle instead of a hardcoded
+  constant, so it always matches the binary you are running.
+
 ## [Versión 3.0.2] - 2026-04-30
 ### Notes
 - Pod-only release. No code changes from 3.0.1. Resolves a CocoaPods publishing issue that prevented 3.0.1 from being consumed correctly.
@@ -363,6 +484,39 @@ Remember do a `pod install` before run the example.
 - NSRange Exception when move faster on timeline
 
 # Release Notes AppleTV
+## [Versión 2.1.0] - 2026-08-19
+First production release of this SDK, and the first distributed through Swift Package
+Manager. Previous versions never left QA.
+
+### Fixed
+- **Playback did not work at all on tvOS 26: black screen, no events and no error.** Starting
+  with that tvOS version, an `AVPlayerItem` whose `AVPlayer` has no output attached to the
+  view hierarchy never finishes loading. The SDK created its player *after* the content
+  reported ready, so it asked the item to load without ever giving it a screen.
+
+  **If your app targets Apple TV and any of your users have updated to tvOS 26, playback is
+  currently broken for them.** This was not introduced by this release — the previous code
+  fails the same way on tvOS 26 and works on tvOS 17 — so upgrading to 2.1.0 is the fix.
+
+### Distribution
+- **The SDK is now distributed through Swift Package Manager.**
+  `MediastreamPlatformSDKAppleTV` 2.0.0-qa.02 is the last version published to CocoaPods.
+  Migrating needs no code changes — see
+  [Migrating from CocoaPods](#migrating-from-cocoapods).
+- **The deployment floor moves from tvOS 14 to tvOS 15.** Required by Google's IMA SDK for
+  tvOS from 4.16.0. Apps that must support tvOS 14 have to stay on the CocoaPods version.
+- **The tvOS simulator works on Apple Silicon again.** The published podspec forced
+  `EXCLUDED_ARCHS[sdk=tvossimulator*] = arm64` onto your target as well as its own, which
+  prevented running a tvOS simulator on any M-series Mac.
+
+### Analytics
+- Youbora updated from 6.3.9 to 6.7.23, with the same behaviour change and endpoint move
+  described in the iOS 5.1.0 notes above.
+
+### Notes
+- `getVersion()` now reads the version from the framework bundle instead of a hardcoded
+  constant, so it always matches the binary you are running.
+
 ## [Versión 0.3.4] - 2025-02-12
 ### Features
 - Google DAI replace ad tag parameters option.

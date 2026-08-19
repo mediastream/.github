@@ -11,6 +11,17 @@ Welcome to the comprehensive documentation center for Mediastream's diverse Soft
 
 - **Step-by-Step Guides**: Follow our comprehensive step-by-step guides for a hassle-free implementation. We're here to assist you at every stage of the process.
 
+## ⚠️ Apple SDKs: CocoaPods is being deprecated
+
+**CocoaPods trunk becomes read-only on December 2, 2026.** The iOS and Apple TV SDKs are now
+distributed through **Swift Package Manager**, and CocoaPods no longer receives new versions.
+Already-published versions stay installable but will not receive fixes. Migrating requires no
+code changes — see the [Apple SDK documentation](/apple/README.md) for the new installation
+steps and the migration guide.
+
+**Apple TV apps should upgrade with priority:** versions before 2.1.0 do not play back at all
+on tvOS 26.
+
 ## Getting Started
 
 If you're new to Mediastream, it's essential to know that we offer various SDKs tailored for different platforms. However, not all features are universally supported across all SDKs. We recommend reviewing the following compatibility table to understand the features we support on each platform.
