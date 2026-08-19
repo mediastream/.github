@@ -22,8 +22,6 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
 ## Version iOS
 - **Version:** 5.1.0, distributed through Swift Package Manager.
 - **Requirements:** iOS 12.0 or later, Xcode 15 or later, Swift 5.9 or later.
-- **Status:** 5.1.0 is in QA validation. Until it ships, the latest generally available
-  version is `MediastreamPlatformSDKxC` 5.0.1 on CocoaPods.
 
 ## Version Apple TV
 - **Version:** 2.1.0, distributed through Swift Package Manager.
@@ -57,12 +55,6 @@ Then:
 ```swift
 import MediastreamPlatformSDKiOS
 ```
-
-> **While 5.1.0 is in QA validation**, that version does not resolve yet — the snippet above
-> becomes valid when it ships. Until then, stay on `MediastreamPlatformSDKxC` 5.0.1 via
-> CocoaPods, or pin the release candidate explicitly to try the package early:
-> `.package(url: "…-spm.git", exact: "5.1.0-rc.2")`. A version range never resolves a
-> pre-release, so `from:` will not pick up an `-rc` or `-dev` build by accident.
 
 Full installation guide, dependency version ranges and per-release compatibility table:
 <https://github.com/mediastream/MediastreamPlatformSDKiOS-spm#readme>
@@ -425,7 +417,7 @@ Remember do a `pod install` before run the example.
 [Sample](/apple/Sample)
 
 # Release Notes iOS
-## [Versión 5.1.0] - 2026-08
+## [Versión 5.1.0] - 2026-08-19
 ### Distribution
 - **The SDK is now distributed through Swift Package Manager.** `MediastreamPlatformSDKxC`
   5.0.1 is the last version published to CocoaPods. Migrating needs no code changes — see
