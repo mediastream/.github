@@ -20,8 +20,12 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
 > same. See [Migrating from CocoaPods](#migrating-from-cocoapods) below.
 
 ## Version iOS
-- **Version:** 5.1.0, distributed through Swift Package Manager.
-- **Requirements:** iOS 12.0 or later, Xcode 15 or later, Swift 5.9 or later.
+- **Version:** 6.0.0, distributed through Swift Package Manager.
+- **Requirements:** **iOS 13.0** or later, **Xcode 16** or later, Swift 5.9 or later.
+- **Note:** 6.0.0 raises the deployment floor from iOS 12 to iOS 13 and needs Xcode 16 to
+  resolve the package. Both come from EaseLive, the dependency behind PlayAnywhere. Xcode 16 is
+  a requirement for your build machine, not for your users' devices. Upgrading needs **no code
+  changes**; apps that must keep supporting iOS 12 have to stay on `5.2.0`.
 
 ## Version Apple TV
 - **Version:** 2.1.0, distributed through Swift Package Manager.
@@ -38,14 +42,14 @@ In Xcode, choose **File → Add Package Dependencies…** and paste:
 https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git
 ```
 
-Pick **Up to Next Major Version** from `5.1.0` and add the `MediastreamPlatformSDKiOS`
+Pick **Up to Next Major Version** from `6.0.0` and add the `MediastreamPlatformSDKiOS`
 product to your app target. Or, in a `Package.swift`:
 
 ```swift
 dependencies: [
   .package(
     url: "https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git",
-    from: "5.1.0"
+    from: "6.0.0"
   )
 ]
 ```
@@ -120,7 +124,8 @@ Two things improve on the way out, and both were imposed on your app by the pod:
 **If your build environment restricts outbound network access**, allow `bitbucket.org`:
 NPAW distributes YouboraLib from there and it is a transitive dependency. If you filter
 outbound traffic, also allow `a-fds.youborafds01.com`, which is where Youbora moved its
-configuration endpoint.
+configuration endpoint. On iOS, from 6.0.0, add `github.com/ease-live` and `sdk.easelive.tv`
+as well — EaseLive's package and its runtime.
 
 
 ### Basic Implementation
@@ -205,6 +210,24 @@ The `MediastreamPlayerConfig` class in the Mediastream iOS|Apple TV SDK provides
 - **`enablePlayerZoom` (Bool):** Pinch zoom on video (custom UI only). Default: **`false`**.
 - **`showBrightnessBar` (Bool):** Brightness slider in fullscreen (video custom UI). Default: **`true`**.
 - **`customBackgroundForAudioPlayer` (String):** Image URL behind audio when using **custom UI** (replaces the default placeholder).
+
+### PlayAnywhere (interactivity overlay) — iOS, from 6.0.0
+
+- **`playAnywhere` (PlayAnywhereConfig?):** Turns on the EaseLive interactivity overlay. Built
+  with `PlayAnywhereConfig(accountId:programId:projectId:env:alwaysVisible:)`: `accountId` and
+  `programId` are required, `projectId` and `env` select a non-default EaseLive project or
+  environment, and `alwaysVisible` keeps the overlay up instead of making the viewer toggle it.
+  Default **`nil`**, and then nothing is built — no overlay, no observers, no change in
+  behaviour. When you leave it unset, the SDK still picks the configuration up from the content
+  if the platform provides one.
+- **Requires `customUI = true`.** With the native `AVPlayerViewController` controls the
+  configuration is ignored and a line is logged: the overlay covers the whole player and is
+  interactive, so it would swallow the system controls' touches, and the toggle button is part
+  of the custom UI.
+- Companion APIs: **`togglePlayAnywhere()`** shows or hides the overlay (a no-op under
+  `alwaysVisible`), **`isPlayAnywhereActive()`** reports whether it is on screen right now, and
+  the **`playAnywhereButton`** outlet on `MediastreamCustomUIView` lets you restyle or hide the
+  built-in button.
 
 ### DVR, live windows, and PiP
 
@@ -353,6 +376,15 @@ The Mediastream SDK allows you to listen to various events emitted by the player
 21. **`externalPlaybackActiveChanged`**
     - Fired when AirPlay external playback state changes (video handoff via `AVPlayer.isExternalPlaybackActive` or system audio route switches to/from AirPlay). The `information` payload is a dictionary: `["external_playback_active": Bool]`. Emissions are coalesced to avoid redundant callbacks during AirPlay teardown.
 
+22. **`playAnywhereStatusChanged`** (iOS, from 6.0.0)
+    - PlayAnywhere's status changed. The `information` payload is `["status": String]`:
+      `enabled` while EaseLive's web app is interactive, `disabled` when it is not, and
+      `hidden` when the SDK is holding the overlay down for an ad break.
+
+23. **`playAnywhereError`** (iOS, from 6.0.0)
+    - A PlayAnywhere error, with payload `["message": String, "fatal": Bool]`. A fatal error
+      releases the overlay and reports `disabled` rather than taking playback down with it.
+
 These events allow you to respond dynamically to various states and actions during playback.
 
 # Player Methods
@@ -405,6 +437,8 @@ Tears down observers, ads, PiP, and the player. Call when you remove the player 
 - **`getCurrentTime() -> Int64`:** Playback position in **milliseconds** for analytics-style APIs.
 - **`getCurrentPosition() -> Int`:** Position in **whole seconds** (floor).
 - **`getDuration()`**, **`getLiveDuration()`**, **`isAudioContent()`**, **`isLocalFile()`:** Introspection helpers.
+- **`togglePlayAnywhere()`** / **`isPlayAnywhereActive()`** (iOS, from 6.0.0): Show or hide the
+  PlayAnywhere overlay from your own UI, and read whether it is on screen.
 
 
 
@@ -417,6 +451,56 @@ Remember do a `pod install` before run the example.
 [Sample](/apple/Sample)
 
 # Release Notes iOS
+## [Versión 6.0.0] - 2026-09-02
+### Breaking
+- **The deployment floor moves from iOS 12.0 to iOS 13.0, and resolving the package now
+  requires Xcode 16 or later.** Both come from EaseLive, the dependency behind PlayAnywhere:
+  its package declares iOS 13, and its manifest uses `swift-tools-version:6.0`, which an older
+  Xcode cannot read — and that failure takes down the resolution of the whole dependency graph,
+  not just the EaseLive part. Xcode 16 is a requirement for your build machine, not for your
+  users' devices.
+- **No code changes are needed to upgrade.** The public API is unchanged and nothing that
+  worked on 5.2.0 was removed or renamed. Apps that must keep supporting iOS 12 stay on
+  `5.2.0`.
+### Features
+- **PlayAnywhere, the EaseLive interactivity overlay, is now part of the SDK.** Set
+  `config.playAnywhere = PlayAnywhereConfig(accountId:programId:)` and the overlay is created
+  with the player, toggled from a button in the custom UI, and torn down with it. `EaseLiveSDK`
+  ships as a dependency of the Swift Package, so there is nothing extra to install and no
+  opt-in module to add. Requires `customUI = true`. Leaving `playAnywhere` unset keeps the SDK
+  behaving exactly as before.
+- New events **`playAnywhereStatusChanged`** and **`playAnywhereError`**, and new methods
+  **`togglePlayAnywhere()`** and **`isPlayAnywhereActive()`**. A fatal EaseLive error releases
+  the overlay and reports `disabled` instead of taking playback down with it.
+- The overlay follows EaseLive's status in both directions, so a web app that goes quiet
+  between interactive segments has its overlay hidden and shown again instead of the session
+  ending at the first `disabled`.
+- Playback commands coming from the overlay — play, pause, seek, rate, volume, mute — go
+  through the SDK's own controls rather than straight to `AVPlayer`, so they respect casting
+  mode, keep the volume slider in agreement, and do not move the content player during an ad
+  break.
+### Notes
+- **If your build environment restricts outbound network access**, allow
+  `github.com/ease-live` and `sdk.easelive.tv`.
+- Your app receives `EaseLiveSDK.framework` embedded alongside the SDK.
+
+## [Versión 5.2.0] - 2026-08-26
+### Bug Fixes
+- **No more spurious `onAdLoadingError` on every playback with ads.** Requesting ads while the
+  player's view had no window made IMA reject the request outright. A later retry succeeded and
+  playback was never affected, but the error reached your app in every ad session, so anyone
+  forwarding ad errors to monitoring saw a 100% error rate. The request now waits until the ad
+  container is on screen, with a three-second watchdog that abandons the ad and lets the content
+  through if it never gets there.
+- **Mid-rolls and post-rolls play again when ads are requested before the player exists.** IMA
+  captures the content playhead when the ads are requested and tracks progress through it to
+  decide when a VMAP break is due; it used to receive `nil` in that window, which lost every
+  break except the pre-roll — invisible in a short test run, since a pre-roll starts at `start`.
+### Features
+- Client-side ads are requested as soon as the ad tag is known, instead of after analytics
+  initialise and the Google DAI branch runs, which removes the wait that sat between resolving
+  the tag and asking IMA for it.
+
 ## [Versión 5.1.0] - 2026-08-19
 ### Distribution
 - **The SDK is now distributed through Swift Package Manager.** `MediastreamPlatformSDKxC`
