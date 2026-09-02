@@ -139,7 +139,7 @@ First of all, don't forget to select "YES" in "Allow Arbitrary Loads", which is 
 ### View
 ```swift
 import UIKit
-import MediastreamPlatformSDK
+import MediastreamPlatformSDKiOS
 
 class ViewController: UIViewController {
 
@@ -446,7 +446,11 @@ Tears down observers, ads, PiP, and the player. Call when you remove the player 
 
 In the following example, you'll find an application showcasing various uses of the Mediastream SDK for iOS. This app provides practical examples of key functionalities, including audio playback, video playback, audio as a service, casting, and more. Make sure you enter the IDs corresponding to your ACCOUNT_ID and CONTENT_ID and enjoy.
 
-Remember do a `pod install` before run the example.
+Open `MediastreamSampleApp.xcodeproj` and build. There is no dependency manager step: Xcode
+resolves the Swift Package on its own the first time you open the project. The sample resolves
+`MediastreamPlatformSDKiOS` with **Up to Next Major Version** from `6.0.0`, exactly as a
+consumer app would, and its `Package.resolved` records the dependency versions it was last
+verified against.
 
 [Sample](/apple/Sample)
 

@@ -31,4 +31,7 @@ android/MediastreamSampleApp/google-services.json
 
 # Android Profiling
 android/MediastreamSampleApp/*.hprof
-apple/MediastreamSampleApp/Pods/*
+# Xcode
+apple/**/xcuserdata/
+apple/**/*.xcuserstate
+apple/**/.DS_Store
