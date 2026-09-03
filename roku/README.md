@@ -6,8 +6,8 @@ Official Mediastream **SceneGraph** SDK for Roku: VOD, live, episodes, and audio
 
 | Field | Value |
 |--------|--------|
-| **Semantic version** | **9.7.202608050** |
-| **Package build** | `202604300` (from SDK `manifest`) |
+| **Semantic version** | **9.9.202609030** |
+| **Package build** | `202609030` (from SDK `manifest`) |
 | **Component library ID** | `MediastreamRokuPlayerSDK` |
 | **Core node** | `MediaStreamPlayer` (inside the loaded package) |
 
@@ -59,10 +59,10 @@ Download the **`.pkg`** from CDN and host it locally in your project (for exampl
 https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 ```
 
-**Pinned to 9.7.202608050:**
+**Pinned to 9.9.202609030:**
 
 ```text
-https://player.cdn.mdstrm.com/roku_sdk/9.7.202608050/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/9.9.202609030/MediaStreamPlayer.pkg
 ```
 
 Typical layout: create `source/packageFile/` at the channel root and place `MediaStreamPlayer.pkg` there.
@@ -133,7 +133,7 @@ The **`MediastreamPlayerConfig`** shape is documented in detail in the SDK repos
 
 ### Common optional fields
 
-- **`accessToken`:** For protected / entitlements flows.
+- **`accessToken`:** For protected / entitlements flows. Tokens are issued **per content**, so a token is only valid for the `id` it was issued for. This is why the default up-next flow cannot play protected episodes: the SDK has no way to obtain the next episode's token. For tokenized catalogs use the custom up-next flow (`customUpnextFeature`), where your app supplies a fresh `accessToken` for each episode through `updateNextEpisode()`.
 - **`videoFormat`:** e.g. `msConfig.audioVideoFormat.DASH` for DASH (`mpd`); default is HLS.
 - **`adUrl`:** Client-side VAST; platform ads apply when omitted (per SDK behavior).
 - **`appName` / `appVersion`:** Analytics and ad tagging.
@@ -173,6 +173,21 @@ sub onSDKStatusChanged(event as dynamic)
     if payload.status = "Loaded" then m.isSDKLoaded = true
 end sub
 ```
+
+### `infoSDKLog`
+
+The SDK `MediaStreamPlayer` node exposes an `infoSDKLog` field (`assocArray`, `alwaysNotify`) carrying `{ status, message }`, where `status` is `"success"` or `"error"`. Observe it to surface setup and playback-load problems:
+
+```brightscript
+m.mediaStreamVideoPlayer.observeField("infoSDKLog", "onSDKInfoLog")
+
+sub onSDKInfoLog(event as dynamic)
+    payload = event.getData()
+    if payload.status = "error" then print "SDK error: "; payload.message
+end sub
+```
+
+> **Changed in 9.9.202609030** — `infoSDKLog` now also emits `status: "error"` when **stream data fails to load** (network failure, API error, or an empty content `id`), reporting the reason in `message`. Previously only configuration errors used this field, and a failed load closed the player emitting just `isVideoFinished`. The event and its payload shape are unchanged, so existing handlers keep working; the event simply fires in this additional case. It is emitted **before** the player closes, so `infoSDKLog` arrives ahead of `isVideoFinished`.
 
 ---
 
