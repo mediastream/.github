@@ -20,19 +20,25 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
 > same. See [Migrating from CocoaPods](#migrating-from-cocoapods) below.
 
 ## Version iOS
-- **Version:** 6.0.0, distributed through Swift Package Manager.
+- **Version:** 6.1.0, distributed through Swift Package Manager.
 - **Requirements:** **iOS 13.0** or later, **Xcode 16** or later, Swift 5.9 or later.
-- **Note:** 6.0.0 raises the deployment floor from iOS 12 to iOS 13 and needs Xcode 16 to
-  resolve the package. Both come from EaseLive, the dependency behind PlayAnywhere. Xcode 16 is
-  a requirement for your build machine, not for your users' devices. Upgrading needs **no code
-  changes**; apps that must keep supporting iOS 12 have to stay on `5.2.0`.
+- **Note:** coming from 6.0.0, 6.1.0 needs **no code changes** and no build changes. It is a
+  fixes-only release — most of it around ads and `autoplay = false`; see the release notes.
+- **Note:** the **iOS 13** floor and the **Xcode 16** requirement were introduced in **6.0.0**,
+  and both come from EaseLive, the dependency behind PlayAnywhere. Xcode 16 is a requirement for
+  your build machine, not for your users' devices. Apps that must keep supporting iOS 12 have to
+  stay on `5.2.0`.
 
 ## Version Apple TV
-- **Version:** 2.1.0, distributed through Swift Package Manager.
+- **Version:** 2.3.0, distributed through Swift Package Manager.
 - **Requirements:** **tvOS 15.0** or later, Xcode 15 or later, Swift 5.9 or later.
-- **Note:** The deployment floor moved from tvOS 14 to tvOS 15. This is not a preference —
-  Google's IMA SDK for tvOS requires it from version 4.16.0 onward. Apps that must keep
-  supporting tvOS 14 have to stay on the CocoaPods version.
+- **Note:** upgrading from 2.1.0 needs **no code changes**. Both 2.2.0 and 2.3.0 are ad-focused
+  releases, and 2.2.0 carries one change that needs a look before you ship it: **it redirects
+  Apple TV ad inventory to the `ms_device=appletv` GAM unit**, so confirm with your ad ops team
+  that the Apple TV unit has line items loaded. See the 2.2.0 release notes.
+- **Note:** The deployment floor moved from tvOS 14 to tvOS 15 in 2.1.0. This is not a
+  preference — Google's IMA SDK for tvOS requires it from version 4.16.0 onward. Apps that must
+  keep supporting tvOS 14 have to stay on the CocoaPods version.
 
 ## Adding Mediastream Platform SDK to Your iOS Project
 
@@ -42,14 +48,14 @@ In Xcode, choose **File → Add Package Dependencies…** and paste:
 https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git
 ```
 
-Pick **Up to Next Major Version** from `6.0.0` and add the `MediastreamPlatformSDKiOS`
+Pick **Up to Next Major Version** from `6.1.0` and add the `MediastreamPlatformSDKiOS`
 product to your app target. Or, in a `Package.swift`:
 
 ```swift
 dependencies: [
   .package(
     url: "https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git",
-    from: "6.0.0"
+    from: "6.1.0"
   )
 ]
 ```
@@ -76,14 +82,14 @@ In Xcode, choose **File → Add Package Dependencies…** and paste:
 https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm.git
 ```
 
-Pick **Up to Next Major Version** from `2.1.0` and add the
+Pick **Up to Next Major Version** from `2.3.0` and add the
 `MediastreamPlatformSDKAppleTV` product to your app target. Or, in a `Package.swift`:
 
 ```swift
 dependencies: [
   .package(
     url: "https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm.git",
-    from: "2.1.0"
+    from: "2.3.0"
   )
 ]
 ```
@@ -439,6 +445,16 @@ Tears down observers, ads, PiP, and the player. Call when you remove the player 
 - **`getDuration()`**, **`getLiveDuration()`**, **`isAudioContent()`**, **`isLocalFile()`:** Introspection helpers.
 - **`togglePlayAnywhere()`** / **`isPlayAnywhereActive()`** (iOS, from 6.0.0): Show or hide the
   PlayAnywhere overlay from your own UI, and read whether it is on screen.
+- **`MediastreamPlatformSDK.adMediaMimeTypes: [String]`** (Apple TV, from 2.3.0): the ad
+  renditions the SDK declares to IMA, so a creative the platform cannot decode is never
+  selected. Defaults to `video/mp4`, `application/x-mpegURL`,
+  `application/vnd.apple.mpegurl` and `video/quicktime`. It is a `public static var` — a
+  process-wide setting to be assigned **before** `setup(_:)`, not a per-instance option on
+  `MediastreamPlayerConfig` — and you only need it to admit a format an advertiser of yours
+  serves and this list does not name. On iOS the same allowlist exists but is fixed (from
+  6.1.0) and not exposed.
+- **`MediastreamPlayerConfig.normalizedAdBaseURL(_:)`** (Apple TV, from 2.2.0): the
+  `ms_device=appletv` rewrite applied to the platform ad map, `open` so you can override it.
 
 
 
@@ -449,12 +465,51 @@ In the following example, you'll find an application showcasing various uses of 
 Open `MediastreamSampleApp.xcodeproj` and build. There is no dependency manager step: Xcode
 resolves the Swift Package on its own the first time you open the project. The sample resolves
 `MediastreamPlatformSDKiOS` with **Up to Next Major Version** from `6.0.0`, exactly as a
-consumer app would, and its `Package.resolved` records the dependency versions it was last
-verified against.
+consumer app would — so it picks up the current **6.1.0** on its own, since that range covers
+every 6.x. Its checked-in `Package.resolved` records the dependency versions it was last
+verified against (`6.0.0`); Xcode rewrites it when it resolves.
 
 [Sample](/apple/Sample)
 
 # Release Notes iOS
+## [Versión 6.1.0] - 2026-09-04
+Fixes only. No API changes, no new requirements: upgrading from 6.0.0 is a version bump.
+
+### Bug Fixes
+- **A pre-roll no longer plays on its own when `autoplay = false`.** The gate that withholds
+  it keyed off a flag only the Google DAI path ever set, so a plain VAST or VMAP pre-roll was
+  never withheld — you asked for a paused player and got an ad playing at once. The gate now
+  keys off real playback intent: `play()`, the native transport controls, `skipAdAndResumeContent()`,
+  returning to the live edge, or content that is already rolling. A route change and the ad
+  prefetch deliberately do not count, since neither is a tap. Intent is sticky for the
+  session, so a later tap cannot re-arm the withholding.
+  - A **mid-roll is never withheld** — by then intent is established, and pausing it would
+    freeze the ad and the content at once.
+  - **`onAdPlay` now reaches you when the ad really starts.** A withheld ad used to emit it
+    while sitting paused; it is emitted on resume instead, still carrying `adDuration`. An ad
+    that is not withheld is unaffected.
+  - The same gate now reaches the **DAI** paths that ignored it, including the mid-session
+    stream swap. A DAI stream that loaded while withheld used to leave the loading view on
+    top, swallowing the play tap meant to release it.
+  - **AirPlay:** a session that was already playing when the route change destroyed its ads is
+    still resumed; one that never asked for playback is no longer started by the reconnect.
+- **`externalPlaybackActiveChanged` no longer fires a spurious deactivation on every
+  `setup()`.** The first observation compared against `nil`, so a session that started with no
+  external route reported a transition to `false` that had not happened. A first observation
+  of `true` is real state and still reaches you.
+- **A finished playback no longer emits `buffering`.** When content ended, the
+  `timeControlStatus` observer could still run afterwards and report a stall on an item with
+  nothing left to play, so anyone tracking buffering saw a phantom stall at the end of every
+  playback. Next-episode loading is unaffected.
+- **IMA is no longer offered ad renditions the device cannot play.** Google Ad Manager returns
+  every `MediaFile` MIME type in the VAST response regardless of creative profile, so
+  filtering them is the player's job and neither rendering-settings call site declared
+  `mimeTypes`. IMA could therefore pick a rendition `AVPlayer` cannot decode, which surfaced as
+  **VAST error 403** instead of a clean fallback to a playable one. The allowlist is now set on
+  both client-side loaders — the main one, which also covers the CSAI pre-roll that runs before
+  SSAI, and the Reels one — and mirrors the list already in production on the web player and on
+  Android. Server-side ads are out of scope: `MediaFile` selection happens on the server.
+
 ## [Versión 6.0.0] - 2026-09-02
 ### Breaking
 - **The deployment floor moves from iOS 12.0 to iOS 13.0, and resolving the package now
@@ -564,6 +619,96 @@ verified against.
 - NSRange Exception when move faster on timeline
 
 # Release Notes AppleTV
+## [Versión 2.3.0] - 2026-08-31
+The SDK tells IMA which creative formats an Apple TV can actually play, instead of letting it
+pick any media file the VAST response lists.
+
+### Ads
+- **Ad rendition selection is now restricted to formats tvOS can decode.** Until 2.2.0 the
+  rendering settings carried no `mimeTypes`, so IMA chose with its own default criteria and
+  could settle on a file `AVPlayer` cannot decode: a break that does not render, with nothing
+  wrong with the creative other than not being playable on this platform. Selection is now
+  limited to `MediastreamPlatformSDK.adMediaMimeTypes` — `video/mp4`,
+  `application/x-mpegURL`, `application/vnd.apple.mpegurl` and `video/quicktime`.
+- **The same list is passed to the DAI path**, which used to be initialised without rendering
+  settings at all.
+
+### Behaviour to be aware of
+- **This is a filter, and filtering changes which VAST responses can play.** When a response
+  offers several media files, one the platform supports is now chosen. When it offers none from
+  the list, IMA runs out of candidates and the break ends in an error — before, it picked one
+  anyway and failed on playback, so what the viewer sees is similar, but the error arrives
+  earlier and is explicit. The cost is that an advertiser serving a legitimate format absent
+  from the list stops being seen until it is added.
+
+### Public API
+- **`MediastreamPlatformSDK.adMediaMimeTypes`** — a `public static var`, editable before
+  `setup(_:)` to widen or narrow the list. It is a process-wide setting: it does not live on
+  `MediastreamPlayerConfig` and cannot be varied per player instance.
+
+## [Versión 2.2.0] - 2026-08-27
+An ads cycle: the client-side pre-roll is requested earlier and stops being lost when the view
+is not mounted yet, post-rolls stop being dropped when jumping to the next episode, and the ad
+map tag stops declaring itself as iOS.
+
+### ⚠️ Before you ship this: Apple TV ad inventory
+- **`ms_device` in the ad map URL is normalised to `appletv`.** The SDK does not generate that
+  parameter — it comes baked into the map the platform returns, and on tvOS it arrived as
+  `ms_device=ios`, because the media JSON request sends no `User-Agent` of its own and the
+  backend cannot tell tvOS from iOS. The tag claimed `ms_device=ios` and
+  `platformType=appletv` at the same time.
+- **This is not a label: the ad proxy uses `ms_device` to pick the GAM unit.** Following the
+  tag's redirect on a production live, `ms_device=ios` and `ms_device=appletv` resolve to
+  different GAM units — so until this version Apple TV traffic was counted and monetised
+  against an iOS app unit.
+- **Because it redirects inventory, ad ops has to confirm the Apple TV unit has line items
+  loaded.** In testing the Apple TV unit had no fill while the iOS one did in the same window:
+  if the inventory is not loaded, the pre-roll for that content goes to zero.
+- The value is only rewritten when the parameter is already present; it is never added to maps
+  that never carried it.
+
+### Ads
+- **The client-side pre-roll is requested as soon as the tag is known**, not at the end of
+  startup. The media JSON callback was being processed off the main thread, where IMA's
+  `requestAds()` stalled for up to ~2 s; it now hops to main, as iOS already did.
+- **The request is parked until the ad container is on screen.** IMA rejects it outright —
+  *"Ads cannot be requested because the ad container is not attached to the view hierarchy"* —
+  if the view has no window yet. With `config.adURL` the request went out from `setup()`,
+  always before the view was mounted, so **a host that only configured `config.adURL` lost the
+  pre-roll silently**; it was saved only if the media JSON also carried its own `ads.map`,
+  whose second attempt did arrive in time. The request is now re-issued from
+  `viewDidLayoutSubviews`, and a 3 s watchdog abandons the ad and lets the content through if
+  the container never reaches a window, instead of leaving the video hidden.
+
+### Bug Fixes
+- **Post-rolls were lost when moving to the next episode.** The SDK jumped to the next episode
+  as soon as content finished, without checking whether the VMAP declared an `end` break. It
+  now detects post-roll cue points and waits, firing the transition on `ALL_ADS_COMPLETED`,
+  content resume, or an ad error. An 8 s watchdog forces the jump if none of those arrive, so
+  the transition cannot get stuck.
+- **Content froze on a single frame when the ad request failed through the DAI branch.** The
+  failure handler cleared its latches only in the non-DAI branch; with them set, the player
+  view is left with no player and hidden, and the `rate` observer pauses again on every play
+  attempt. The bug already existed in 2.1.0, latent — there the request never failed.
+
+### Behaviour to be aware of
+- **`onAdEnded` now also fires on `ALL_ADS_COMPLETED`**, in addition to `COMPLETE`. In a
+  single-ad break you receive it **twice**.
+- **IMA logging was decoupled from the test-ads mode.** `testAdsEnabled` no longer turns on
+  IMA's debug logging as a side effect; it is controlled separately with
+  `MediastreamTestConfig.setImaDebugLoggingEnabled(_:)`. If you relied on the coupling you will
+  see fewer logs with test mode on.
+
+### Public API
+- **`MediastreamPlayerConfig.normalizedAdBaseURL(_:)`** — the `ms_device` normalisation,
+  `open` so it can be overridden.
+- **`MediastreamTestConfig.setImaDebugLoggingEnabled(_:)`**, and `stripGoogleDAI`, which
+  ignores `ad_insertion_google` from the media JSON to leave playback on pure CSAI. Diagnostic
+  tooling, not an integration option.
+- **`AdLatencyProbe` / `AdLatencyEvent`** — opt-in probe that emits the ad-flow milestones with
+  their timings (`ima_request_ads`, `ima_ad_loaded`, `ima_ad_started`, …). Inert until you call
+  `start(runId:)`, and URLs are redacted before they leave.
+
 ## [Versión 2.1.0] - 2026-08-19
 First production release of this SDK, and the first distributed through Swift Package
 Manager. Previous versions never left QA.
