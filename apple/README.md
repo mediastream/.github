@@ -20,10 +20,12 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
 > same. See [Migrating from CocoaPods](#migrating-from-cocoapods) below.
 
 ## Version iOS
-- **Version:** 6.1.0, distributed through Swift Package Manager.
+- **Version:** 6.3.0, distributed through Swift Package Manager.
 - **Requirements:** **iOS 13.0** or later, **Xcode 16** or later, Swift 5.9 or later.
-- **Note:** coming from 6.0.0, 6.1.0 needs **no code changes** and no build changes. It is a
-  fixes-only release — most of it around ads and `autoplay = false`; see the release notes.
+- **Note:** 6.1.0, 6.2.0 and 6.3.0 are fixes-only releases, all of them around ads. They need
+  **no code changes** and no build changes: upgrading from any other 6.x is a version bump.
+- **Note:** **do not ship 6.2.0.** It left every control dead on live channels, and 6.3.0 is
+  the fix. Coming from 6.1.0 or earlier, go straight to **6.3.0**.
 - **Note:** the **iOS 13** floor and the **Xcode 16** requirement were introduced in **6.0.0**,
   and both come from EaseLive, the dependency behind PlayAnywhere. Xcode 16 is a requirement for
   your build machine, not for your users' devices. Apps that must keep supporting iOS 12 have to
@@ -48,14 +50,14 @@ In Xcode, choose **File → Add Package Dependencies…** and paste:
 https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git
 ```
 
-Pick **Up to Next Major Version** from `6.1.0` and add the `MediastreamPlatformSDKiOS`
+Pick **Up to Next Major Version** from `6.3.0` and add the `MediastreamPlatformSDKiOS`
 product to your app target. Or, in a `Package.swift`:
 
 ```swift
 dependencies: [
   .package(
     url: "https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git",
-    from: "6.1.0"
+    from: "6.3.0"
   )
 ]
 ```
@@ -465,13 +467,86 @@ In the following example, you'll find an application showcasing various uses of 
 Open `MediastreamSampleApp.xcodeproj` and build. There is no dependency manager step: Xcode
 resolves the Swift Package on its own the first time you open the project. The sample resolves
 `MediastreamPlatformSDKiOS` with **Up to Next Major Version** from `6.0.0`, exactly as a
-consumer app would — so it picks up the current **6.1.0** on its own, since that range covers
+consumer app would — so it picks up the current **6.3.0** on its own, since that range covers
 every 6.x. Its checked-in `Package.resolved` records the dependency versions it was last
 verified against (`6.0.0`); Xcode rewrites it when it resolves.
 
 [Sample](/apple/Sample)
 
 # Release Notes iOS
+## [Versión 6.3.0] - 2026-09-10
+One fix, for a regression 6.2.0 introduced. If you are on 6.2.0, upgrade.
+
+### Bug Fixes
+- **Live channels respond to taps again.** Entering a live channel left every control dead —
+  play/pause, the seek bar, fullscreen, the dismiss button. Requesting the DAI stream opened
+  an ad break, but requesting a stream is not a break: under DAI the ads are stitched into the
+  content, so the signal that closes a break never arrives and a full-screen transparent
+  container sat over the player swallowing every touch for the whole live session. Two
+  changes, and the second is the one that matters: requesting a stream no longer opens a
+  break, and the ad container now lets a touch through when it lands on its own background, so
+  only the views IMA actually places inside it receive events. That removes the class of
+  problem rather than this one instance — a container left visible by some other unforeseen
+  path can no longer block the interface. Verified on device: the controls respond in live,
+  and the VOD pre-roll still plays.
+
+### Notes
+- The Picture in Picture `zPosition` fix below shipped in 6.2.0 marked as not verified on
+  device, because the case could not be reproduced locally at the time. It has since been
+  confirmed on device.
+
+## [Versión 6.2.0] - 2026-09-10
+An ads cycle on the client-side (CSAI) path: ads that were heard but not seen, content
+starting underneath a pre-roll, and mid-rolls disappearing after an automatic next-episode
+advance. Fixes only, no API changes.
+
+> ⚠️ 6.2.0 also introduced a regression that leaves the controls dead on live channels.
+> Ship **6.3.0** instead, which fixes it and carries everything below.
+
+### Bug Fixes
+- **The content no longer starts under a CSAI pre-roll.** Reported as the content audio
+  playing before the ad, and then both overlapping, on VOD with `customUI`. The flag that held
+  the content back was cleared as soon as the ad tag responded — which is before the ad takes
+  over the screen — so playback could start inside that window. A second path matches what QA
+  actually saw: if the ads manager's start is delayed, IMA asks for the content to resume on
+  its own before the break begins, and the SDK used to obey and put the content under the ad
+  that was about to play. The hold now rises when the ad request actually leaves and is
+  released only by a resume that follows a real ad start, a tag-load failure, an ad playback
+  error, or one of two timeouts (3 s and 5 s) so a break that never starts cannot leave a
+  black player.
+  - **Not covered:** a multi-ad pod. A gap remains between the first ad completing and the
+    second starting.
+- **A CSAI ad is no longer heard but not seen.** IMA used to draw into the player's own view
+  while the SDK was still building the player hierarchy asynchronously: when the ad won the
+  race, everything inserted afterwards — the zoom container that carries the video layer, the
+  controls container — sat on top of the ad, which kept playing its audio underneath. It was a
+  race, about 2 in 4 times on an iPhone 8. IMA now gets a dedicated container view that the
+  SDK keeps in front during a break and hides outside one, so it never swallows touches meant
+  for the controls.
+  - **Not covered:** `ReelViewController`, which keeps its own IMA stack.
+- **A mid-roll is no longer heard but not seen.** With a VMAP, the pre-roll and every mid-roll
+  share a single ad display container, since the ad request runs once per session. Showing the
+  container was bound to that request, while hiding it ran at the end of every break: from the
+  second break on, IMA rendered into a container that was already hidden. The pair now opens
+  and closes once per break, tied to IMA's own signals. Verified on device against Google's
+  sample VMAP (pre-roll + mid-roll at 00:00:15 + post-roll): both breaks visible and complete.
+- **Mid-rolls play again after an automatic next-episode advance.** IMA keeps the content
+  playhead it is given for the whole session, and that playhead is bound to one `AVPlayer`. On
+  an auto-advance the ad request can run before the player is swapped, so IMA was left watching
+  the previous episode's player, never saw a cue point cross, and silently dropped every
+  mid-roll and post-roll of the new episode — the pre-roll still played, because its cue is
+  `start`. The SDK now always hands IMA a forwarding playhead and re-points it at each new
+  player. Re-entering an episode by hand already worked. Verified on device: episode 1 with a
+  mid-roll, seek to the end, auto-advance to episode 2, seek to the middle — the mid-roll of
+  episode 2 now plays.
+- **An ad no longer paints under the (paused) content after Picture in Picture.** `zPosition`
+  outranks sibling order, so keeping the ad container last in the view hierarchy is not
+  enough: the Picture in Picture transitions raise the video layer and, with it, the controls
+  above the ad — and a torn-down overlay could leave the content on top for the rest of the
+  session. The container is now placed relative to the video layer instead of at a fixed
+  depth, both when the break opens and on the next layout. Shipped here as not verified on
+  device; **confirmed on device in 6.3.0**.
+
 ## [Versión 6.1.0] - 2026-09-04
 Fixes only. No API changes, no new requirements: upgrading from 6.0.0 is a version bump.
 
