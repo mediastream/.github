@@ -6,8 +6,8 @@ Official Mediastream **SceneGraph** SDK for Roku: VOD, live, episodes, and audio
 
 | Field | Value |
 |--------|--------|
-| **Semantic version** | **9.10.202609040** |
-| **Package build** | `202609040` (from SDK `manifest`) |
+| **Semantic version** | **9.11.202609110** |
+| **Package build** | `202609110` (from SDK `manifest`) |
 | **Component library ID** | `MediastreamRokuPlayerSDK` |
 | **Core node** | `MediaStreamPlayer` (inside the loaded package) |
 
@@ -59,10 +59,10 @@ Download the **`.pkg`** from CDN and host it locally in your project (for exampl
 https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 ```
 
-**Pinned to 9.10.202609040:**
+**Pinned to 9.11.202609110:**
 
 ```text
-https://player.cdn.mdstrm.com/roku_sdk/9.10.202609040/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/9.11.202609110/MediaStreamPlayer.pkg
 ```
 
 Typical layout: create `source/packageFile/` at the channel root and place `MediaStreamPlayer.pkg` there.
@@ -206,6 +206,8 @@ Subscribe with the SDK node’s `callFunc("addEventListener", eventName, handler
 | `ended` | Content finished |
 | `bitratechange` | ABR ladder change |
 | `seeked` | Seek completed |
+
+> **Fixed in 9.11.202609110.** On VOD played with an ad tag and without Google DAI, these events stopped firing once ad playback took over, from 9.6.202608040 through 9.10.202609040. If your app gates on `ended` to advance to the next title or to close the player, it never fired on that path. Live and Google DAI were not affected.
 
 ---
 
