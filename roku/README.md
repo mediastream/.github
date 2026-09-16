@@ -6,8 +6,8 @@ Official Mediastream **SceneGraph** SDK for Roku: VOD, live, episodes, and audio
 
 | Field | Value |
 |--------|--------|
-| **Semantic version** | **9.11.202609110** |
-| **Package build** | `202609110` (from SDK `manifest`) |
+| **Semantic version** | **9.12.202609160** |
+| **Package build** | `202609160` (from SDK `manifest`) |
 | **Component library ID** | `MediastreamRokuPlayerSDK` |
 | **Core node** | `MediaStreamPlayer` (inside the loaded package) |
 
@@ -59,10 +59,10 @@ Download the **`.pkg`** from CDN and host it locally in your project (for exampl
 https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 ```
 
-**Pinned to 9.11.202609110:**
+**Pinned to 9.12.202609160:**
 
 ```text
-https://player.cdn.mdstrm.com/roku_sdk/9.11.202609110/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/9.12.202609160/MediaStreamPlayer.pkg
 ```
 
 Typical layout: create `source/packageFile/` at the channel root and place `MediaStreamPlayer.pkg` there.
@@ -137,10 +137,12 @@ The **`MediastreamPlayerConfig`** shape is documented in detail in the SDK repos
 - **`videoFormat`:** e.g. `msConfig.audioVideoFormat.DASH` for DASH (`mpd`); default is HLS.
 - **`adUrl`:** Client-side VAST; platform ads apply when omitted (per SDK behavior).
 - **`appName` / `appVersion`:** Analytics and ad tagging.
-- **`startAt`:** Start position (e.g. continue watching).
+- **`startAt`:** Start position in seconds (e.g. continue watching). Applies to VOD, audio, and live with DVR enabled; on live without DVR it is ignored and playback starts at the live edge.
 - **`dvr` / `windowDvr` / `dvrStart` / `dvrEnd`:** Live DVR window parameters when supported.
 - **Google DAI:** Values are usually filled from the **Mediastream stream API** (`ad_insertion_google`). For live **DASH + DAI**, ensure `asset_key_dash` is present in the API payload when using DASH; the SDK maps it to `google_dai_assetKeyDash` and selects it when `videoFormat` is DASH.
 - **DRM:** `drmData` (Widevine `serverURL` under `widevine`) and `drmToken` as required by your DRM provider (SDK sends the token in the license request path it implements).
+
+> **Fixed in 9.12.202609160.** `startAt` was accepted but not applied on ad-supported VOD, so playback started from the beginning: on the **client-side ad tag** route (`adUrl`, Roku Ads Framework) from 9.6.202608040 through 9.11.202609110, and on the **Google DAI VOD** route in every build that supported it — the stream request always sent `bookmarkTime: 0`. If your channel implements continue-watching over an ad-supported VOD catalog, it did not work on those builds; VOD without ads was never affected. Live with DVR also now honors `startAt`.
 
 ### Debug / measurement
 
