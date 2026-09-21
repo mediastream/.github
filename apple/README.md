@@ -34,8 +34,10 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
   stay on `5.2.0`.
 
 ## Version Apple TV
-- **Version:** 2.3.0, distributed through Swift Package Manager.
+- **Version:** 2.4.0, distributed through Swift Package Manager.
 - **Requirements:** **tvOS 15.0** or later, Xcode 15 or later, Swift 5.9 or later.
+- **Note:** 2.4.0 adds one optional configuration field and changes nothing about playback.
+  Upgrading from any other 2.x is a version bump, with **no code changes**.
 - **Note:** upgrading from 2.1.0 needs **no code changes**. Both 2.2.0 and 2.3.0 are ad-focused
   releases, and 2.2.0 carries one change that needs a look before you ship it: **it redirects
   Apple TV ad inventory to the `ms_device=appletv` GAM unit**, so confirm with your ad ops team
@@ -86,14 +88,14 @@ In Xcode, choose **File → Add Package Dependencies…** and paste:
 https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm.git
 ```
 
-Pick **Up to Next Major Version** from `2.3.0` and add the
+Pick **Up to Next Major Version** from `2.4.0` and add the
 `MediastreamPlatformSDKAppleTV` product to your app target. Or, in a `Package.swift`:
 
 ```swift
 dependencies: [
   .package(
     url: "https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm.git",
-    from: "2.3.0"
+    from: "2.4.0"
   )
 ]
 ```
@@ -255,7 +257,7 @@ The `MediastreamPlayerConfig` class in the Mediastream iOS|Apple TV SDK provides
 - **`addAdCustomAttribute`(_ key:, value:):** Same as documented VAST `cust.*` replacement behavior (works when your ad URL is driven from config).
 - **`adTagParametersForDAI` ([AdRequestParam: String]):** Google DAI ad-tag query parameters (`AdRequestParam` enum keys such as `ppid`, `rdid`, `cust_params`, …).
 - **`ensureDAITagParamsFallbackForDAI(ppidFallback:)`:** Fills missing DAI tag params (ppid, idtype, rdid, is_lat) from config / device; the SDK calls this for DAI requests, but apps may call it when building custom flows.
-- **`dualRenderSupported` (`Bool?`, iOS, from 6.4.0; Apple TV, from 2.4.0):** Declares whether the device can sustain two simultaneous video pipelines. **Leave it unset** — the default is already right on both platforms, and it differs because the platforms differ: iOS can host more than one `AVPlayer` rendering video, so the SDK reports `dual_render=1`; tvOS renders video from a single `AVPlayer` at a time, so Apple TV reports `dual_render=0`, and there the value is fixed rather than detected, since no Apple TV device can sustain two. Mediastream's streaming service reads that signal to decide between server-guided ad insertion (SGAI) and classic Google DAI. The SDK sends the capability on **both** the content configuration request and the playback URL — including the DVR playback URL on Apple TV — because the service evaluates it again when it serves the manifest. Set it explicitly only to force the reported value, which is primarily useful in QA. **Cast sessions always report `0`** whatever you set here: the receiver does the rendering, so this device's answer does not describe it. **On Apple TV the field is merged but not yet published:** the current Apple TV version is 2.3.0, and it ships with 2.4.0.
+- **`dualRenderSupported` (`Bool?`, iOS, from 6.4.0; Apple TV, from 2.4.0):** Declares whether the device can sustain two simultaneous video pipelines. **Leave it unset** — the default is already right on both platforms, and it differs because the platforms differ: iOS can host more than one `AVPlayer` rendering video, so the SDK reports `dual_render=1`; tvOS renders video from a single `AVPlayer` at a time, so Apple TV reports `dual_render=0`, and there the value is fixed rather than detected, since no Apple TV device can sustain two. Mediastream's streaming service reads that signal to decide between server-guided ad insertion (SGAI) and classic Google DAI. The SDK sends the capability on **both** the content configuration request and the playback URL — including the DVR playback URL on Apple TV — because the service evaluates it again when it serves the manifest. Set it explicitly only to force the reported value, which is primarily useful in QA. **Cast sessions always report `0`** whatever you set here: the receiver does the rendering, so this device's answer does not describe it.
 
 > **Setting this does not turn SGAI on.** Server-guided ad insertion is not enabled in production on the server side yet, so this field changes the capability the SDK reports, not what or how it plays.
 
@@ -725,6 +727,32 @@ Fixes only. No API changes, no new requirements: upgrading from 6.0.0 is a versi
 - NSRange Exception when move faster on timeline
 
 # Release Notes AppleTV
+## [Versión 2.4.0] - 2026-09-21
+One new optional configuration field. Nothing about playback changes, and there is nothing to
+do in your app: upgrading from any 2.x is a version bump.
+
+### Features
+- **The SDK now tells Mediastream whether the device can sustain two simultaneous video
+  pipelines,** through a `dual_render` capability sent on the content configuration request
+  and on the playback URL, including the DVR playback URL. The streaming service reads it to
+  decide between server-guided ad insertion (SGAI), which stitches the ad pod on the device
+  and therefore needs a second pipeline alongside the content one, and classic Google DAI,
+  which does not. On Apple TV the answer is no — tvOS renders video from a single `AVPlayer`
+  at a time — so the SDK reports `dual_render=0`. The value is fixed rather than detected:
+  no Apple TV device can sustain two pipelines.
+- **`dualRenderSupported` (`Bool?`)** on `MediastreamPlayerConfig` overrides that answer.
+  **Leave it unset:** the default is already correct for every Apple TV, and the field exists
+  mainly to force a value in QA.
+- **Cast URLs always report `0`.** A cast session renders on the receiver, not on this
+  device, so the local answer does not describe it. On Apple TV this is a consistency change
+  — `castUrl` exists for API parity with iOS — but it keeps the SDKs behaving identically.
+
+### Notes
+- **No behaviour change in this release.** SGAI is not enabled in production on the server
+  side yet, and the service treats a missing parameter and `0` the same way, so a host that
+  sets nothing gets exactly what 2.3.0 did. The field is there so the decision can be made
+  later without another SDK upgrade.
+
 ## [Versión 2.3.0] - 2026-08-31
 The SDK tells IMA which creative formats an Apple TV can actually play, instead of letting it
 pick any media file the VAST response lists.
