@@ -20,12 +20,14 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
 > same. See [Migrating from CocoaPods](#migrating-from-cocoapods) below.
 
 ## Version iOS
-- **Version:** 6.3.0, distributed through Swift Package Manager.
+- **Version:** 6.4.0, distributed through Swift Package Manager.
 - **Requirements:** **iOS 13.0** or later, **Xcode 16** or later, Swift 5.9 or later.
+- **Note:** 6.4.0 adds one optional configuration field and changes nothing about playback.
+  Upgrading from any other 6.x is a version bump, with **no code changes**.
 - **Note:** 6.1.0, 6.2.0 and 6.3.0 are fixes-only releases, all of them around ads. They need
-  **no code changes** and no build changes: upgrading from any other 6.x is a version bump.
+  **no code changes** and no build changes either.
 - **Note:** **do not ship 6.2.0.** It left every control dead on live channels, and 6.3.0 is
-  the fix. Coming from 6.1.0 or earlier, go straight to **6.3.0**.
+  the fix. Coming from 6.1.0 or earlier, go straight to **6.4.0**.
 - **Note:** the **iOS 13** floor and the **Xcode 16** requirement were introduced in **6.0.0**,
   and both come from EaseLive, the dependency behind PlayAnywhere. Xcode 16 is a requirement for
   your build machine, not for your users' devices. Apps that must keep supporting iOS 12 have to
@@ -50,14 +52,14 @@ In Xcode, choose **File → Add Package Dependencies…** and paste:
 https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git
 ```
 
-Pick **Up to Next Major Version** from `6.3.0` and add the `MediastreamPlatformSDKiOS`
+Pick **Up to Next Major Version** from `6.4.0` and add the `MediastreamPlatformSDKiOS`
 product to your app target. Or, in a `Package.swift`:
 
 ```swift
 dependencies: [
   .package(
     url: "https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git",
-    from: "6.3.0"
+    from: "6.4.0"
   )
 ]
 ```
@@ -255,7 +257,7 @@ The `MediastreamPlayerConfig` class in the Mediastream iOS|Apple TV SDK provides
 - **`ensureDAITagParamsFallbackForDAI(ppidFallback:)`:** Fills missing DAI tag params (ppid, idtype, rdid, is_lat) from config / device; the SDK calls this for DAI requests, but apps may call it when building custom flows.
 - **`dualRenderSupported` (`Bool?`, iOS, from 6.4.0):** Declares whether the device can sustain two simultaneous video pipelines. **Leave it unset** — on iOS the default is already correct: the platform can host more than one `AVPlayer` rendering video, so the SDK reports `dual_render=1`. Mediastream's streaming service reads that signal to decide between server-guided ad insertion (SGAI) and classic Google DAI. The SDK sends the capability on **both** the content configuration request and the playback URL, because the service evaluates it again when it serves the manifest. Set it explicitly only to force the reported value, which is primarily useful in QA. **Cast sessions always report `0`** whatever you set here: the Chromecast receiver does the rendering, so this device's answer does not describe it.
 
-> **On `master`, not yet in a tagged release.** `dualRenderSupported` is merged but is not present in 6.3.0; it ships with the next published version. SGAI is not enabled in production on the server side yet, so setting this field does not change playback behaviour today — it only changes the capability the SDK reports.
+> **Setting this does not turn SGAI on.** Server-guided ad insertion is not enabled in production on the server side yet, so this field changes the capability the SDK reports, not what or how it plays.
 
 - **`drmUrl`**, **`addDrmHeader`(_:, value:):** FairPlay / DRM asset licensing when applicable.
 - **`appCertificateUrl`:** Related FairPlay certificate URL when required.
@@ -470,14 +472,39 @@ In the following example, you'll find an application showcasing various uses of 
 
 Open `MediastreamSampleApp.xcodeproj` and build. There is no dependency manager step: Xcode
 resolves the Swift Package on its own the first time you open the project. The sample resolves
-`MediastreamPlatformSDKiOS` with **Up to Next Major Version** from `6.0.0`, exactly as a
-consumer app would — so it picks up the current **6.3.0** on its own, since that range covers
-every 6.x. Its checked-in `Package.resolved` records the dependency versions it was last
-verified against (`6.0.0`); Xcode rewrites it when it resolves.
+`MediastreamPlatformSDKiOS` with **Up to Next Major Version** from `6.4.0`, exactly as a
+consumer app would — so it picks up any later 6.x on its own. Its checked-in
+`Package.resolved` records the dependency versions it was last verified against (`6.4.0`);
+Xcode rewrites it when it resolves.
 
 [Sample](/apple/Sample)
 
 # Release Notes iOS
+## [Versión 6.4.0] - 2026-09-21
+One new optional configuration field. Nothing about playback changes, and there is nothing to
+do in your app: upgrading from any 6.x is a version bump.
+
+### Features
+- **The SDK now tells Mediastream whether the device can sustain two simultaneous video
+  pipelines,** through a `dual_render` capability sent on both the content configuration
+  request and the playback URL. The streaming service reads it to decide between
+  server-guided ad insertion (SGAI), which stitches the ad pod on the device and therefore
+  needs a second pipeline alongside the content one, and classic Google DAI, which does not.
+  On iOS the answer is yes — the platform can host more than one `AVPlayer` rendering video —
+  so the SDK reports `dual_render=1` on its own.
+- **`dualRenderSupported` (`Bool?`)** on `MediastreamPlayerConfig` overrides that answer.
+  **Leave it unset:** the default is already correct for every device this SDK supports, and
+  the field exists mainly to force a value in QA. It survives a `reloadPlayer`.
+- **Cast sessions always report `0`.** The Chromecast receiver does the rendering, so the
+  local device's answer does not describe it, and claiming a capability on evidence the SDK
+  does not have could opt a cast session into the wrong ad path.
+
+### Notes
+- **No behaviour change in this release.** SGAI is not enabled in production on the server
+  side yet, and the service treats a missing parameter and `0` the same way, so a host that
+  sets nothing gets exactly what 6.3.0 did. The field is there so the decision can be made
+  later without another SDK upgrade.
+
 ## [Versión 6.3.0] - 2026-09-10
 One fix, for a regression 6.2.0 introduced. If you are on 6.2.0, upgrade.
 
