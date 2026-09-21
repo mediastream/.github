@@ -6,8 +6,8 @@ Official Mediastream **SceneGraph** SDK for Roku: VOD, live, episodes, and audio
 
 | Field | Value |
 |--------|--------|
-| **Semantic version** | **9.12.202609160** |
-| **Package build** | `202609160` (from SDK `manifest`) |
+| **Semantic version** | **9.13.202609210** |
+| **Package build** | `202609210` (from SDK `manifest`) |
 | **Component library ID** | `MediastreamRokuPlayerSDK` |
 | **Core node** | `MediaStreamPlayer` (inside the loaded package) |
 
@@ -59,10 +59,10 @@ Download the **`.pkg`** from CDN and host it locally in your project (for exampl
 https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 ```
 
-**Pinned to 9.12.202609160:**
+**Pinned to 9.13.202609210:**
 
 ```text
-https://player.cdn.mdstrm.com/roku_sdk/9.12.202609160/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/9.13.202609210/MediaStreamPlayer.pkg
 ```
 
 Typical layout: create `source/packageFile/` at the channel root and place `MediaStreamPlayer.pkg` there.
@@ -145,7 +145,7 @@ The **`MediastreamPlayerConfig`** shape is documented in detail in the SDK repos
 
 > **Fixed in 9.12.202609160.** `startAt` was accepted but not applied on ad-supported VOD, so playback started from the beginning: on the **client-side ad tag** route (`adUrl`, Roku Ads Framework) from 9.6.202608040 through 9.11.202609110, and on the **Google DAI VOD** route in every build that supported it — the stream request always sent `bookmarkTime: 0`. If your channel implements continue-watching over an ad-supported VOD catalog, it did not work on those builds; VOD without ads was never affected. Live with DVR also now honors `startAt`.
 
-> **On `master`, not yet in a tagged release.** `dualRenderSupported` is merged but is not present in 9.12.202609160; it ships with the next published version. SGAI is not enabled in production on the server side yet, so setting this field does not change playback behavior today — it only changes the capability the SDK reports.
+> **Added in 9.13.202609210.** SGAI is not enabled in production on the server side yet, so setting `dualRenderSupported` does not change playback behavior today — it only changes the capability the SDK reports.
 
 ### Debug / measurement
 
