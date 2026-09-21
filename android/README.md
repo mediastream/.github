@@ -5,7 +5,7 @@ Hello, Android Developer! 👋
 Welcome to the Mediastream SDK for Android, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is **11.2.2** (see `MediastreamPlayer.getVersion()`).
+- **Version:** The current version of the SDK is **11.3.0** (see `MediastreamPlayer.getVersion()`).
 - **Compatibility:** Targets **compileSdk 35** (Android 15). **minSdk 24**. Java **17** is required for consuming projects using the same toolchain as the SDK.
 - **Coming from 10.0.x?** Read [Breaking changes (upgrading from 10.0.x to 11.x)](#breaking-changes-upgrading-from-100x-to-11x) first. One of them breaks the build of **every** consumer, whether or not you use the feature behind it: from **11.1.0** the SDK depends on EaseLive, and its Maven repository has to be declared in your `settings.gradle`.
 
@@ -14,12 +14,20 @@ Welcome to the Mediastream SDK for Android, designed to streamline the integrati
 To integrate the Mediastream Platform SDK into your Android project, add the following dependency to your project's build.gradle file:
 
 ```gradle
-implementation "io.github.mediastream:mediastreamplatformsdkandroid:11.2.2"
+implementation "io.github.mediastream:mediastreamplatformsdkandroid:11.3.0"
 ```
 
 > **From 11.1.0 this dependency alone is not enough to resolve.** Add the EaseLive Maven
 > repository to your `settings.gradle` / `settings.gradle.kts` as well — see
 > [Settings Gradle](#settings-gradle).
+
+## What's new in 11.3.0 — dual-render capability
+
+- **11.3.0 — The SDK now declares whether the device can sustain two simultaneous video pipelines.** Mediastream's streaming service reads that capability to choose between server-guided ad insertion (SGAI), which stitches the ad pod on the device, and classic Google DAI; without the signal every native session is pinned to DAI. The capability travels on **both** the content configuration request and the playback URL, because the service evaluates it again when it serves the manifest — sending it on only one leaves the configuration announcing SGAI while the manifest comes back as DAI.
+  - **Android is the only Mediastream SDK that resolves the default at runtime.** It comes from the device's UI mode: handhelds report `1`, Android TV / Fire TV report `0`. The scarce resources live on the TV side — a single hardware decoder, a single secure decoder for Widevine L1, one video plane — and claiming a capability the device lacks breaks playback, while withholding it only keeps today's behaviour.
+  - **Cast sessions always report `0`**, whatever the local device is: the receiver does the rendering, so the local answer does not describe it.
+  - The new optional **`dualRenderSupported`** config field overrides the detection — see [Ads](#ads). Leave it unset unless you are forcing a value in QA.
+  - **No behaviour change in this version.** The service gates on an explicit opt-in, so `0` and an absent parameter were already equivalent, and SGAI is not enabled in production on the server side yet.
 
 ## What's new in 11.2.x
 
@@ -405,7 +413,7 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 - **`ensureDAITagParamsFallback(platform)`:** Fills missing PPID/RDID/IDTYPE/IS_LAT for DAI from SDK cache.
 - **`dualRenderSupported` (`Boolean?`, from 11.3.0):** Declares whether the device can sustain two simultaneous video pipelines. **Leave it unset** — the default is already correct. Unlike the other Mediastream SDKs, Android resolves that default **at runtime** from the device's UI mode: handhelds report `dual_render=1`, Android TV / Fire TV report `0`. The scarce resources live on the TV side — a single hardware decoder, a single secure decoder for Widevine L1, one video plane — and claiming a capability the device lacks breaks playback, while withholding it only keeps today's behaviour. The SDK sends the capability on **both** the content configuration request and the playback URL, because Mediastream's streaming service evaluates it again when it serves the manifest; it reads that signal to decide between server-guided ad insertion (SGAI) and classic Google DAI. Set it explicitly only to force the reported value, which is primarily useful in QA. **Cast sessions always report `0`** whatever you set here: the receiver does the rendering, so the local device's answer does not describe it.
 
-> **On `master`, not yet in a tagged release.** `dualRenderSupported` is merged but is not present in 11.2.2; it ships with the next published version. SGAI is not enabled in production on the server side yet, so setting this field does not change playback behaviour today — it only changes the capability the SDK reports.
+> **SGAI is not enabled in production on the server side yet**, so setting `dualRenderSupported` does not change playback behaviour today — it only changes the capability the SDK reports.
 
 ## **Next / previous episode**
 
@@ -658,7 +666,7 @@ The Mediastream player exposes playback control, fullscreen, PiP, Cast, next-epi
 
 ## Introspection
 
-- **`getVersion()`** — SDK version string (e.g. `"11.2.2"`).
+- **`getVersion()`** — SDK version string (e.g. `"11.3.0"`).
 - **`getPlayerView()`**, **`getCurrentUrl()`**, **`getCurrentMediaConfig()`**, **`getMediaTitle()`**, **`getMediaPoster()`**, **`getCurrentPosition()`**, **`getDuration()`**, **`getContentDuration()`**, **`getResolution()`**, **`getBitrate()`**, **`getBandwidth()`**, **`getCurrentMsPlayer()`** — Debug and UI integration helpers.
 
 ## Other
@@ -910,6 +918,13 @@ These changes simplify the integration and reduce the need for manual action set
 By following these steps, you can integrate the MediastreamPlayerServiceWithSync into your Android application, ensuring support for Android Auto and efficient media playback with synchronization capabilities. The migration steps also ensure a smooth transition from the old service implementation to the new one.
 
 # Release Notes
+
+## [Version 11.3.0] - 2026-09-21
+Preparation for SGAI. The public API only gains one optional field, so this is a minor. **No behaviour change:** the streaming service gates on an explicit opt-in, so `0` and an absent parameter were already equivalent, and SGAI is not enabled in production on the server side yet — what changes today is only the capability the SDK reports.
+
+### Features
+- **`dualRenderSupported` (`Boolean?`): the SDK declares whether the device can sustain two simultaneous video pipelines.** The capability is sent as `dual_render` on **both** the content configuration request and the playback URL, because the streaming service evaluates it again when it serves the manifest; sending it on only one leaves the session inconsistent. The default is resolved **at runtime** from the device's UI mode — handhelds report `1`, Android TV / Fire TV report `0` — which makes Android the only Mediastream SDK where this value is not a constant. Leave the field unset unless you need to force a value in QA.
+- **Cast URLs always report `dual_render=0`.** A cast session renders on the receiver, not on this device, so the local capability answer does not describe it; reporting it would claim, on no evidence, that the receiver sustains two pipelines.
 
 ## [Version 11.2.2] - 2026-09-02
 ### Fixes
