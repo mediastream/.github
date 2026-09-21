@@ -253,6 +253,10 @@ The `MediastreamPlayerConfig` class in the Mediastream iOS|Apple TV SDK provides
 - **`addAdCustomAttribute`(_ key:, value:):** Same as documented VAST `cust.*` replacement behavior (works when your ad URL is driven from config).
 - **`adTagParametersForDAI` ([AdRequestParam: String]):** Google DAI ad-tag query parameters (`AdRequestParam` enum keys such as `ppid`, `rdid`, `cust_params`, …).
 - **`ensureDAITagParamsFallbackForDAI(ppidFallback:)`:** Fills missing DAI tag params (ppid, idtype, rdid, is_lat) from config / device; the SDK calls this for DAI requests, but apps may call it when building custom flows.
+- **`dualRenderSupported` (`Bool?`, iOS, from 6.4.0):** Declares whether the device can sustain two simultaneous video pipelines. **Leave it unset** — on iOS the default is already correct: the platform can host more than one `AVPlayer` rendering video, so the SDK reports `dual_render=1`. Mediastream's streaming service reads that signal to decide between server-guided ad insertion (SGAI) and classic Google DAI. The SDK sends the capability on **both** the content configuration request and the playback URL, because the service evaluates it again when it serves the manifest. Set it explicitly only to force the reported value, which is primarily useful in QA. **Cast sessions always report `0`** whatever you set here: the Chromecast receiver does the rendering, so this device's answer does not describe it.
+
+> **On `master`, not yet in a tagged release.** `dualRenderSupported` is merged but is not present in 6.3.0; it ships with the next published version. SGAI is not enabled in production on the server side yet, so setting this field does not change playback behaviour today — it only changes the capability the SDK reports.
+
 - **`drmUrl`**, **`addDrmHeader`(_:, value:):** FairPlay / DRM asset licensing when applicable.
 - **`appCertificateUrl`:** Related FairPlay certificate URL when required.
 
