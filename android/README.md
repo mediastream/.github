@@ -403,6 +403,9 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 - **`addAdCustomAttribute(key, value)`:** Adds `custom.<key>` parameters for CSAI VAST URLs (requires matching `custom.*` placeholders in the tag).
 - **`fetchDeviceIdsAsync` / `waitForDeviceIdsCache`:** Cache GAID (or Amazon AAID on Fire TV) for `rdid` / `is_lat` in **getAdQueryString** and DAI fallbacks.
 - **`ensureDAITagParamsFallback(platform)`:** Fills missing PPID/RDID/IDTYPE/IS_LAT for DAI from SDK cache.
+- **`dualRenderSupported` (`Boolean?`, from 11.3.0):** Declares whether the device can sustain two simultaneous video pipelines. **Leave it unset** — the default is already correct. Unlike the other Mediastream SDKs, Android resolves that default **at runtime** from the device's UI mode: handhelds report `dual_render=1`, Android TV / Fire TV report `0`. The scarce resources live on the TV side — a single hardware decoder, a single secure decoder for Widevine L1, one video plane — and claiming a capability the device lacks breaks playback, while withholding it only keeps today's behaviour. The SDK sends the capability on **both** the content configuration request and the playback URL, because Mediastream's streaming service evaluates it again when it serves the manifest; it reads that signal to decide between server-guided ad insertion (SGAI) and classic Google DAI. Set it explicitly only to force the reported value, which is primarily useful in QA. **Cast sessions always report `0`** whatever you set here: the receiver does the rendering, so the local device's answer does not describe it.
+
+> **On `master`, not yet in a tagged release.** `dualRenderSupported` is merged but is not present in 11.2.2; it ships with the next published version. SGAI is not enabled in production on the server side yet, so setting this field does not change playback behaviour today — it only changes the capability the SDK reports.
 
 ## **Next / previous episode**
 
