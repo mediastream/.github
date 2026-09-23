@@ -5,7 +5,7 @@ Hello, Android Developer! 👋
 Welcome to the Mediastream SDK for Android, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is **11.3.0** (see `MediastreamPlayer.getVersion()`).
+- **Version:** The current version of the SDK is **11.4.0** (see `MediastreamPlayer.getVersion()`).
 - **Compatibility:** Targets **compileSdk 35** (Android 15). **minSdk 24**. Java **17** is required for consuming projects using the same toolchain as the SDK.
 - **Coming from 10.0.x?** Read [Breaking changes (upgrading from 10.0.x to 11.x)](#breaking-changes-upgrading-from-100x-to-11x) first. One of them breaks the build of **every** consumer, whether or not you use the feature behind it: from **11.1.0** the SDK depends on EaseLive, and its Maven repository has to be declared in your `settings.gradle`.
 
@@ -14,12 +14,17 @@ Welcome to the Mediastream SDK for Android, designed to streamline the integrati
 To integrate the Mediastream Platform SDK into your Android project, add the following dependency to your project's build.gradle file:
 
 ```gradle
-implementation "io.github.mediastream:mediastreamplatformsdkandroid:11.3.0"
+implementation "io.github.mediastream:mediastreamplatformsdkandroid:11.4.0"
 ```
 
 > **From 11.1.0 this dependency alone is not enough to resolve.** Add the EaseLive Maven
 > repository to your `settings.gradle` / `settings.gradle.kts` as well — see
 > [Settings Gradle](#settings-gradle).
+
+## What's new in 11.4.0 — Spanish (Spain)
+
+- **11.4.0 — New UI language: `MediastreamPlayerConfig.Language.SPANISH_SPAIN`** ("Español (España)", BCP-47 `es-ES`). Select it like any other language, `config.language = MediastreamPlayerConfig.Language.SPANISH_SPAIN`, including at runtime through `reloadPlayer(newConfig)`. It uses Spain's terminology: the live indicator reads **"Directo"** and the TV button **"Volver a directo"**. `SPANISH` (`es`, Latin American Spanish) is unchanged.
+  - The name and the `es-ES` code are the same across the four Mediastream SDKs (Android, iOS, Apple TV and Roku).
 
 ## What's new in 11.3.0 — dual-render capability
 
@@ -113,7 +118,7 @@ Major themes in the **10.0** release family (see release notes for patch details
 - **TV:** Dedicated settings and subtitle/audio dialogs, D-pad handling, focus management, and safer controller behavior during ads.
 - **Ads:** Improved client- and server-side ad flows (including DAI/SSAI), **autoplay** alignment with preroll, device IDs (`rdid` / `is_lat`) for CSAI and DAI tag fallbacks (including **Fire TV** AAID where applicable).
 - **Analytics & partners:** **Comscore** and **In The Game (ITG)** when enabled in platform/player configuration.
-- **Subtitles & UI:** Custom **ASS** styling support, **localization** of player UI (English, Spanish, Portuguese), **edge-to-edge** / window insets on Android 15+, optional **brightness** bar and **pinch-to-zoom** on the player surface.
+- **Subtitles & UI:** Custom **ASS** styling support, **localization** of player UI (English, Spanish, Spanish (Spain), Portuguese), **edge-to-edge** / window insets on Android 15+, optional **brightness** bar and **pinch-to-zoom** on the player surface.
 - **Android Auto & notifications:** Continued improvements for browsing, episodes, podcasts, and sync service flows (see service section below).
 
 ## Breaking changes (upgrading from 10.0.x to 11.x)
@@ -436,7 +441,7 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 - **`appHandlesWindowInsets` (Boolean):** If `true`, the SDK **does not** apply system-bar padding on the player container (your app handles edge-to-edge). Default `true` in code — set to `false` to let the SDK pad for API 35+ edge-to-edge.
 - **`applyEdgeSafeMargins` (Boolean):** Extra safe margins for dismiss/cast on edge displays.
 - **`customPlayerView` (`PlayerView?`):** Inject your own `PlayerView` layout.
-- **`language` (`Language`):** `ENGLISH`, `SPANISH`, `PORTUGUESE` — localized strings for settings/subtitles UI.
+- **`language` (`Language`):** `ENGLISH` (`en`), `SPANISH` (`es`, Latin American Spanish), `SPANISH_SPAIN` (`es-ES`, "Español (España)", from 11.4.0), `PORTUGUESE` (`pt`) — localized strings for the player UI (live indicator, settings, track and subtitle menus). Default `ENGLISH`; it does not follow the device locale.
 - **`baseColor` (Int):** Accent color (`-1` = use platform/API).
 - **`showSubtitles` / `speedInControlBar` / `pauseOnScreenClick` / `pip` (`FlagStatus`):** Override platform for subtitles button, speed menu, tap-to-pause, PiP.
 - **`pipExpandToFullscreenFirst` (Boolean):** Enter fullscreen briefly before PiP so PiP crops only the video.
@@ -666,7 +671,7 @@ The Mediastream player exposes playback control, fullscreen, PiP, Cast, next-epi
 
 ## Introspection
 
-- **`getVersion()`** — SDK version string (e.g. `"11.3.0"`).
+- **`getVersion()`** — SDK version string (e.g. `"11.4.0"`).
 - **`getPlayerView()`**, **`getCurrentUrl()`**, **`getCurrentMediaConfig()`**, **`getMediaTitle()`**, **`getMediaPoster()`**, **`getCurrentPosition()`**, **`getDuration()`**, **`getContentDuration()`**, **`getResolution()`**, **`getBitrate()`**, **`getBandwidth()`**, **`getCurrentMsPlayer()`** — Debug and UI integration helpers.
 
 ## Other
@@ -918,6 +923,15 @@ These changes simplify the integration and reduce the need for manual action set
 By following these steps, you can integrate the MediastreamPlayerServiceWithSync into your Android application, ensuring support for Android Auto and efficient media playback with synchronization capabilities. The migration steps also ensure a smooth transition from the old service implementation to the new one.
 
 # Release Notes
+
+## [Version 11.4.0] - 2026-09-23
+New UI language. The public API only gains one enum value, so this is a minor.
+
+### Features
+- **`Language.SPANISH_SPAIN` (`es-ES`, "Español (España)").** Selected through `config.language` like the other languages, also on `reloadPlayer(newConfig)`. `SPANISH` (`es`) keeps the Latin American strings.
+
+### Fixes
+- **The SDK now builds the UI locale from the full language tag.** It used to create it with `Locale(code)`, which takes a tag like `es-ES` as a bare language and drops the region, so region-specific strings would never load. It now uses `Locale.forLanguageTag(code)`; `en`, `es` and `pt` resolve exactly as before.
 
 ## [Version 11.3.0] - 2026-09-21
 Preparation for SGAI. The public API only gains one optional field, so this is a minor. **No behaviour change:** the streaming service gates on an explicit opt-in, so `0` and an absent parameter were already equivalent, and SGAI is not enabled in production on the server side yet — what changes today is only the capability the SDK reports.
