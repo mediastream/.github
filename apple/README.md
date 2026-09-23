@@ -34,10 +34,11 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
   stay on `5.2.0`.
 
 ## Version Apple TV
-- **Version:** 2.4.0, distributed through Swift Package Manager.
+- **Version:** 2.6.0, distributed through Swift Package Manager.
 - **Requirements:** **tvOS 15.0** or later, Xcode 15 or later, Swift 5.9 or later.
-- **Note:** 2.4.0 adds one optional configuration field and changes nothing about playback.
-  Upgrading from any other 2.x is a version bump, with **no code changes**.
+- **Note:** 2.6.0 adds the Spanish (Spain) UI language and localizes the custom UI's live
+  badge. Upgrading from any other 2.x is a version bump, with **no code changes**. The badge
+  now reads `Live` instead of `LIVE` in English; see the 2.6.0 release notes.
 - **Note:** upgrading from 2.1.0 needs **no code changes**. Both 2.2.0 and 2.3.0 are ad-focused
   releases, and 2.2.0 carries one change that needs a look before you ship it: **it redirects
   Apple TV ad inventory to the `ms_device=appletv` GAM unit**, so confirm with your ad ops team
@@ -88,14 +89,14 @@ In Xcode, choose **File → Add Package Dependencies…** and paste:
 https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm.git
 ```
 
-Pick **Up to Next Major Version** from `2.4.0` and add the
+Pick **Up to Next Major Version** from `2.6.0` and add the
 `MediastreamPlatformSDKAppleTV` product to your app target. Or, in a `Package.swift`:
 
 ```swift
 dependencies: [
   .package(
     url: "https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm.git",
-    from: "2.4.0"
+    from: "2.6.0"
   )
 ]
 ```
@@ -218,7 +219,7 @@ The `MediastreamPlayerConfig` class in the Mediastream iOS|Apple TV SDK provides
 - **`showAirplayButton` (Bool):** Show a native `AVRoutePickerView` (AirPlay button) in the custom UI controls bar. Default: **`false`**. Only applies when `customUI = true`.
 - **`useCustomAirplayButton` (UIButton?):** Supply your own button to host the AirPlay route picker overlay when using custom UI. When set, the SDK attaches the `AVRoutePickerView` to your button's frame instead of the built-in control.
 - **`showReplayView` (Bool):** After VOD/episode ends, show in-player replay UI when enabled.
-- **`language` (MediastreamPlayerConfig.Language):** SDK strings (e.g. LIVE, settings). **ENGLISH**, **SPANISH**, **PORTUGUESE**.
+- **`language` (MediastreamPlayerConfig.Language):** SDK strings (e.g. LIVE, settings). **ENGLISH**, **SPANISH**, **SPANISH_SPAIN** (`es-ES`, "Español (España)"; Apple TV, from 2.6.0), **PORTUGUESE**.
 - **`enablePlayerZoom` (Bool):** Pinch zoom on video (custom UI only). Default: **`false`**.
 - **`showBrightnessBar` (Bool):** Brightness slider in fullscreen (video custom UI). Default: **`true`**.
 - **`customBackgroundForAudioPlayer` (String):** Image URL behind audio when using **custom UI** (replaces the default placeholder).
@@ -727,6 +728,38 @@ Fixes only. No API changes, no new requirements: upgrading from 6.0.0 is a versi
 - NSRange Exception when move faster on timeline
 
 # Release Notes AppleTV
+## [Versión 2.6.0] - 2026-09-23
+A new UI language, Spanish (Spain), and the custom UI's live badge now follows the configured
+language instead of always reading `LIVE`.
+
+### Features
+- **Spanish (Spain), `es-ES`.** Select it with `config.language = .SPANISH_SPAIN`, the same way
+  as `.SPANISH`. It uses Spain's vocabulary ("Pausar", "Desde el inicio", "Volver a la
+  transmisión en directo"). The existing `.SPANISH` (Latin American Spanish) is unchanged.
+  The code is the same `es-ES` used by the iOS, Android and Roku SDKs.
+- **The custom UI's live badge is localized.** It used to be a fixed `LIVE`; it now reads
+  `Live` / `En Vivo` / `Ao Vivo` / `Directo` for English / Spanish / Portuguese / Spanish (Spain),
+  the same texts as the iOS SDK.
+
+### Notes
+- **The badge is no longer upper case** — in English it changes from `LIVE` to `Live`. An app
+  that looks the button up by its `"LIVE"` title will no longer find it.
+
+## [Versión 2.5.0] - 2026-09-23
+Client-side mid-rolls play again, and content audio no longer plays under the pre-roll.
+
+### Ads
+- **CSAI mid-rolls play again.** They had been broken since 2.2.0 in every session: IMA was
+  handed no content playhead, so it could not schedule time-based breaks. Pre-rolls and
+  post-rolls kept playing, which is what hid the problem. Each missed mid-roll was reported as
+  `onError ["source": "ad", "fatal": true, "code": "AD_LOAD_FAILED"]`; those errors go away.
+- **Content no longer starts while a client-side break is pending,** so its audio can no longer
+  be heard under the ad. Between `requestAds()` and the end of the break, `play()` does not
+  start the content. This is intentional.
+- **Muting the content during the pre-roll works again.**
+- **An IMA error no longer releases the break immediately:** a bounded 5-second release is
+  armed instead, and cancelled if the ad starts.
+
 ## [Versión 2.4.0] - 2026-09-21
 One new optional configuration field. Nothing about playback changes, and there is nothing to
 do in your app: upgrading from any 2.x is a version bump.
