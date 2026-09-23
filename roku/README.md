@@ -1,13 +1,13 @@
 # Mediastream Roku SDK
 
-Official Mediastream **SceneGraph** SDK for Roku: VOD, live, episodes, and audio with ads (RAF, Google DAI), optional Widevine DRM, analytics, and localization (EN / ES / PT). This guide matches the **current `master`** of the Mediastream Roku SDK package.
+Official Mediastream **SceneGraph** SDK for Roku: VOD, live, episodes, and audio with ads (RAF, Google DAI), optional Widevine DRM, analytics, and localization (EN / ES / ES-ES / PT). This guide matches the **current `master`** of the Mediastream Roku SDK package.
 
 ## Version
 
 | Field | Value |
 |--------|--------|
-| **Semantic version** | **9.13.202609210** |
-| **Package build** | `202609210` (from SDK `manifest`) |
+| **Semantic version** | **9.14.202609230** |
+| **Package build** | `202609230` (from SDK `manifest`) |
 | **Component library ID** | `MediastreamRokuPlayerSDK` |
 | **Core node** | `MediaStreamPlayer` (inside the loaded package) |
 
@@ -59,10 +59,10 @@ Download the **`.pkg`** from CDN and host it locally in your project (for exampl
 https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 ```
 
-**Pinned to 9.13.202609210:**
+**Pinned to 9.14.202609230:**
 
 ```text
-https://player.cdn.mdstrm.com/roku_sdk/9.13.202609210/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/9.14.202609230/MediaStreamPlayer.pkg
 ```
 
 Typical layout: create `source/packageFile/` at the channel root and place `MediaStreamPlayer.pkg` there.
@@ -141,9 +141,12 @@ The **`MediastreamPlayerConfig`** shape is documented in detail in the SDK repos
 - **`dvr` / `windowDvr` / `dvrStart` / `dvrEnd`:** Live DVR window parameters when supported.
 - **Google DAI:** Values are usually filled from the **Mediastream stream API** (`ad_insertion_google`). For live **DASH + DAI**, ensure `asset_key_dash` is present in the API payload when using DASH; the SDK maps it to `google_dai_assetKeyDash` and selects it when `videoFormat` is DASH.
 - **DRM:** `drmData` (Widevine `serverURL` under `widevine`) and `drmToken` as required by your DRM provider (SDK sends the token in the license request path it implements).
+- **`languageCode` (string):** UI language for the SDK strings, e.g. the live badge. Use the `msConfig.languageCode` constants: `EN` (`"en"`, default), `ES` (`"es"`, Latin American Spanish), `ES_ES` (`"es-ES"`, Spanish (Spain)) and `PT` (`"pt"`). `"es-ES"` also accepts the Roku locale form `"es_ES"` and case variants such as `"es-es"`.
 - **`dualRenderSupported` (boolean):** Declares whether the device can sustain two simultaneous video pipelines. **Leave it unset** — the default is correct on every Roku device. Roku exposes a single video decoder and a single `Video` node, so two pipelines are not representable on the platform; the SDK reports `dual_render=0` on both the content configuration request and the playback URL. Mediastream's streaming service reads that signal to decide between server-guided ad insertion (SGAI) and classic Google DAI, so Roku sessions resolve to Google DAI. Set it explicitly only to force the reported value, which is primarily useful in QA.
 
 > **Fixed in 9.12.202609160.** `startAt` was accepted but not applied on ad-supported VOD, so playback started from the beginning: on the **client-side ad tag** route (`adUrl`, Roku Ads Framework) from 9.6.202608040 through 9.11.202609110, and on the **Google DAI VOD** route in every build that supported it — the stream request always sent `bookmarkTime: 0`. If your channel implements continue-watching over an ad-supported VOD catalog, it did not work on those builds; VOD without ads was never affected. Live with DVR also now honors `startAt`.
+
+> **Added in 9.14.202609230.** Spanish (Spain) (`msConfig.languageCode.ES_ES`, `"es-ES"`). It differs from `es` mainly in live wording: the live badge reads `DIRECTO` instead of `EN VIVO`. Existing `es` channels are unchanged.
 
 > **Added in 9.13.202609210.** SGAI is not enabled in production on the server side yet, so setting `dualRenderSupported` does not change playback behavior today — it only changes the capability the SDK reports.
 
