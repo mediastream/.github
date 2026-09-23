@@ -20,14 +20,15 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
 > same. See [Migrating from CocoaPods](#migrating-from-cocoapods) below.
 
 ## Version iOS
-- **Version:** 6.4.0, distributed through Swift Package Manager.
+- **Version:** 6.5.0, distributed through Swift Package Manager.
 - **Requirements:** **iOS 13.0** or later, **Xcode 16** or later, Swift 5.9 or later.
-- **Note:** 6.4.0 adds one optional configuration field and changes nothing about playback.
-  Upgrading from any other 6.x is a version bump, with **no code changes**.
+- **Note:** 6.5.0 adds Spanish (Spain) as a UI language, and 6.4.0 added one optional
+  configuration field. Neither changes playback: upgrading from any other 6.x is a version
+  bump, with **no code changes**.
 - **Note:** 6.1.0, 6.2.0 and 6.3.0 are fixes-only releases, all of them around ads. They need
   **no code changes** and no build changes either.
 - **Note:** **do not ship 6.2.0.** It left every control dead on live channels, and 6.3.0 is
-  the fix. Coming from 6.1.0 or earlier, go straight to **6.4.0**.
+  the fix. Coming from 6.1.0 or earlier, go straight to **6.5.0**.
 - **Note:** the **iOS 13** floor and the **Xcode 16** requirement were introduced in **6.0.0**,
   and both come from EaseLive, the dependency behind PlayAnywhere. Xcode 16 is a requirement for
   your build machine, not for your users' devices. Apps that must keep supporting iOS 12 have to
@@ -55,14 +56,14 @@ In Xcode, choose **File → Add Package Dependencies…** and paste:
 https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git
 ```
 
-Pick **Up to Next Major Version** from `6.4.0` and add the `MediastreamPlatformSDKiOS`
+Pick **Up to Next Major Version** from `6.5.0` and add the `MediastreamPlatformSDKiOS`
 product to your app target. Or, in a `Package.swift`:
 
 ```swift
 dependencies: [
   .package(
     url: "https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git",
-    from: "6.4.0"
+    from: "6.5.0"
   )
 ]
 ```
@@ -219,7 +220,7 @@ The `MediastreamPlayerConfig` class in the Mediastream iOS|Apple TV SDK provides
 - **`showAirplayButton` (Bool):** Show a native `AVRoutePickerView` (AirPlay button) in the custom UI controls bar. Default: **`false`**. Only applies when `customUI = true`.
 - **`useCustomAirplayButton` (UIButton?):** Supply your own button to host the AirPlay route picker overlay when using custom UI. When set, the SDK attaches the `AVRoutePickerView` to your button's frame instead of the built-in control.
 - **`showReplayView` (Bool):** After VOD/episode ends, show in-player replay UI when enabled.
-- **`language` (MediastreamPlayerConfig.Language):** SDK strings (e.g. LIVE, settings). **ENGLISH**, **SPANISH**, **SPANISH_SPAIN** (`es-ES`, "Español (España)"; Apple TV, from 2.6.0), **PORTUGUESE**.
+- **`language` (MediastreamPlayerConfig.Language):** SDK strings (e.g. LIVE, settings). **ENGLISH**, **SPANISH**, **SPANISH_SPAIN** (`es-ES`, "Español (España)"; iOS, from 6.5.0; Apple TV, from 2.6.0), **PORTUGUESE**. `SPANISH` (`es`) is Latin American Spanish. On iOS, `SPANISH_SPAIN` differs from it in the live indicator, which reads "Directo" instead of "En Vivo".
 - **`enablePlayerZoom` (Bool):** Pinch zoom on video (custom UI only). Default: **`false`**.
 - **`showBrightnessBar` (Bool):** Brightness slider in fullscreen (video custom UI). Default: **`true`**.
 - **`customBackgroundForAudioPlayer` (String):** Image URL behind audio when using **custom UI** (replaces the default placeholder).
@@ -475,14 +476,31 @@ In the following example, you'll find an application showcasing various uses of 
 
 Open `MediastreamSampleApp.xcodeproj` and build. There is no dependency manager step: Xcode
 resolves the Swift Package on its own the first time you open the project. The sample resolves
-`MediastreamPlatformSDKiOS` with **Up to Next Major Version** from `6.4.0`, exactly as a
+`MediastreamPlatformSDKiOS` with **Up to Next Major Version** from `6.5.0`, exactly as a
 consumer app would — so it picks up any later 6.x on its own. Its checked-in
-`Package.resolved` records the dependency versions it was last verified against (`6.4.0`);
+`Package.resolved` records the dependency versions it was last verified against (`6.5.0`);
 Xcode rewrites it when it resolves.
 
 [Sample](/apple/Sample)
 
 # Release Notes iOS
+## [Versión 6.5.0] - 2026-09-23
+A new UI language. Nothing about playback changes, and there is nothing to do in your app
+unless you want the new language: upgrading from any 6.x is a version bump.
+
+### Features
+- **Spanish (Spain) is now available as a UI language,** as
+  `MediastreamPlayerConfig.Language.SPANISH_SPAIN` (`"es-ES"`, "Español (España)"). Select it
+  like any other language: `config.language = .SPANISH_SPAIN`. The existing `SPANISH` (`"es"`),
+  written for Latin America, is unchanged.
+- **The visible difference is the live indicator,** which reads **"Directo"** instead of
+  "En Vivo". The rest of the SDK's strings are the same as in `SPANISH`.
+
+### Notes
+- **`Language` gained a case.** The change is additive, but if your app has an exhaustive
+  `switch` over `MediastreamPlayerConfig.Language` with no `default`, Xcode warns about the
+  new case. It does not fail the build.
+
 ## [Versión 6.4.0] - 2026-09-21
 One new optional configuration field. Nothing about playback changes, and there is nothing to
 do in your app: upgrading from any 6.x is a version bump.
