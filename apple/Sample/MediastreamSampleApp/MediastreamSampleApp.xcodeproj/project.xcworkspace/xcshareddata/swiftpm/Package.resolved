@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git",
       "state" : {
-        "revision" : "9402be3329e25fcf4147db7ab68d20f7d8560a29",
-        "version" : "6.6.0"
+        "revision" : "f3c03666e101ebfcf8c4602967d53ff333de4398",
+        "version" : "6.7.0"
       }
     },
     {

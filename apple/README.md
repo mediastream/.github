@@ -20,16 +20,20 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
 > same. See [Migrating from CocoaPods](#migrating-from-cocoapods) below.
 
 ## Version iOS
-- **Version:** 6.6.0, distributed through Swift Package Manager.
+- **Version:** 6.7.0, distributed through Swift Package Manager.
 - **Requirements:** **iOS 13.0** or later, **Xcode 16** or later, Swift 5.9 or later.
+- **Note:** 6.7.0 adds Cast APIs (`castStreamUrl`, `castStreamContentType`,
+  `getCastSubtitleTracks()`), stops duplicating subtitles the HLS manifest already carries, and
+  lets the admin set Konodrac's `channel`. It is additive: upgrading from any other 6.x is a
+  version bump, with **no code changes**. **If your app casts**, moving to `castStreamUrl` is
+  recommended; see the [Cast integration guide](https://github.com/mediastream/MediastreamPlatformSDKiOS-spm/blob/master/CAST_INTEGRATION.md).
 - **Note:** 6.6.0 is a fixes-only release: the loading indicator shows again when a player is
   re-entered. 6.5.0 added Spanish (Spain) as a UI language, and 6.4.0 added one optional
-  configuration field. None of them changes the API: upgrading from any other 6.x is a version
-  bump, with **no code changes**.
+  configuration field. None of them changes the API.
 - **Note:** 6.1.0, 6.2.0 and 6.3.0 are fixes-only releases, all of them around ads. They need
   **no code changes** and no build changes either.
 - **Note:** **do not ship 6.2.0.** It left every control dead on live channels, and 6.3.0 is
-  the fix. Coming from 6.1.0 or earlier, go straight to **6.6.0**.
+  the fix. Coming from 6.1.0 or earlier, go straight to **6.7.0**.
 - **Note:** the **iOS 13** floor and the **Xcode 16** requirement were introduced in **6.0.0**,
   and both come from EaseLive, the dependency behind PlayAnywhere. Xcode 16 is a requirement for
   your build machine, not for your users' devices. Apps that must keep supporting iOS 12 have to
@@ -57,14 +61,14 @@ In Xcode, choose **File → Add Package Dependencies…** and paste:
 https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git
 ```
 
-Pick **Up to Next Major Version** from `6.6.0` and add the `MediastreamPlatformSDKiOS`
+Pick **Up to Next Major Version** from `6.7.0` and add the `MediastreamPlatformSDKiOS`
 product to your app target. Or, in a `Package.swift`:
 
 ```swift
 dependencies: [
   .package(
     url: "https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git",
-    from: "6.6.0"
+    from: "6.7.0"
   )
 ]
 ```
@@ -81,7 +85,9 @@ Full installation guide, dependency version ranges and per-release compatibility
 **If your app uses Chromecast**, note that Google does not publish a Swift Package for the
 Cast SDK. Keep `google-cast-sdk` on CocoaPods — both dependency managers coexist in the same
 project — or add the Cast `.xcframework` manually. Details in
-[CAST_INTEGRATION.md](https://github.com/mediastream/MediastreamPlatformSDKiOS-spm/blob/master/CAST_INTEGRATION.md).
+[CAST_INTEGRATION.md](https://github.com/mediastream/MediastreamPlatformSDKiOS-spm/blob/master/CAST_INTEGRATION.md),
+which from 6.7.0 recommends loading `castStreamUrl` / `castStreamContentType` and explains how
+subtitles reach the receiver.
 
 ## Adding Mediastream Platform SDK to Your Apple TV Project
 
@@ -449,6 +455,8 @@ Tears down observers, ads, PiP, and the player. Call when you remove the player 
 
 - **`isPlayerExternalPlaybackActive: Bool`** (read-only): `true` when AirPlay video (`AVPlayer.isExternalPlaybackActive`) **or** the system audio route is AirPlay. Useful to check state before the player is initialized (e.g. audio re-entering while the TV is still paired).
 - **`setCastingModeEnabled(_ enabled: Bool)`** / **`isCastingModeEnabled`:** Local player stays paused; `play()` / `pause()` / seek emit events for an external Cast implementation.
+- **`castStreamUrl`** / **`castStreamContentType`** (iOS, from 6.7.0): The URL to load on the Cast device — HLS when the content has it, MP4 otherwise, so it covers VOD and Live/DVR — and its MIME type for `GCKMediaInformationBuilder.contentType`. Prefer them over `castUrl`, which is MP4-only, VOD-only and kept for compatibility. See the [Cast integration guide](https://github.com/mediastream/MediastreamPlatformSDKiOS-spm/blob/master/CAST_INTEGRATION.md).
+- **`getCastSubtitleTracks()`** (iOS, from 6.7.0): Same list as `getSubtitleTracks()` minus `.ass`/`.ssa`, which Cast's default receiver cannot render; build sideload `GCKMediaTrack`s from its `"external"` entries. Subtitle track dictionaries also carry **`extendedLanguageCode`** (full BCP-47, e.g. `es-PE`); match on it rather than the two-letter `language`.
 - **`skipAdAndResumeContent()`:** Skip the current IMA ad and resume main content (e.g. video ad on audio).
 - **`playNext()`** / **`playPrev()`:** Jump to configured next/previous episode (`reloadPlayer` under the hood).
 - **`updateNextEpisode(_ config:)`:** Supply the next episode `MediastreamPlayerConfig` when you handle `nextEpisodeIncoming` yourself.
@@ -477,14 +485,50 @@ In the following example, you'll find an application showcasing various uses of 
 
 Open `MediastreamSampleApp.xcodeproj` and build. There is no dependency manager step: Xcode
 resolves the Swift Package on its own the first time you open the project. The sample resolves
-`MediastreamPlatformSDKiOS` with **Up to Next Major Version** from `6.6.0`, exactly as a
+`MediastreamPlatformSDKiOS` with **Up to Next Major Version** from `6.7.0`, exactly as a
 consumer app would — so it picks up any later 6.x on its own. Its checked-in
-`Package.resolved` records the dependency versions it was last verified against (`6.6.0`);
+`Package.resolved` records the dependency versions it was last verified against (`6.7.0`);
 Xcode rewrites it when it resolves.
 
 [Sample](/apple/Sample)
 
 # Release Notes iOS
+## [Versión 6.7.0] - 2026-09-24
+New Cast APIs, a subtitle fix and a Konodrac improvement. Everything is additive: upgrading
+from any 6.x is a version bump. If your app casts, read the Cast note below.
+
+### Features
+- **`castStreamUrl` and `castStreamContentType`:** an HLS-first Cast URL (MP4 only when there is
+  no HLS rendition), populated for Live/DVR as well as VOD, and the MIME type to go with it.
+  `castUrl` is unchanged — still MP4-only and VOD-only — and kept for compatibility.
+- **`getCastSubtitleTracks()`:** the subtitle list to build `GCKMediaTrack`s from. It leaves out
+  `.ass`/`.ssa`, which Cast's default receiver cannot render.
+- **`extendedLanguageCode`** on the dictionaries from `getSubtitleTracks()` /
+  `getSelectedSubtitleTrack()`: the full BCP-47 tag (e.g. `es-PE`), for hosts that need to tell
+  apart tracks the two-letter `language` would collide on.
+- **Konodrac's `channel` can be set from the admin** (the player's Konodrac tracking settings).
+  When set there it wins over `konodracChannel` and `appName`, so a channel can be renamed
+  without an app release. Set `config.playerId`: the whole Konodrac block comes from the player
+  named in the request, and without it the account's default player's settings apply.
+
+### Bug Fixes
+- **Subtitles no longer appear twice** when the platform has also declared an uploaded `.vtt`
+  inside the HLS manifest. The SDK skips those sidecar files while HLS is playing, driven by an
+  `in_hls_manifest` flag from the platform; MP4/MP3 playback still loads every sidecar. Until the
+  platform sends the flag, nothing changes.
+- **Subtitle selection changed outside the SDK is reflected in the SDK** — from the Apple TV's
+  own remote during AirPlay, or from `AVPlayerViewController`'s CC menu. The CC icon, settings
+  picker and `subtitleChanged` event now follow it (iOS 13+).
+- `.ass`/`.ssa` subtitles are no longer offered to Cast, where they could make the receiver pick
+  the wrong track.
+
+### Notes
+- **If your app casts, move to `castStreamUrl` + `castStreamContentType` and attach sideload
+  subtitles from `getCastSubtitleTracks()`.** Once the platform marks subtitles with
+  `in_hls_manifest`, an app still casting the MP4 `castUrl` loses those languages on the Cast
+  device. The [Cast integration guide](https://github.com/mediastream/MediastreamPlatformSDKiOS-spm/blob/master/CAST_INTEGRATION.md)
+  has the code.
+
 ## [Versión 6.6.0] - 2026-09-24
 One fix, nothing to change in your app: upgrading from any 6.x is a version bump.
 
