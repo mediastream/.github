@@ -40,11 +40,12 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
   stay on `5.2.0`.
 
 ## Version Apple TV
-- **Version:** 2.6.0, distributed through Swift Package Manager.
+- **Version:** 2.7.0, distributed through Swift Package Manager.
 - **Requirements:** **tvOS 15.0** or later, Xcode 15 or later, Swift 5.9 or later.
-- **Note:** 2.6.0 adds the Spanish (Spain) UI language and localizes the custom UI's live
-  badge. Upgrading from any other 2.x is a version bump, with **no code changes**. The badge
-  now reads `Live` instead of `LIVE` in English; see the 2.6.0 release notes.
+- **Note:** 2.7.0 fixes the layout of the end-of-episode *Watch Credits* / *Next Episode*
+  buttons. Upgrading from any other 2.x is a version bump, with **no code changes**. If you
+  come from a version before 2.6.0, note that the custom UI's live badge now reads `Live`
+  instead of `LIVE` in English; see the 2.6.0 release notes.
 - **Note:** upgrading from 2.1.0 needs **no code changes**. Both 2.2.0 and 2.3.0 are ad-focused
   releases, and 2.2.0 carries one change that needs a look before you ship it: **it redirects
   Apple TV ad inventory to the `ms_device=appletv` GAM unit**, so confirm with your ad ops team
@@ -97,14 +98,14 @@ In Xcode, choose **File → Add Package Dependencies…** and paste:
 https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm.git
 ```
 
-Pick **Up to Next Major Version** from `2.6.0` and add the
+Pick **Up to Next Major Version** from `2.7.0` and add the
 `MediastreamPlatformSDKAppleTV` product to your app target. Or, in a `Package.swift`:
 
 ```swift
 dependencies: [
   .package(
     url: "https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm.git",
-    from: "2.6.0"
+    from: "2.7.0"
   )
 ]
 ```
@@ -801,6 +802,24 @@ Fixes only. No API changes, no new requirements: upgrading from 6.0.0 is a versi
 - NSRange Exception when move faster on timeline
 
 # Release Notes AppleTV
+## [Versión 2.7.0] - 2026-09-24
+The end-of-episode buttons stay inside the TV's safe area and no longer look oversized.
+
+### Next Episode
+- **The *Watch Credits* / *Next Episode* block respects tvOS's safe area.** It used to sit
+  45 pt past it, about 35 pt from the physical edge of the screen, in the zone a TV can crop
+  through overscan. It is now anchored 80 pt from the right and bottom edges, which is exactly
+  the inset an Apple TV reports.
+- **The buttons are no longer disproportionate.** The *Watch Credits* button's padding made
+  its content taller than the button itself; padding and spacing are reduced on both buttons.
+- **Focus no longer overflows the container.** The focused button used to scale up 1.12x and
+  spill out of its own stack, past the screen edge; focus is now a 6 pt white border drawn
+  inside the button's bounds.
+- **`showNextEpisodeUIForTesting()` shows the real UI.** It used to show an empty view. It now
+  loads the same view as the production path, with its texts in the configured `language`.
+- All labels fit in every UI language, including the longest ones ("Assistir Créditos" /
+  "Próximo Episódio").
+
 ## [Versión 2.6.0] - 2026-09-23
 A new UI language, Spanish (Spain), and the custom UI's live badge now follows the configured
 language instead of always reading `LIVE`.
