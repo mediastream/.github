@@ -5,7 +5,7 @@ Hello, Android Developer! 👋
 Welcome to the Mediastream SDK for Android, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is **11.5.0** (see `MediastreamPlayer.getVersion()`).
+- **Version:** The current version of the SDK is **11.5.1** (see `MediastreamPlayer.getVersion()`).
 - **Compatibility:** Targets **compileSdk 35** (Android 15). **minSdk 24**. Java **17** is required for consuming projects using the same toolchain as the SDK.
 - **Coming from 10.0.x?** Read [Breaking changes (upgrading from 10.0.x to 11.x)](#breaking-changes-upgrading-from-100x-to-11x) first. One of them breaks the build of **every** consumer, whether or not you use the feature behind it: from **11.1.0** the SDK depends on EaseLive, and its Maven repository has to be declared in your `settings.gradle`.
 
@@ -14,12 +14,17 @@ Welcome to the Mediastream SDK for Android, designed to streamline the integrati
 To integrate the Mediastream Platform SDK into your Android project, add the following dependency to your project's build.gradle file:
 
 ```gradle
-implementation "io.github.mediastream:mediastreamplatformsdkandroid:11.5.0"
+implementation "io.github.mediastream:mediastreamplatformsdkandroid:11.5.1"
 ```
 
 > **From 11.1.0 this dependency alone is not enough to resolve.** Add the EaseLive Maven
 > repository to your `settings.gradle` / `settings.gradle.kts` as well — see
 > [Settings Gradle](#settings-gradle).
+
+## What's new in 11.5.1 — Konodrac fixes
+
+- **11.5.1 — Konodrac consumption events now reach Konodrac on Android and Android TV.** The SDK opened the HTTP connection and closed it without reading the response, and on Android it is reading the response that actually sends the request, so no event was delivered and nothing reported an error. It now reads the response before disconnecting, and logs a warning on a non-2xx status.
+- **11.5.1 — The Konodrac channel comes from the platform's player configuration when set.** See [`konodracChannel`](#cast-notifications-analytics) for the precedence; apps that do not configure a platform channel see no change.
 
 ## What's new in 11.5.0 — screen reader support, live latency, TV seek
 
@@ -491,7 +496,7 @@ limitation and reports it through `onError` rather than showing a black screen.
 - **`castAvailable` (Boolean):** Enable Cast integration.
 - **`playerId` (String):** Player ID from platform for skin, ads, logos, etc.
 - **`appName` / `appVersion`:** Sent in analytics and stream URLs.
-- **`konodracChannel` (String?):** Optional channel override for Konodrac analytics. Falls back to `appName`, then `"mdstrm-android-player"`. Only used when Konodrac is enabled via platform config.
+- **`konodracChannel` (String?):** Optional channel for Konodrac analytics. Only used when Konodrac is enabled via platform config. **From 11.5.1, a channel set in the player's Konodrac tracking configuration on the platform (`tracking.konodrac.channel`) takes precedence**; `konodracChannel` applies when the platform sends none. Falls back to `appName`, then `"mdstrm-android-player"`.
 - **`customerID` / `distributorId` / `maxProfile`:** Business and quality parameters.
 - **`profileID` (String?):** Optional viewer / subscriber profile identifier forwarded to platform analytics.
 - **`notificationColor`**, **`notificationSongName`**, **`notificationDescription`**, **`notificationAlbumName`**, **`notificationImageUrl`**, **`notificationIconUrl`**, **`notificationHasNext`**, **`notificationHasPrevious`:** Notification and mini-player metadata when using the service.
@@ -679,7 +684,7 @@ The Mediastream player exposes playback control, fullscreen, PiP, Cast, next-epi
 
 ## Introspection
 
-- **`getVersion()`** — SDK version string (e.g. `"11.5.0"`).
+- **`getVersion()`** — SDK version string (e.g. `"11.5.1"`).
 - **`getPlayerView()`**, **`getCurrentUrl()`**, **`getCurrentMediaConfig()`**, **`getMediaTitle()`**, **`getMediaPoster()`**, **`getCurrentPosition()`**, **`getDuration()`**, **`getContentDuration()`**, **`getResolution()`**, **`getBitrate()`**, **`getBandwidth()`**, **`getCurrentMsPlayer()`** — Debug and UI integration helpers.
 
 ## Other
@@ -931,6 +936,13 @@ These changes simplify the integration and reduce the need for manual action set
 By following these steps, you can integrate the MediastreamPlayerServiceWithSync into your Android application, ensuring support for Android Auto and efficient media playback with synchronization capabilities. The migration steps also ensure a smooth transition from the old service implementation to the new one.
 
 # Release Notes
+
+## [Version 11.5.1] - 2026-09-25
+Two Konodrac fixes. No public API changes.
+
+### Fixes
+- **Konodrac events were never delivered.** The request was torn down before it was sent because the response was never read. The SDK now reads the response before disconnecting and logs a warning on non-2xx.
+- **Konodrac channel from the platform.** A channel set in the player's Konodrac tracking configuration (`tracking.konodrac.channel`) now takes precedence over `konodracChannel`, `appName` and the default.
 
 ## [Version 11.5.0] - 2026-09-24
 Screen reader support, a live latency fix and Android TV seek steps. No public API changes; minor because screen reader support is a new capability.
