@@ -6,8 +6,8 @@ Official Mediastream **SceneGraph** SDK for Roku: VOD, live, episodes, and audio
 
 | Field | Value |
 |--------|--------|
-| **Semantic version** | **9.14.202609240** |
-| **Package build** | `202609240` (from SDK `manifest`) |
+| **Semantic version** | **9.14.202609280** |
+| **Package build** | `202609280` (from SDK `manifest`) |
 | **Component library ID** | `MediastreamRokuPlayerSDK` |
 | **Core node** | `MediaStreamPlayer` (inside the loaded package) |
 
@@ -44,7 +44,7 @@ requires_verimatrix_version=1.0
 
 | Requirement | Notes |
 |-------------|--------|
-| Roku OS | SceneGraph (`rsg_version` 1.2+ as in SDK manifest) |
+| Roku OS | SceneGraph; the SDK manifest declares `rsg_version=1.3`, which Roku requires to run on firmware **15.1** or later |
 | Libraries | `roku_ads_lib`, `googleima3` (Google IMA DAI) |
 
 ---
@@ -59,10 +59,10 @@ Download the **`.pkg`** from CDN and host it locally in your project (for exampl
 https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 ```
 
-**Pinned to 9.14.202609240:**
+**Pinned to 9.14.202609280:**
 
 ```text
-https://player.cdn.mdstrm.com/roku_sdk/9.14.202609240/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/9.14.202609280/MediaStreamPlayer.pkg
 ```
 
 Typical layout: create `source/packageFile/` at the channel root and place `MediaStreamPlayer.pkg` there.
@@ -145,6 +145,8 @@ The **`MediastreamPlayerConfig`** shape is documented in detail in the SDK repos
 - **`dualRenderSupported` (boolean):** Declares whether the device can sustain two simultaneous video pipelines. **Leave it unset** — the default is correct on every Roku device. Roku exposes a single video decoder and a single `Video` node, so two pipelines are not representable on the platform; the SDK reports `dual_render=0` on both the content configuration request and the playback URL. Mediastream's streaming service reads that signal to decide between server-guided ad insertion (SGAI) and classic Google DAI, so Roku sessions resolve to Google DAI. Set it explicitly only to force the reported value, which is primarily useful in QA.
 
 > **Fixed in 9.12.202609160.** `startAt` was accepted but not applied on ad-supported VOD, so playback started from the beginning: on the **client-side ad tag** route (`adUrl`, Roku Ads Framework) from 9.6.202608040 through 9.11.202609110, and on the **Google DAI VOD** route in every build that supported it — the stream request always sent `bookmarkTime: 0`. If your channel implements continue-watching over an ad-supported VOD catalog, it did not work on those builds; VOD without ads was never affected. Live with DVR also now honors `startAt`.
+
+> **Changed in 9.14.202609280.** The SDK manifest now declares `rsg_version=1.3`, as Roku's Static Analysis requires. There is no player behavior change. Roku states that RSG 1.3 requires a minimum firmware of 15.1: set the minimum firmware version of your channel to 15.1 or later in the Roku Developer Dashboard. If Static Analysis reports that your channel `manifest` needs `rsg_version=1.3`, add that line to your own channel manifest too; the SDK package cannot change it for you.
 
 > **Fixed in 9.14.202609240.** When a **Google DAI** stream request failed (for example "The servers response was not valid." or "The stream could not be loaded."), the SDK crashed the channel with a BrightScript runtime error in `DAIPlayerTask.brs` instead of falling back to playback without ads, on both live and VOD, from 9.2.202607080 through 9.14.202609230. This includes the common live flow of a client-side preroll followed by DAI. Now live recovers to the direct stream without ads; VOD no longer crashes, but the player closes. Waiting for the DAI stream manager is also bounded to 15 seconds. If your channel uses Google DAI, update to this build or later.
 
