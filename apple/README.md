@@ -40,12 +40,13 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
   stay on `5.2.0`.
 
 ## Version Apple TV
-- **Version:** 2.7.0, distributed through Swift Package Manager.
+- **Version:** 2.9.0, distributed through Swift Package Manager.
 - **Requirements:** **tvOS 15.0** or later, Xcode 15 or later, Swift 5.9 or later.
-- **Note:** 2.7.0 fixes the layout of the end-of-episode *Watch Credits* / *Next Episode*
-  buttons. Upgrading from any other 2.x is a version bump, with **no code changes**. If you
-  come from a version before 2.6.0, note that the custom UI's live badge now reads `Live`
-  instead of `LIVE` in English; see the 2.6.0 release notes.
+- **Note:** 2.9.0 lets IMA play audio-only ads (a radio preroll, for example), which used to
+  fail with IMA error 403 and be skipped. Upgrading from any other 2.x is a version bump, with
+  **no code changes**. If you come from a version before 2.8.0, note that platform-served
+  subtitles now appear in the custom UI; if you come from before 2.6.0, the custom UI's live
+  badge now reads `Live` instead of `LIVE` in English. See the release notes.
 - **Note:** upgrading from 2.1.0 needs **no code changes**. Both 2.2.0 and 2.3.0 are ad-focused
   releases, and 2.2.0 carries one change that needs a look before you ship it: **it redirects
   Apple TV ad inventory to the `ms_device=appletv` GAM unit**, so confirm with your ad ops team
@@ -98,14 +99,14 @@ In Xcode, choose **File → Add Package Dependencies…** and paste:
 https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm.git
 ```
 
-Pick **Up to Next Major Version** from `2.7.0` and add the
+Pick **Up to Next Major Version** from `2.9.0` and add the
 `MediastreamPlatformSDKAppleTV` product to your app target. Or, in a `Package.swift`:
 
 ```swift
 dependencies: [
   .package(
     url: "https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm.git",
-    from: "2.7.0"
+    from: "2.9.0"
   )
 ]
 ```
@@ -470,7 +471,9 @@ Tears down observers, ads, PiP, and the player. Call when you remove the player 
 - **`MediastreamPlatformSDK.adMediaMimeTypes: [String]`** (Apple TV, from 2.3.0): the ad
   renditions the SDK declares to IMA, so a creative the platform cannot decode is never
   selected. Defaults to `video/mp4`, `application/x-mpegURL`,
-  `application/vnd.apple.mpegurl` and `video/quicktime`. It is a `public static var` — a
+  `application/vnd.apple.mpegurl` and `video/quicktime`, plus, from 2.9.0, `audio/mp4`,
+  `audio/mpeg`, `audio/aac` and `audio/ogg`, so audio-only ads play. If you assign your own
+  list, include the audio types to keep audio ads working. It is a `public static var` — a
   process-wide setting to be assigned **before** `setup(_:)`, not a per-instance option on
   `MediastreamPlayerConfig` — and you only need it to admit a format an advertiser of yours
   serves and this list does not name. On iOS the same allowlist exists but is fixed (from
@@ -802,6 +805,43 @@ Fixes only. No API changes, no new requirements: upgrading from 6.0.0 is a versi
 - NSRange Exception when move faster on timeline
 
 # Release Notes AppleTV
+## [Versión 2.9.0] - 2026-09-29
+Client-side IMA ads whose VAST only offers audio files play again.
+
+### Ads
+- **IMA accepts audio MediaFiles.** `MediastreamPlatformSDK.adMediaMimeTypes`, the list the SDK
+  passes to `IMAAdsRenderingSettings.mimeTypes`, only named video types since 2.3.0. With an
+  audio-only VAST (a radio preroll, for example), IMA discarded every MediaFile and failed with
+  error 403: *"Linear assets were found in the VAST ad response, but none of them matched the
+  video player's capabilities."* The ad was skipped and the content started without it. The
+  list now also includes `audio/mp4`, `audio/mpeg`, `audio/aac` and `audio/ogg`, which
+  AVPlayer plays on tvOS. This applies to pre-, mid- and post-rolls.
+- **For integrators with monitoring:** each of those ads was reported as
+  `onError ["source": "ad", "fatal": true, "code": "AD_LOAD_FAILED"]`. Those errors go away,
+  and `onAdLoaded` / `onAdPlay` / `onAdEnded` arrive instead.
+- Video ads are unaffected. If you assigned your own `adMediaMimeTypes`, your list is kept
+  as is; add the audio types to it if you want audio ads.
+
+## [Versión 2.8.0] - 2026-09-29
+Subtitles served by the platform's `subtitles[]` array now show up and render, even when they
+are not embedded in the manifest.
+
+### Subtitles
+- **`subtitles[]` tracks are listed in the subtitle picker** alongside the manifest's own
+  tracks, labelled with `language_name` (or `language`). The SDK renders them itself: WebVTT
+  and ASS/SSA, drawn above the video and below the controls.
+- **No duplicates:** an entry marked `in_hls_manifest` is skipped while playing HLS, and the
+  manifest's track is preferred, with the same rule as the iOS and Android SDKs.
+
+### Behaviour changes to be aware of
+- `subtitles[]` tracks only appear with `customUI = true`. The native
+  `AVPlayerViewController` menu can only list the manifest's tracks.
+- On LIVE content, `subtitles[]` tracks are not offered yet.
+- A subtitle file that cannot be downloaded or parses to no cues now emits
+  `MediastreamErrorEvent.Code.subtitleLoadFailed` (`SUBTITLE_LOAD_FAILED`, non-fatal) as `error`
+  and `onError`. It is a new case of a non-frozen enum: an exhaustive `switch` over `Code` needs
+  a `default` or `@unknown default`.
+
 ## [Versión 2.7.0] - 2026-09-24
 The end-of-episode buttons stay inside the TV's safe area and no longer look oversized.
 
