@@ -20,8 +20,11 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
 > same. See [Migrating from CocoaPods](#migrating-from-cocoapods) below.
 
 ## Version iOS
-- **Version:** 6.7.0, distributed through Swift Package Manager.
+- **Version:** 6.10.0, distributed through Swift Package Manager.
 - **Requirements:** **iOS 13.0** or later, **Xcode 16** or later, Swift 5.9 or later.
+- **Note:** 6.10.0 is a fixes-only release: audio-only prerolls (for example a radio preroll
+  whose VAST carries only `audio/mp4` / `audio/mpeg` files) play again instead of failing with IMA
+  error 403. Upgrading from any other 6.x is a version bump, with **no code changes**.
 - **Note:** 6.7.0 adds Cast APIs (`castStreamUrl`, `castStreamContentType`,
   `getCastSubtitleTracks()`), stops duplicating subtitles the HLS manifest already carries, and
   lets the admin set Konodrac's `channel`. It is additive: upgrading from any other 6.x is a
@@ -33,7 +36,7 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
 - **Note:** 6.1.0, 6.2.0 and 6.3.0 are fixes-only releases, all of them around ads. They need
   **no code changes** and no build changes either.
 - **Note:** **do not ship 6.2.0.** It left every control dead on live channels, and 6.3.0 is
-  the fix. Coming from 6.1.0 or earlier, go straight to **6.7.0**.
+  the fix. Coming from 6.1.0 or earlier, go straight to **6.10.0**.
 - **Note:** the **iOS 13** floor and the **Xcode 16** requirement were introduced in **6.0.0**,
   and both come from EaseLive, the dependency behind PlayAnywhere. Xcode 16 is a requirement for
   your build machine, not for your users' devices. Apps that must keep supporting iOS 12 have to
@@ -63,14 +66,14 @@ In Xcode, choose **File → Add Package Dependencies…** and paste:
 https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git
 ```
 
-Pick **Up to Next Major Version** from `6.7.0` and add the `MediastreamPlatformSDKiOS`
+Pick **Up to Next Major Version** from `6.10.0` and add the `MediastreamPlatformSDKiOS`
 product to your app target. Or, in a `Package.swift`:
 
 ```swift
 dependencies: [
   .package(
     url: "https://github.com/mediastream/MediastreamPlatformSDKiOS-spm.git",
-    from: "6.7.0"
+    from: "6.10.0"
   )
 ]
 ```
@@ -489,14 +492,25 @@ In the following example, you'll find an application showcasing various uses of 
 
 Open `MediastreamSampleApp.xcodeproj` and build. There is no dependency manager step: Xcode
 resolves the Swift Package on its own the first time you open the project. The sample resolves
-`MediastreamPlatformSDKiOS` with **Up to Next Major Version** from `6.7.0`, exactly as a
+`MediastreamPlatformSDKiOS` with **Up to Next Major Version** from `6.10.0`, exactly as a
 consumer app would — so it picks up any later 6.x on its own. Its checked-in
-`Package.resolved` records the dependency versions it was last verified against (`6.7.0`);
+`Package.resolved` records the dependency versions it was last verified against (`6.10.0`);
 Xcode rewrites it when it resolves.
 
 [Sample](/apple/Sample)
 
 # Release Notes iOS
+## [Versión 6.10.0] - 2026-09-29
+One fix, nothing to change in your app: upgrading from any 6.x is a version bump.
+
+### Bug Fixes
+- **Audio-only prerolls play again.** The SDK told IMA to accept only video media files, so when
+  an ad's VAST carried nothing but audio files — a radio preroll with `audio/mp4` and
+  `audio/mpeg`, for instance — IMA discarded all of them and failed with error 403 ("Linear
+  assets were found in the VAST ad response, but none of them matched the video player's
+  capabilities"). The content then started with no ad. `audio/mp4`, `audio/mpeg` and
+  `audio/aac` are now accepted, in the main player and in Reels. Video prerolls are unchanged.
+
 ## [Versión 6.7.0] - 2026-09-24
 New Cast APIs, a subtitle fix and a Konodrac improvement. Everything is additive: upgrading
 from any 6.x is a version bump. If your app casts, read the Cast note below.
