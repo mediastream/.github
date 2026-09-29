@@ -5,7 +5,7 @@ Hello, Android Developer! 👋
 Welcome to the Mediastream SDK for Android, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is **11.5.1** (see `MediastreamPlayer.getVersion()`).
+- **Version:** The current version of the SDK is **11.5.3** (see `MediastreamPlayer.getVersion()`).
 - **Compatibility:** Targets **compileSdk 35** (Android 15). **minSdk 24**. Java **17** is required for consuming projects using the same toolchain as the SDK.
 - **Coming from 10.0.x?** Read [Breaking changes (upgrading from 10.0.x to 11.x)](#breaking-changes-upgrading-from-100x-to-11x) first. One of them breaks the build of **every** consumer, whether or not you use the feature behind it: from **11.1.0** the SDK depends on EaseLive, and its Maven repository has to be declared in your `settings.gradle`.
 
@@ -14,12 +14,21 @@ Welcome to the Mediastream SDK for Android, designed to streamline the integrati
 To integrate the Mediastream Platform SDK into your Android project, add the following dependency to your project's build.gradle file:
 
 ```gradle
-implementation "io.github.mediastream:mediastreamplatformsdkandroid:11.5.1"
+implementation "io.github.mediastream:mediastreamplatformsdkandroid:11.5.3"
 ```
 
 > **From 11.1.0 this dependency alone is not enough to resolve.** Add the EaseLive Maven
 > repository to your `settings.gradle` / `settings.gradle.kts` as well — see
 > [Settings Gradle](#settings-gradle).
+
+## What's new in 11.5.3 — audio prerolls
+
+- **11.5.3 — Audio-only prerolls now play.** The SDK told IMA it could only play video ad files, so a VAST whose media files are all audio (e.g. a radio preroll with `audio/mp4` and `audio/mpeg`) was rejected with error 403 (`VAST_LINEAR_ASSET_MISMATCH`): the ad was skipped and the content started without it. The accepted types now include `audio/mp4`, `audio/mpeg`, `audio/aac` and `audio/ogg`. This covers client-side ads, the preroll before DAI, and reels.
+
+## What's new in 11.5.2 — PiP on audio, scrubbing
+
+- **11.5.2 — Audio content no longer opens an empty Picture-in-Picture window.** On audio, leaving the app (Home or Recents) could open a black PiP window. Audio is now excluded from PiP, like the vertical player; the media notification is the audio equivalent. The platform's `pip` setting is ignored for audio.
+- **11.5.2 — The center controls no longer jump while scrubbing with thumbnail previews.** When trick-play thumbnails are configured, the center controls moved when the preview appeared and could stay offset for the rest of the session. Phone and tablet only; Live, DVR and DAI are unaffected.
 
 ## What's new in 11.5.1 — Konodrac fixes
 
@@ -456,7 +465,7 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 - **`customPlayerView` (`PlayerView?`):** Inject your own `PlayerView` layout.
 - **`language` (`Language`):** `ENGLISH` (`en`), `SPANISH` (`es`, Latin American Spanish), `SPANISH_SPAIN` (`es-ES`, "Español (España)", from 11.4.0), `PORTUGUESE` (`pt`) — localized strings for the player UI (live indicator, settings, track and subtitle menus). Default `ENGLISH`; it does not follow the device locale.
 - **`baseColor` (Int):** Accent color (`-1` = use platform/API).
-- **`showSubtitles` / `speedInControlBar` / `pauseOnScreenClick` / `pip` (`FlagStatus`):** Override platform for subtitles button, speed menu, tap-to-pause, PiP.
+- **`showSubtitles` / `speedInControlBar` / `pauseOnScreenClick` / `pip` (`FlagStatus`):** Override platform for subtitles button, speed menu, tap-to-pause, PiP. From 11.5.2, PiP never applies to audio content (like the vertical player), whatever `pip` says.
 - **`pipExpandToFullscreenFirst` (Boolean):** Enter fullscreen briefly before PiP so PiP crops only the video.
 - **`pipReplaceActivityContentWithPlayer` (Boolean):** Replace Activity content with the player before PiP (requires `Activity` context).
 - **`customBackgroundForAudioPlayer` (String?):** Background image URL for **audio** content when you want a custom still instead of poster-only.
@@ -684,7 +693,7 @@ The Mediastream player exposes playback control, fullscreen, PiP, Cast, next-epi
 
 ## Introspection
 
-- **`getVersion()`** — SDK version string (e.g. `"11.5.1"`).
+- **`getVersion()`** — SDK version string (e.g. `"11.5.3"`).
 - **`getPlayerView()`**, **`getCurrentUrl()`**, **`getCurrentMediaConfig()`**, **`getMediaTitle()`**, **`getMediaPoster()`**, **`getCurrentPosition()`**, **`getDuration()`**, **`getContentDuration()`**, **`getResolution()`**, **`getBitrate()`**, **`getBandwidth()`**, **`getCurrentMsPlayer()`** — Debug and UI integration helpers.
 
 ## Other
@@ -936,6 +945,19 @@ These changes simplify the integration and reduce the need for manual action set
 By following these steps, you can integrate the MediastreamPlayerServiceWithSync into your Android application, ensuring support for Android Auto and efficient media playback with synchronization capabilities. The migration steps also ensure a smooth transition from the old service implementation to the new one.
 
 # Release Notes
+
+## [Version 11.5.3] - 2026-09-29
+One fix. No public API changes.
+
+### Fixes
+- **Audio-only prerolls were rejected by IMA.** The ad media MIME type list passed to IMA only contained video types, so an audio-only VAST failed with `VAST_LINEAR_ASSET_MISMATCH` (403) and the content started without the ad. The list now includes `audio/mp4`, `audio/mpeg`, `audio/aac` and `audio/ogg`, for client-side ads, the preroll before DAI and reels.
+
+## [Version 11.5.2] - 2026-09-28
+Two UI fixes. No public API changes.
+
+### Fixes
+- **Empty PiP window on audio content.** Audio is now excluded from all PiP logic (auto-enter, `startPiP()`, and the mode-change entry), like the vertical player. Audio is detected from the media info's `isAudio`, or from `playerType = AUDIO` when the host passes `config.src`. Behaviour change: forcing `playerType = VIDEO` on audio content no longer enters PiP. Exiting PiP is never blocked, so a session that entered PiP on video and advanced to audio still restores correctly.
+- **Center controls jumping while scrubbing with thumbnails.** The preview frame is now hidden synchronously, and the center controls stay invisible during the scrub on phone and tablet. The preview's horizontal position is recomputed from the bar's real position, so fullscreen or rotation no longer carries stale geometry.
 
 ## [Version 11.5.1] - 2026-09-25
 Two Konodrac fixes. No public API changes.
