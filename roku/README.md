@@ -6,8 +6,8 @@ Official Mediastream **SceneGraph** SDK for Roku: VOD, live, episodes, and audio
 
 | Field | Value |
 |--------|--------|
-| **Semantic version** | **9.14.202609280** |
-| **Package build** | `202609280` (from SDK `manifest`) |
+| **Semantic version** | **9.14.202609290** |
+| **Package build** | `202609290` (from SDK `manifest`) |
 | **Component library ID** | `MediastreamRokuPlayerSDK` |
 | **Core node** | `MediaStreamPlayer` (inside the loaded package) |
 
@@ -59,10 +59,10 @@ Download the **`.pkg`** from CDN and host it locally in your project (for exampl
 https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 ```
 
-**Pinned to 9.14.202609280:**
+**Pinned to 9.14.202609290:**
 
 ```text
-https://player.cdn.mdstrm.com/roku_sdk/9.14.202609280/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/9.14.202609290/MediaStreamPlayer.pkg
 ```
 
 Typical layout: create `source/packageFile/` at the channel root and place `MediaStreamPlayer.pkg` there.
@@ -136,6 +136,7 @@ The **`MediastreamPlayerConfig`** shape is documented in detail in the SDK repos
 - **`accessToken`:** For protected / entitlements flows. Tokens are issued **per content**, so a token is only valid for the `id` it was issued for. This is why the default up-next flow cannot play protected episodes: the SDK has no way to obtain the next episode's token. For tokenized catalogs use the custom up-next flow (`customUpnextFeature`), where your app supplies a fresh `accessToken` for each episode through `updateNextEpisode()`.
 - **`videoFormat`:** e.g. `msConfig.audioVideoFormat.DASH` for DASH (`mpd`); default is HLS.
 - **`adUrl`:** Client-side VAST; platform ads apply when omitted (per SDK behavior).
+- **`adConstraints`:** Optional limits for client-side (RAF) ad selection: `maxHeight`, `maxWidth`, `maxBitrate` and `mimeTypes`. When omitted, the SDK leaves size and bitrate unlimited and accepts RAF's default video types plus `audio/mpeg` and `audio/mp4`, so audio-only VAST creatives play. `mimeTypes` replaces that map and must map each MIME type to a RAF stream format **String**, for example `{ "video/mp4": "mp4", "audio/mpeg": "mp3" }`; entries with any other value type are ignored with a warning.
 - **`appName` / `appVersion`:** Analytics and ad tagging.
 - **`startAt`:** Start position in seconds (e.g. continue watching). Applies to VOD, audio, and live with DVR enabled; on live without DVR it is ignored and playback starts at the live edge.
 - **`dvr` / `windowDvr` / `dvrStart` / `dvrEnd`:** Live DVR window parameters when supported.
@@ -145,6 +146,8 @@ The **`MediastreamPlayerConfig`** shape is documented in detail in the SDK repos
 - **`dualRenderSupported` (boolean):** Declares whether the device can sustain two simultaneous video pipelines. **Leave it unset** — the default is correct on every Roku device. Roku exposes a single video decoder and a single `Video` node, so two pipelines are not representable on the platform; the SDK reports `dual_render=0` on both the content configuration request and the playback URL. Mediastream's streaming service reads that signal to decide between server-guided ad insertion (SGAI) and classic Google DAI, so Roku sessions resolve to Google DAI. Set it explicitly only to force the reported value, which is primarily useful in QA.
 
 > **Fixed in 9.12.202609160.** `startAt` was accepted but not applied on ad-supported VOD, so playback started from the beginning: on the **client-side ad tag** route (`adUrl`, Roku Ads Framework) from 9.6.202608040 through 9.11.202609110, and on the **Google DAI VOD** route in every build that supported it — the stream request always sent `bookmarkTime: 0`. If your channel implements continue-watching over an ad-supported VOD catalog, it did not work on those builds; VOD without ads was never affected. Live with DVR also now honors `startAt`.
+
+> **Fixed in 9.14.202609290.** Audio-only VAST prerolls (MediaFiles `audio/mpeg` or `audio/mp4`, for example radio prerolls) did not play: Roku Ads Framework rejected them with error 403 "Couldn't find supported MediaFile", and content started without the ad. RAF's default MediaFile types are video only; the SDK now adds the audio types, without changing how video ads are selected. A publisher `adConstraints.mimeTypes` map with non-String values used to crash the channel inside RAF; those entries are now ignored.
 
 > **Changed in 9.14.202609280.** The SDK manifest now declares `rsg_version=1.3`, as Roku's Static Analysis requires. There is no player behavior change. Roku states that RSG 1.3 requires a minimum firmware of 15.1: set the minimum firmware version of your channel to 15.1 or later in the Roku Developer Dashboard. If Static Analysis reports that your channel `manifest` needs `rsg_version=1.3`, add that line to your own channel manifest too; the SDK package cannot change it for you.
 
