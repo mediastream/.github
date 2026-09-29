@@ -6,8 +6,8 @@ Official Mediastream **SceneGraph** SDK for Roku: VOD, live, episodes, and audio
 
 | Field | Value |
 |--------|--------|
-| **Semantic version** | **9.14.202609290** |
-| **Package build** | `202609290` (from SDK `manifest`) |
+| **Semantic version** | **9.14.202609291** |
+| **Package build** | `202609291` (from SDK `manifest`) |
 | **Component library ID** | `MediastreamRokuPlayerSDK` |
 | **Core node** | `MediaStreamPlayer` (inside the loaded package) |
 
@@ -59,10 +59,10 @@ Download the **`.pkg`** from CDN and host it locally in your project (for exampl
 https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 ```
 
-**Pinned to 9.14.202609290:**
+**Pinned to 9.14.202609291:**
 
 ```text
-https://player.cdn.mdstrm.com/roku_sdk/9.14.202609290/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/9.14.202609291/MediaStreamPlayer.pkg
 ```
 
 Typical layout: create `source/packageFile/` at the channel root and place `MediaStreamPlayer.pkg` there.
@@ -146,6 +146,8 @@ The **`MediastreamPlayerConfig`** shape is documented in detail in the SDK repos
 - **`dualRenderSupported` (boolean):** Declares whether the device can sustain two simultaneous video pipelines. **Leave it unset** — the default is correct on every Roku device. Roku exposes a single video decoder and a single `Video` node, so two pipelines are not representable on the platform; the SDK reports `dual_render=0` on both the content configuration request and the playback URL. Mediastream's streaming service reads that signal to decide between server-guided ad insertion (SGAI) and classic Google DAI, so Roku sessions resolve to Google DAI. Set it explicitly only to force the reported value, which is primarily useful in QA.
 
 > **Fixed in 9.12.202609160.** `startAt` was accepted but not applied on ad-supported VOD, so playback started from the beginning: on the **client-side ad tag** route (`adUrl`, Roku Ads Framework) from 9.6.202608040 through 9.11.202609110, and on the **Google DAI VOD** route in every build that supported it — the stream request always sent `bookmarkTime: 0`. If your channel implements continue-watching over an ad-supported VOD catalog, it did not work on those builds; VOD without ads was never affected. Live with DVR also now honors `startAt`.
+
+> **Fixed in 9.14.202609291.** When the viewer closed the player (Back, or `forceClosePlayer()`), the SDK did not report the time watched since the last periodic analytics event, which is sent every 30 seconds. The platform's last position could be up to 30 seconds behind, so continue-watching and progress bars showed a stale value. The SDK now sends the final `playing` and `pause` events with the exact position when the player closes. The platform may still take a few seconds to reflect them, so if your app shows progress right after returning from the player, prefer its locally known position.
 
 > **Fixed in 9.14.202609290.** Audio-only VAST prerolls (MediaFiles `audio/mpeg` or `audio/mp4`, for example radio prerolls) did not play: Roku Ads Framework rejected them with error 403 "Couldn't find supported MediaFile", and content started without the ad. RAF's default MediaFile types are video only; the SDK now adds the audio types, without changing how video ads are selected. A publisher `adConstraints.mimeTypes` map with non-String values used to crash the channel inside RAF; those entries are now ignored.
 
