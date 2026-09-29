@@ -25,6 +25,11 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
 - **Note:** 6.10.0 is a fixes-only release: audio-only prerolls (for example a radio preroll
   whose VAST carries only `audio/mp4` / `audio/mpeg` files) play again instead of failing with IMA
   error 403. Upgrading from any other 6.x is a version bump, with **no code changes**.
+- **Note:** 6.9.0 makes the custom UI, Vertical and Reels usable with VoiceOver, with no public
+  API changes. If your UI tests query the player's buttons **by index**, re-check them: with the
+  controls visible there is one more button, second in order. Queries by label are unaffected.
+- **Note:** 6.8.0 draws **ad-break markers** on the custom UI slider for VOD with mid-rolls,
+  **on by default**. Set `showAdMarkers = false` to keep the slider as it was in 6.7.0.
 - **Note:** 6.7.0 adds Cast APIs (`castStreamUrl`, `castStreamContentType`,
   `getCastSubtitleTracks()`), stops duplicating subtitles the HLS manifest already carries, and
   lets the admin set Konodrac's `channel`. It is additive: upgrading from any other 6.x is a
@@ -235,6 +240,7 @@ The `MediastreamPlayerConfig` class in the Mediastream iOS|Apple TV SDK provides
 - **`language` (MediastreamPlayerConfig.Language):** SDK strings (e.g. LIVE, settings). **ENGLISH**, **SPANISH**, **SPANISH_SPAIN** (`es-ES`, "Español (España)"; iOS, from 6.5.0; Apple TV, from 2.6.0), **PORTUGUESE**. `SPANISH` (`es`) is Latin American Spanish. On iOS, `SPANISH_SPAIN` differs from it in the live indicator, which reads "Directo" instead of "En Vivo".
 - **`enablePlayerZoom` (Bool):** Pinch zoom on video (custom UI only). Default: **`false`**.
 - **`showBrightnessBar` (Bool):** Brightness slider in fullscreen (video custom UI). Default: **`true`**.
+- **`showAdMarkers` (Bool, iOS, from 6.8.0):** Marks each mid-roll ad break on the custom UI slider, at its IMA cue point. VOD only — live never shows markers — and only with `customUI = true`. Prerolls, postrolls and cue points outside the content duration get no marker. The markers take the player's `base_color` (default `#97D700`). Default: **`true`**. UI only: ads play the same either way. It survives `reloadPlayer`.
 - **`customBackgroundForAudioPlayer` (String):** Image URL behind audio when using **custom UI** (replaces the default placeholder).
 
 ### PlayAnywhere (interactivity overlay) — iOS, from 6.0.0
@@ -510,6 +516,60 @@ One fix, nothing to change in your app: upgrading from any 6.x is a version bump
   assets were found in the VAST ad response, but none of them matched the video player's
   capabilities"). The content then started with no ad. `audio/mp4`, `audio/mpeg` and
   `audio/aac` are now accepted, in the main player and in Reels. Video prerolls are unchanged.
+
+## [Versión 6.9.0] - 2026-09-29
+Accessibility: the custom UI, the Vertical (microdramas) player and Reels are usable with
+VoiceOver. No public API changes, nothing to change in your app.
+
+### Features
+- **Every custom UI control has an accessible name,** localized in `en`, `es` and `pt`, instead
+  of reading out as a bare "button". Play/pause and fullscreen are named after what they do in
+  their current state.
+- **A permanent element shows and hides the controls,** modelled on what the Android SDK gives
+  TalkBack. It reads "Show player controls" or "Hide player controls", and activating it does
+  what a tap does. It is not there during an ad or under the next-episode card.
+- **The settings panel reads as tabs and options,** with the active tab and the current option
+  announced as selected. The panel is modal, so the cursor cannot escape behind it.
+- **The Vertical player is accessible:** a double tap on the reveal surface shows the skin, the
+  skin stays up while the VoiceOver cursor is on it, and episodes change with a three-finger
+  scroll.
+- **The Reels player is accessible:** close, the progress bar, mute and the metadata toggle are
+  named, and the video container is the play/pause element.
+
+### Behaviour to be aware of
+- **Your cast button is named by the SDK only when it has no `accessibilityLabel`.** Apps often
+  pass an icon-font glyph as its title, which VoiceOver cannot pronounce. A label you set is left
+  alone.
+- **UI tests:** with the controls visible, the player has 8 buttons instead of 7, and the new
+  element comes second. Queries by label are unaffected; queries by index
+  (`element(boundBy:)`) are not.
+
+### Bug Fixes
+- The hidden `MPVolumeView` no longer leaves a phantom "Volume, adjustable" stop over the whole
+  player.
+- The loading spinner no longer reads out "in progress" over Vertical and Reels.
+- During a Reels ad, `Skip Ad` and `Learn More` now reach VoiceOver.
+
+## [Versión 6.8.0] - 2026-09-28
+Ad-break markers on the custom UI slider.
+
+### Features
+- **The custom UI slider marks where each mid-roll ad break falls in a VOD,** read from the IMA
+  ad cue points. Prerolls and postrolls get no marker, and neither does any cue point outside
+  the content duration. The markers take the player's `base_color` (default `#97D700`) and stay
+  aligned on rotation.
+- **`showAdMarkers` (`Bool`, default `true`)** on `MediastreamPlayerConfig` turns them off. It
+  only affects UI; ads play exactly the same either way.
+
+### Behaviour to be aware of
+- **Markers are on by default.** Upgrading from 6.7.0, VOD content with mid-rolls shows them
+  with no change in your code. Set `showAdMarkers = false` to keep the previous slider.
+- Only the custom UI (`customUI = true`) draws markers, and live never shows them.
+- The markers are cleared on `releasePlayer()` and on `reloadPlayer`, so a reload onto other
+  content does not keep the previous content's markers.
+
+### Bug Fixes
+- `update(from:)` now copies `showFullScreenButton`, which it used to skip.
 
 ## [Versión 6.7.0] - 2026-09-24
 New Cast APIs, a subtitle fix and a Konodrac improvement. Everything is additive: upgrading
