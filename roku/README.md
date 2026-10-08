@@ -6,8 +6,8 @@ Official Mediastream **SceneGraph** SDK for Roku: VOD, live, episodes, and audio
 
 | Field | Value |
 |--------|--------|
-| **Semantic version** | **9.14.202609291** |
-| **Package build** | `202609291` (from SDK `manifest`) |
+| **Semantic version** | **9.14.202610080** |
+| **Package build** | `202610080` (from SDK `manifest`) |
 | **Component library ID** | `MediastreamRokuPlayerSDK` |
 | **Core node** | `MediaStreamPlayer` (inside the loaded package) |
 
@@ -59,10 +59,10 @@ Download the **`.pkg`** from CDN and host it locally in your project (for exampl
 https://player.cdn.mdstrm.com/roku_sdk/MediaStreamPlayer.pkg
 ```
 
-**Pinned to 9.14.202609291:**
+**Pinned to 9.14.202610080:**
 
 ```text
-https://player.cdn.mdstrm.com/roku_sdk/9.14.202609291/MediaStreamPlayer.pkg
+https://player.cdn.mdstrm.com/roku_sdk/9.14.202610080/MediaStreamPlayer.pkg
 ```
 
 Typical layout: create `source/packageFile/` at the channel root and place `MediaStreamPlayer.pkg` there.
@@ -138,7 +138,7 @@ The **`MediastreamPlayerConfig`** shape is documented in detail in the SDK repos
 - **`adUrl`:** Client-side VAST; platform ads apply when omitted (per SDK behavior).
 - **`adConstraints`:** Optional limits for client-side (RAF) ad selection: `maxHeight`, `maxWidth`, `maxBitrate` and `mimeTypes`. When omitted, the SDK leaves size and bitrate unlimited and accepts RAF's default video types plus `audio/mpeg` and `audio/mp4`, so audio-only VAST creatives play. `mimeTypes` replaces that map and must map each MIME type to a RAF stream format **String**, for example `{ "video/mp4": "mp4", "audio/mpeg": "mp3" }`; entries with any other value type are ignored with a warning.
 - **`appName` / `appVersion`:** Analytics and ad tagging.
-- **`startAt`:** Start position in seconds (e.g. continue watching). Applies to VOD, audio, and live with DVR enabled; on live without DVR it is ignored and playback starts at the live edge.
+- **`startAt`:** Start position in seconds (e.g. continue watching). Applies to VOD, audio, and live with DVR enabled; on live without DVR it is ignored and playback starts at the live edge. It applies only to the content it is set for: up-next episodes start at 0, unless the custom up-next flow passes the next episode's own `startAt` to `updateNextEpisode()`. A `startAt` at or past the end of the content is ignored.
 - **`dvr` / `windowDvr` / `dvrStart` / `dvrEnd`:** Live DVR window parameters when supported.
 - **Google DAI:** Values are usually filled from the **Mediastream stream API** (`ad_insertion_google`). For live **DASH + DAI**, ensure `asset_key_dash` is present in the API payload when using DASH; the SDK maps it to `google_dai_assetKeyDash` and selects it when `videoFormat` is DASH.
 - **DRM:** `drmData` (Widevine `serverURL` under `widevine`) and `drmToken` as required by your DRM provider (SDK sends the token in the license request path it implements).
@@ -146,6 +146,8 @@ The **`MediastreamPlayerConfig`** shape is documented in detail in the SDK repos
 - **`dualRenderSupported` (boolean):** Declares whether the device can sustain two simultaneous video pipelines. **Leave it unset** — the default is correct on every Roku device. Roku exposes a single video decoder and a single `Video` node, so two pipelines are not representable on the platform; the SDK reports `dual_render=0` on both the content configuration request and the playback URL. Mediastream's streaming service reads that signal to decide between server-guided ad insertion (SGAI) and classic Google DAI, so Roku sessions resolve to Google DAI. Set it explicitly only to force the reported value, which is primarily useful in QA.
 
 > **Fixed in 9.12.202609160.** `startAt` was accepted but not applied on ad-supported VOD, so playback started from the beginning: on the **client-side ad tag** route (`adUrl`, Roku Ads Framework) from 9.6.202608040 through 9.11.202609110, and on the **Google DAI VOD** route in every build that supported it — the stream request always sent `bookmarkTime: 0`. If your channel implements continue-watching over an ad-supported VOD catalog, it did not work on those builds; VOD without ads was never affected. Live with DVR also now honors `startAt`.
+
+> **Fixed in 9.14.202610080.** In an up-next chain, every following episode started at the `startAt` set for the first content; an episode shorter than that value ended as soon as it loaded and the chain stopped. Each episode now starts at 0 unless the custom flow passes its own `startAt` (seconds) to `updateNextEpisode()`. The SDK also always sends `ms_device=roku` on the ad map it gets from the Mediastream media API, so ad tags resolve to the Roku platform regardless of the request User-Agent; an `adUrl` set by your app is sent unchanged.
 
 > **Fixed in 9.14.202609291.** When the viewer closed the player (Back, or `forceClosePlayer()`), the SDK did not report the time watched since the last periodic analytics event, which is sent every 30 seconds. The platform's last position could be up to 30 seconds behind, so continue-watching and progress bars showed a stale value. The SDK now sends the final `playing` and `pause` events with the exact position when the player closes. The platform may still take a few seconds to reflect them, so if your app shows progress right after returning from the player, prefer its locally known position.
 
