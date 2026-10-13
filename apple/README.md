@@ -48,8 +48,15 @@ Welcome to the Mediastream SDK for iOS and Apple TV, designed to streamline the 
   stay on `5.2.0`.
 
 ## Version Apple TV
-- **Version:** 2.9.0, distributed through Swift Package Manager.
+- **Version:** 2.10.0, distributed through Swift Package Manager.
 - **Requirements:** **tvOS 15.0** or later, Xcode 15 or later, Swift 5.9 or later.
+- **Note:** 2.10.0 makes Apple TV ad requests declare the right platform. They no longer send
+  `mobile=true`, which made Mediastream's ad map serve the GAM **MOBILE** tag; they get the
+  non-mobile `appletv` tag instead, so **check your GAM line items** with your ad ops team.
+  `ms_device=appletv` is now always set on Mediastream's ad map. **A host `adURL` is no longer
+  rewritten:** its `ms_device` goes out exactly as you pass it, so if you target by platform,
+  put `ms_device=appletv` in it yourself. No public API changes, and no code changes otherwise.
+  See the 2.10.0 release notes.
 - **Note:** 2.9.0 lets IMA play audio-only ads (a radio preroll, for example), which used to
   fail with IMA error 403 and be skipped. Upgrading from any other 2.x is a version bump, with
   **no code changes**. If you come from a version before 2.8.0, note that platform-served
@@ -107,14 +114,14 @@ In Xcode, choose **File → Add Package Dependencies…** and paste:
 https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm.git
 ```
 
-Pick **Up to Next Major Version** from `2.9.0` and add the
+Pick **Up to Next Major Version** from `2.10.0` and add the
 `MediastreamPlatformSDKAppleTV` product to your app target. Or, in a `Package.swift`:
 
 ```swift
 dependencies: [
   .package(
     url: "https://github.com/mediastream/MediastreamPlatformSDKAppleTV-spm.git",
-    from: "2.9.0"
+    from: "2.10.0"
   )
 ]
 ```
@@ -270,7 +277,7 @@ The `MediastreamPlayerConfig` class in the Mediastream iOS|Apple TV SDK provides
 
 ### Ads and DRM
 
-- **`adURL` (String):** Override ad tag (VAST, etc.). Platform ads are used when unset unless `hasAds()` is used.
+- **`adURL` (String):** Override ad tag (VAST, etc.). Platform ads are used when unset unless `hasAds()` is used. **Apple TV, from 2.10.0:** the SDK uses your tag as is and only appends `platformType` and the `custom.*` parameters; it no longer rewrites `ms_device` (that applies only to Mediastream's ad map). If you need platform targeting, include `ms_device=appletv` yourself.
 - **`googleImaPPID` (String):** Publisher-provided ID for IMA.
 - **`googleImaLanguage` (String):** IMA UI language (default **en**).
 - **`hasAds()`:** Call after setting `adURL` so the player treats ads as enabled from config alone.
@@ -489,6 +496,9 @@ Tears down observers, ads, PiP, and the player. Call when you remove the player 
   6.1.0) and not exposed.
 - **`MediastreamPlayerConfig.normalizedAdBaseURL(_:)`** (Apple TV, from 2.2.0): the
   `ms_device=appletv` rewrite applied to the platform ad map, `open` so you can override it.
+  From 2.10.0 it rewrites the first `ms_device`, drops any repeats and adds it if missing, and
+  it is no longer applied to `adURL`. An override keeps its own behaviour, but only on the
+  platform ad map.
 
 
 
@@ -879,6 +889,35 @@ Fixes only. No API changes, no new requirements: upgrading from 6.0.0 is a versi
 - NSRange Exception when move faster on timeline
 
 # Release Notes AppleTV
+## [Versión 2.10.0] - 2026-10-13
+Apple TV ad requests declare the right platform: they stop asking for the MOBILE tag, and
+`ms_device` no longer depends on what the backend guesses. No public API changes.
+
+### Ads
+- **`mobile=true` is no longer sent.** `getAdQueryString` appended it to every ad URL, and on
+  Mediastream's ad map that parameter selects the GAM MOBILE tag even when the platform is
+  `appletv`. `platformType=appletv` is still sent.
+- **`ms_device=appletv` is always set on Mediastream's ad map.** The media JSON's `ads.map`
+  (pre-, mid- and post-rolls) carries the `ms_device` the backend infers from the request's
+  User-Agent. On tvOS that is `<AppName>/<build> CFNetwork/… Darwin/…`, so an app whose name does
+  not say "AppleTV" got `ms_device=ios`, and a map without the parameter resolved as `web`.
+  `normalizedAdBaseURL(_:)` now rewrites the first `ms_device`, drops repeats and adds it if
+  missing; before, it only rewrote one that was already there.
+- **A host `adURL` is no longer touched in `ms_device`.** It used to go through
+  `normalizedAdBaseURL(_:)` too. Your own tag is used as is and only gets the parameters the SDK
+  appends (`platformType` and `custom.*`).
+- The PPID reaches IMA as before: through `IMASettings.ppid` in CSAI, and in DAI through
+  `IMASettings.ppid` and the stream request's `adTagParameters[ppid]`. `custom.ppid` stays in the
+  URL.
+
+### Behaviour changes to be aware of
+- A MOBILE tag configured in GAM for Mediastream is no longer served on Apple TV; the
+  non-mobile `appletv` tag is served instead. Review your line items.
+- If your `adURL` carried `ms_device` and you relied on the SDK changing it to `appletv`, it
+  now goes out exactly as you pass it.
+- `normalizedAdBaseURL(_:)` is `open`: a subclass that overrides it keeps its own behaviour,
+  but it is no longer applied to `adURL`.
+
 ## [Versión 2.9.0] - 2026-09-29
 Client-side IMA ads whose VAST only offers audio files play again.
 
