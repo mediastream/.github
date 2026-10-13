@@ -5,7 +5,7 @@ Hello, Android Developer! 👋
 Welcome to the Mediastream SDK for Android, designed to streamline the integration of our powerful features into your applications. This SDK provides access to advanced Mediastream capabilities, allowing you to deliver exceptional multimedia experiences to your users.
 
 ## Version
-- **Version:** The current version of the SDK is **11.5.3** (see `MediastreamPlayer.getVersion()`).
+- **Version:** The current version of the SDK is **11.5.4** (see `MediastreamPlayer.getVersion()`).
 - **Compatibility:** Targets **compileSdk 35** (Android 15). **minSdk 24**. Java **17** is required for consuming projects using the same toolchain as the SDK.
 - **Coming from 10.0.x?** Read [Breaking changes (upgrading from 10.0.x to 11.x)](#breaking-changes-upgrading-from-100x-to-11x) first. One of them breaks the build of **every** consumer, whether or not you use the feature behind it: from **11.1.0** the SDK depends on EaseLive, and its Maven repository has to be declared in your `settings.gradle`.
 
@@ -14,12 +14,20 @@ Welcome to the Mediastream SDK for Android, designed to streamline the integrati
 To integrate the Mediastream Platform SDK into your Android project, add the following dependency to your project's build.gradle file:
 
 ```gradle
-implementation "io.github.mediastream:mediastreamplatformsdkandroid:11.5.3"
+implementation "io.github.mediastream:mediastreamplatformsdkandroid:11.5.4"
 ```
 
 > **From 11.1.0 this dependency alone is not enough to resolve.** Add the EaseLive Maven
 > repository to your `settings.gradle` / `settings.gradle.kts` as well — see
 > [Settings Gradle](#settings-gradle).
+
+## What's new in 11.5.4 — ad targeting on TV, postroll before the next episode
+
+- **11.5.4 — Android TV and Fire TV no longer receive the phone ad tag.** The SDK added `mobile=true` to every ad request, whatever the device, and the ad map serves the MOBILE tag whenever `mobile=true` arrives, regardless of `ms_device`. `mobile=true` is now sent only from phones and tablets (`ms_device=android`); Android TV and Fire TV no longer send it, so they stop getting the MOBILE tag.
+  - **`ms_device` is now set only on Mediastream URLs:** the `ads.map` returned by the API and the Reels ad tag (Reels did not send it before). The SDK's value (`android` / `androidtv` / `firetv`) replaces whatever the embed or backend put there, without duplicating it.
+  - **⚠️ A host `adURL` is no longer modified in `ms_device`.** If you pass your own ad tag and need to target by platform, add `ms_device` to it yourself. `mobile=true`, `platformType` and `custom.*` are still appended to it under the same rules as the `ads.map`.
+  - `platformType` and `custom.*` (`ppid` / `rdid` / `idtype` / `is_lat` / `addAdCustomAttribute`) are unchanged. The PPID still reaches IMA through `ImaSdkSettings.setPpid`.
+- **11.5.4 — Auto-advance to the next episode no longer skips the IMA postroll.** The next episode now loads when the postroll ends, and `onEnd()` is not emitted while an ad is playing. No API changes.
 
 ## What's new in 11.5.3 — audio prerolls
 
@@ -427,7 +435,7 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 
 ## **Ads**
 
-- **`adURL` (String):** Client-side ad tag (VAST/VMAP); platform ads apply if omitted.
+- **`adURL` (String):** Client-side ad tag (VAST/VMAP); platform ads apply if omitted. From **11.5.4** the SDK does not set `ms_device` on your tag (it only does so on the API's `ads.map` and the Reels tag): if you need to target by platform, include `ms_device` yourself. `mobile=true` (phones and tablets only), `platformType` and `custom.*` are still appended.
 - **`noAds` (Boolean, from 11.0.1):** Suppresses **client-side** ads (CSAI) — both `adURL` and the ad map returned by the API. It does **not** affect DAI/SSAI, which is stitched server-side and keeps playing. Default `false`. The policy propagates to next/previous episode configs, because it applies to the whole playlist and not only to the content it was set on.
 - **`muteAds` (`FlagStatus`):** Mute ads; `NONE` follows platform.
 - **`mute`:** Not a top-level property in current config; use **`volume`** or platform settings.
@@ -437,6 +445,7 @@ The `MediastreamPlayerConfig` class in the Mediastream Android SDK provides a ra
 - **`adTagParametersForDAI` (`MutableMap<Util.AdTagParameter, String>`):** Google DAI **setAdTagParameters** map (PPID, `cust_params`, etc.).
 - **`addAdCustomAttribute(key, value)`:** Adds `custom.<key>` parameters for CSAI VAST URLs (requires matching `custom.*` placeholders in the tag).
 - **`fetchDeviceIdsAsync` / `waitForDeviceIdsCache`:** Cache GAID (or Amazon AAID on Fire TV) for `rdid` / `is_lat` in **getAdQueryString** and DAI fallbacks.
+- **`getAdQueryString(platform, baseUrl, setMsDevice: Boolean = true)`:** Builds the ad query parameters for an ad URL. `setMsDevice` was added in 11.5.4 (optional, `@JvmOverloads`), so existing calls compile unchanged.
 - **`ensureDAITagParamsFallback(platform)`:** Fills missing PPID/RDID/IDTYPE/IS_LAT for DAI from SDK cache.
 - **`dualRenderSupported` (`Boolean?`, from 11.3.0):** Declares whether the device can sustain two simultaneous video pipelines. **Leave it unset** — the default is already correct. Unlike the other Mediastream SDKs, Android resolves that default **at runtime** from the device's UI mode: handhelds report `dual_render=1`, Android TV / Fire TV report `0`. The scarce resources live on the TV side — a single hardware decoder, a single secure decoder for Widevine L1, one video plane — and claiming a capability the device lacks breaks playback, while withholding it only keeps today's behaviour. The SDK sends the capability on **both** the content configuration request and the playback URL, because Mediastream's streaming service evaluates it again when it serves the manifest; it reads that signal to decide between server-guided ad insertion (SGAI) and classic Google DAI. Set it explicitly only to force the reported value, which is primarily useful in QA. **Cast sessions always report `0`** whatever you set here: the receiver does the rendering, so the local device's answer does not describe it.
 
@@ -693,7 +702,7 @@ The Mediastream player exposes playback control, fullscreen, PiP, Cast, next-epi
 
 ## Introspection
 
-- **`getVersion()`** — SDK version string (e.g. `"11.5.3"`).
+- **`getVersion()`** — SDK version string (e.g. `"11.5.4"`).
 - **`getPlayerView()`**, **`getCurrentUrl()`**, **`getCurrentMediaConfig()`**, **`getMediaTitle()`**, **`getMediaPoster()`**, **`getCurrentPosition()`**, **`getDuration()`**, **`getContentDuration()`**, **`getResolution()`**, **`getBitrate()`**, **`getBandwidth()`**, **`getCurrentMsPlayer()`** — Debug and UI integration helpers.
 
 ## Other
@@ -945,6 +954,17 @@ These changes simplify the integration and reduce the need for manual action set
 By following these steps, you can integrate the MediastreamPlayerServiceWithSync into your Android application, ensuring support for Android Auto and efficient media playback with synchronization capabilities. The migration steps also ensure a smooth transition from the old service implementation to the new one.
 
 # Release Notes
+
+## [Version 11.5.4] - 2026-10-13
+Two ad fixes. No breaking API changes: `getAdQueryString()` gains one optional parameter.
+
+### Fixes
+- **Auto-advance to the next episode skipped the postroll.** When a VOD with an IMA postroll ended, the SDK took the content → ad transition as the end of the item: the `AUTO_TRANSITION` discontinuity into the ad group triggered `playNext()`, and the `STATE_BUFFERING` check near the end emitted `onEnd()` while the postroll started. A transition into or out of an ad group no longer counts as an episode change, and `onEnd()` is not emitted while an ad is playing, neither when it is scheduled nor when it runs after the delay. The next episode loads when the postroll ends.
+- **Android TV and Fire TV received the phone ad tag.** `getAdQueryString()` added `mobile=true` to every ad request, and the ad map serves the MOBILE tag whenever `mobile=true` arrives, whatever `ms_device` says. `mobile=true` is now sent only from phones and tablets (`ms_device=android`).
+  - **`ms_device` is set only on Mediastream URLs.** The API's `ads.map` still gets the SDK's `ms_device` (`android` / `androidtv` / `firetv`), replacing the embed's value without duplicating it. **A host `adURL` is no longer modified in `ms_device`**: add it yourself if you need platform targeting. `mobile=true`, `platformType` and `custom.*` are still appended under the same rules as the `ads.map`.
+  - **Reels now sends `ms_device` too.** Its ad tag comes from the API and was used as is, so on TV it kept whatever the backend set.
+  - The PPID already reached IMA through `ImaSdkSettings.setPpid` in the four loaders (client-side, SSAI preroll, DAI and reels). Unchanged; `custom.ppid` stays in the URL.
+  - `getAdQueryString()` gains an optional `setMsDevice` parameter (default `true`, `@JvmOverloads`), so existing calls compile unchanged.
 
 ## [Version 11.5.3] - 2026-09-29
 One fix. No public API changes.
